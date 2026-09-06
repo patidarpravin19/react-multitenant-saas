@@ -1,0 +1,62 @@
+import { Moon, Search, Sun, UserRound, ChevronDown } from "lucide-react";
+import { useTenant } from "../../context/TenantContext";
+import { useTheme } from "../../context/ThemeContext";
+
+export function Header() {
+  const { tenant } = useTenant();
+  const { theme, toggleTheme } = useTheme();
+
+  return (
+    <header className="sticky top-0 z-30 flex h-16 items-center gap-3 border-b border-slate-200 bg-white/95 px-4 shadow-sm backdrop-blur sm:px-6 dark:border-slate-800 dark:bg-slate-900/95">
+      <div className="flex min-w-0 items-center gap-3">
+        <img
+          src={tenant.logoUrl}
+          alt={`${tenant.tenantName} logo`}
+          className="size-9 rounded-lg border border-slate-200 bg-white object-contain p-1 dark:border-slate-700"
+        />
+        <span className="hidden max-w-44 truncate text-sm font-semibold text-slate-900 sm:block dark:text-slate-100">
+          {tenant.tenantName}
+        </span>
+      </div>
+
+      <div className="mx-auto hidden w-full max-w-xl md:block">
+        <label className="relative block">
+          <span className="sr-only">Global search</span>
+          <Search
+            aria-hidden
+            className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400"
+          />
+          <input
+            type="search"
+            placeholder="Search users, projects, reports..."
+            className="w-full rounded-lg border border-slate-300 bg-slate-50 py-2 pl-9 pr-3 text-sm text-slate-900 transition-all duration-300 placeholder:text-slate-400 focus:border-[var(--tenant-primary)] focus:bg-white focus:ring-2 focus:ring-[var(--tenant-primary)]/20 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus:bg-slate-950"
+          />
+        </label>
+      </div>
+
+      <div className="ml-auto flex items-center gap-2">
+        <button
+          type="button"
+          onClick={toggleTheme}
+          aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
+          className="grid size-10 place-items-center rounded-lg border border-slate-200 text-slate-600 transition-all duration-300 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
+        >
+          {theme === "dark" ? <Sun className="size-4" /> : <Moon className="size-4" />}
+        </button>
+
+        <button
+          type="button"
+          aria-haspopup="menu"
+          aria-expanded="false"
+          className="flex h-10 items-center gap-2 rounded-lg border border-slate-200 px-2.5 text-slate-700 transition-all duration-300 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
+        >
+          <span className="grid size-7 place-items-center rounded-full bg-[var(--tenant-secondary)] text-[var(--tenant-primary)]">
+            <UserRound className="size-4" />
+          </span>
+          <span className="hidden text-sm font-medium lg:inline">Demo User</span>
+          <ChevronDown className="size-4" aria-hidden />
+        </button>
+      </div>
+    </header>
+  );
+}
