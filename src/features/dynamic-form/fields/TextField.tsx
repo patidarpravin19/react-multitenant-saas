@@ -1,7 +1,10 @@
 import { FormFieldShell } from "../../../components/ui/FormFieldShell";
 import type { DynamicFieldProps } from "./fieldTypes";
+import type { Control, FieldValues } from "react-hook-form";
 
-export function TextField({ field, register, errors }: DynamicFieldProps) {
+type CompatibleProps = DynamicFieldProps & { control?: Control<FieldValues> };
+
+export function TextField({ field, register, errors }: CompatibleProps) {
   if (field.type !== "text") return null;
 
   const error = errors[field.name]?.message;

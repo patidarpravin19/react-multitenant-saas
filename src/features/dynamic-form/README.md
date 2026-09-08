@@ -1,13 +1,33 @@
-# Dynamic Form Extension Guide
+# Dynamic Form Control Platform
 
-To add a new field type without modifying existing field implementations:
+Supported controls:
+- Text, Email, Password
+- Number, Telephone, URL
+- Textarea
+- Single Select
+- Multi Select with chips and max-selection support
+- Radio group
+- Checkbox
+- Accessible Toggle/Switch
+- Date, Time, DateTime
+- Month, Week
+- Color
+- Range/Slider
+- File upload
+- Hidden metadata
 
-1. Add a new discriminated config interface in `src/types/form.ts`.
-2. Create the field component under `fields/`.
-3. Add its Zod builder case in `validation/schemaFactory.ts`.
-4. Register the component in `registry/fieldRegistry.tsx`.
-5. Add JSON/config entries wherever the form is configured.
+Architecture:
+1. `types/form.ts` defines discriminated configuration types.
+2. `fields/` contains isolated renderers.
+3. `registry/fieldRegistry.tsx` maps control type to renderer.
+4. `validation/schemaFactory.ts` generates Zod validation from the same config.
+5. `DynamicForm.tsx` composes React Hook Form with the registry.
 
-For a larger application, the registry can be converted to dependency injection:
-`createFieldRegistry([{ type, component, schemaBuilder }])`, allowing feature packages
-to register fields at composition-root startup.
+To add a new control:
+- Add its config type.
+- Implement its renderer.
+- Add its schema case.
+- Register it.
+Existing controls do not need to change.
+
+For enterprise scale, convert the registry into a plugin contract so feature packages can contribute `{ type, component, schemaBuilder }`.

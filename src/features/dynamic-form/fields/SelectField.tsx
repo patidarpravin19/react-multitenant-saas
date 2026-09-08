@@ -1,7 +1,10 @@
 import { FormFieldShell } from "../../../components/ui/FormFieldShell";
 import type { DynamicFieldProps } from "./fieldTypes";
+import type { Control, FieldValues } from "react-hook-form";
 
-export function SelectField({ field, register, errors }: DynamicFieldProps) {
+type CompatibleProps = DynamicFieldProps & { control?: Control<FieldValues> };
+
+export function SelectField({ field, register, errors }: CompatibleProps) {
   if (field.type !== "select") return null;
 
   const error = errors[field.name]?.message;

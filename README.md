@@ -78,3 +78,13 @@ src/
 - Add server-state management (for example TanStack Query) only for remote state.
 - Keep UI state in local component/context state unless cross-feature sharing requires more.
 - Keep domain-specific components inside their feature folders.
+
+## Dynamic Grid (V3)
+
+The project now includes a reusable generic DynamicGrid with interchangeable client/server processing modes, typed server query/result contracts, paging, global and column filtering, multi-sort, row selection, column visibility, density, CSV export, server refresh, loading/error/empty states, and accessible table semantics. See `src/features/dynamic-grid/README.md`.
+
+## Shared Notification System
+
+V3 also includes a shared feedback layer under `src/components/feedback` and `src/context/NotificationContext.tsx`.
+
+It provides success/error/warning/info toasts, persistent alerts, and Promise-based confirmation dialogs. Mount `NotificationProvider` once near the application root and call `useNotifications()` from any feature.

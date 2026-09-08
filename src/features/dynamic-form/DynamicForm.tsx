@@ -15,7 +15,12 @@ interface DynamicFormProps {
 
 function createDefaultValues(fields: FormFieldConfig[]): FieldValues {
   return Object.fromEntries(
-    fields.map((field) => [field.name, field.type === "checkbox" ? false : ""]),
+    fields.map((field) => {
+      if (field.defaultValue !== undefined) return [field.name, field.defaultValue];
+      if (field.type === "checkbox" || field.type === "toggle") return [field.name, false];
+      if (field.type === "multiSelect") return [field.name, []];
+      return [field.name, ""];
+    }),
   );
 }
 
@@ -32,6 +37,7 @@ export function DynamicForm({
 
   const {
     register,
+    control,
     handleSubmit,
     reset,
     formState: { errors, isSubmitting },
@@ -82,9 +88,9 @@ export function DynamicForm({
             return (
               <div
                 key={field.id}
-                className={field.type === "checkbox" ? "md:col-span-2" : ""}
+                className={field.colSpan === 2 || field.type === "checkbox" || field.type === "toggle" ? "md:col-span-2" : ""}
               >
-                <Component field={field} register={register} errors={errors} />
+                <Component field={field} register={register} control={control} errors={errors} />
               </div>
             );
           })}
