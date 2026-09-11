@@ -7,8 +7,7 @@ import { Sidebar } from "./Sidebar";
 import { Footer } from "./Footer";
 
 export function AppShell() {
-  const [sidebarCollapsed, setSidebarCollapsed] =
-    useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   return (
     <div
@@ -19,14 +18,11 @@ export function AppShell() {
         text-slate-900
         dark:bg-slate-950
         dark:text-slate-100
-      "    >
+      "
+    >
       <Sidebar
         collapsed={sidebarCollapsed}
-        onToggle={() =>
-          setSidebarCollapsed(
-            current => !current,
-          )
-        }
+        onToggle={() => setSidebarCollapsed((current) => !current)}
       />
 
       <div className="flex min-w-0 flex-1 flex-col">

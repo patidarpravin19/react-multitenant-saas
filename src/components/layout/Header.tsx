@@ -41,7 +41,11 @@ export function Header() {
           aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
           className="grid size-10 place-items-center rounded-lg border border-slate-200 text-slate-600 transition-all duration-300 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
         >
-          {theme === "dark" ? <Sun className="size-4" /> : <Moon className="size-4" />}
+          {theme === "dark" ? (
+            <Sun className="size-4" />
+          ) : (
+            <Moon className="size-4" />
+          )}
         </button>
 
         <button
@@ -53,7 +57,9 @@ export function Header() {
           <span className="grid size-7 place-items-center rounded-full bg-[var(--tenant-secondary)] text-[var(--tenant-primary)]">
             <UserRound className="size-4" />
           </span>
-          <span className="hidden text-sm font-medium lg:inline">Demo User</span>
+          <span className="hidden text-sm font-medium lg:inline">
+            Demo User
+          </span>
           <ChevronDown className="size-4" aria-hidden />
         </button>
       </div>

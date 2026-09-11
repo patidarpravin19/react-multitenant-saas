@@ -19,8 +19,10 @@ interface DynamicFormProps {
 function createDefaultValues(fields: FormFieldConfig[]): FieldValues {
   return Object.fromEntries(
     fields.map((field) => {
-      if (field.defaultValue !== undefined) return [field.name, field.defaultValue];
-      if (field.type === "checkbox" || field.type === "toggle") return [field.name, false];
+      if (field.defaultValue !== undefined)
+        return [field.name, field.defaultValue];
+      if (field.type === "checkbox" || field.type === "toggle")
+        return [field.name, false];
       if (field.type === "multiSelect") return [field.name, []];
       return [field.name, ""];
     }),
@@ -39,7 +41,10 @@ export function DynamicForm({
   const [submitError, setSubmitError] = useState<string | null>(null);
 
   const schema = useMemo(() => createDynamicFormSchema(fields), [fields]);
-  const defaultValues = useMemo(() => ({ ...createDefaultValues(fields), ...initialValues }), [fields, initialValues]);
+  const defaultValues = useMemo(
+    () => ({ ...createDefaultValues(fields), ...initialValues }),
+    [fields, initialValues],
+  );
 
   const {
     register,
@@ -94,9 +99,20 @@ export function DynamicForm({
             return (
               <div
                 key={field.id}
-                className={field.colSpan === 2 || field.type === "checkbox" || field.type === "toggle" ? "md:col-span-2" : ""}
+                className={
+                  field.colSpan === 2 ||
+                  field.type === "checkbox" ||
+                  field.type === "toggle"
+                    ? "md:col-span-2"
+                    : ""
+                }
               >
-                <Component field={field} register={register} control={control} errors={errors} />
+                <Component
+                  field={field}
+                  register={register}
+                  control={control}
+                  errors={errors}
+                />
               </div>
             );
           })}
@@ -112,7 +128,18 @@ export function DynamicForm({
         ) : null}
 
         <div className="flex flex-col-reverse gap-3 border-t border-slate-200 pt-5 sm:flex-row sm:justify-end dark:border-slate-800">
-          <Button type="button" variant="secondary" onClick={() => onCancel ? onCancel() : (reset(defaultValues), setSubmitError(null))} disabled={isSubmitting}>{onCancel ? "Cancel" : "Reset"}</Button>
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={() =>
+              onCancel
+                ? onCancel()
+                : (reset(defaultValues), setSubmitError(null))
+            }
+            disabled={isSubmitting}
+          >
+            {onCancel ? "Cancel" : "Reset"}
+          </Button>
 
           <Button type="submit" isLoading={isSubmitting}>
             {isSubmitting ? "Submitting..." : submitLabel}

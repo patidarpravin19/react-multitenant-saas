@@ -13,26 +13,33 @@ export function createResourceApi<T extends ResourceRecord>(endpoint: string) {
     if (!force && cachedList) return cachedList;
     if (!force && pendingList) return pendingList;
 
-    const request = apiClient.get<T[]>(endpoint)
-      .then(records => {
+    const request = apiClient
+      .get<T[]>(endpoint)
+      .then((records) => {
         cachedList = records;
         return records;
       })
-      .finally(() => { pendingList = undefined; });
+      .finally(() => {
+        pendingList = undefined;
+      });
     pendingList = request;
     return request;
   }
 
   return {
     list,
-    getById: (id: string) => apiClient.get<T>(`${endpoint}/${encodeURIComponent(id)}`),
+    getById: (id: string) =>
+      apiClient.get<T>(`${endpoint}/${encodeURIComponent(id)}`),
     create: async (values: Record<string, unknown>) => {
       const record = await apiClient.post<T>(endpoint, values);
       cachedList = undefined;
       return record;
     },
     update: async (id: string, values: Record<string, unknown>) => {
-      const record = await apiClient.put<T>(`${endpoint}/${encodeURIComponent(id)}`, values);
+      const record = await apiClient.put<T>(
+        `${endpoint}/${encodeURIComponent(id)}`,
+        values,
+      );
       cachedList = undefined;
       return record;
     },

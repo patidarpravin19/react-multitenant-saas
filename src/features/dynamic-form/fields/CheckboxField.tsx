@@ -27,7 +27,9 @@ export function CheckboxField({ field, register, errors }: CompatibleProps) {
         <span>
           <span className="block text-sm font-medium text-slate-800 dark:text-slate-200">
             {field.label}
-            {field.required ? <span className="ml-1 text-red-600">*</span> : null}
+            {field.required ? (
+              <span className="ml-1 text-red-600">*</span>
+            ) : null}
           </span>
           {field.description ? (
             <span className="mt-0.5 block text-xs text-slate-500 dark:text-slate-400">
@@ -38,7 +40,11 @@ export function CheckboxField({ field, register, errors }: CompatibleProps) {
       </label>
 
       {message ? (
-        <p id={`${field.id}-error`} role="alert" className="text-sm font-medium text-red-600 dark:text-red-400">
+        <p
+          id={`${field.id}-error`}
+          role="alert"
+          className="text-sm font-medium text-red-600 dark:text-red-400"
+        >
           {message}
         </p>
       ) : null}

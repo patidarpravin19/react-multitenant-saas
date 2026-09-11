@@ -1,34 +1,28 @@
-import {
-    Plus,
-    X,
-} from "lucide-react";
+import { Plus, X } from "lucide-react";
 
-import {
-    useState,
-} from "react";
+import { useState } from "react";
 
 interface ProductCrudLayoutProps {
-    title: string;
-    description?: string;
-    children: React.ReactNode;
-    form?: React.ReactNode;
-    addButtonLabel?: string;
+  title: string;
+  description?: string;
+  children: React.ReactNode;
+  form?: React.ReactNode;
+  addButtonLabel?: string;
 }
 
 export function ProductCrudLayout({
-    title,
-    description,
-    children,
-    form,
-    addButtonLabel = "Add New",
+  title,
+  description,
+  children,
+  form,
+  addButtonLabel = "Add New",
 }: ProductCrudLayoutProps) {
-    const [showForm, setShowForm] =
-        useState(false);
+  const [showForm, setShowForm] = useState(false);
 
-    return (
-        <div className="space-y-5">
-            <div
-                className="
+  return (
+    <div className="space-y-5">
+      <div
+        className="
           flex
           flex-col
           gap-3
@@ -37,10 +31,10 @@ export function ProductCrudLayout({
           sm:items-center
           sm:justify-between
         "
-            >
-                <div>
-                    <h1
-                        className="
+      >
+        <div>
+          <h1
+            className="
               text-2xl
               font-semibold
               tracking-tight
@@ -48,31 +42,29 @@ export function ProductCrudLayout({
 
               dark:text-slate-100
             "
-                    >
-                        {title}
-                    </h1>
+          >
+            {title}
+          </h1>
 
-                    {description && (
-                        <p
-                            className="
+          {description && (
+            <p
+              className="
                 mt-1
                 text-sm
                 text-slate-500
 
                 dark:text-slate-400
               "
-                        >
-                            {description}
-                        </p>
-                    )}
-                </div>
+            >
+              {description}
+            </p>
+          )}
+        </div>
 
-                <button
-                    type="button"
-                    onClick={() =>
-                        setShowForm(true)
-                    }
-                    className="
+        <button
+          type="button"
+          onClick={() => setShowForm(true)}
+          className="
             inline-flex
             items-center
             justify-center
@@ -90,16 +82,16 @@ export function ProductCrudLayout({
 
             hover:opacity-90
           "
-                >
-                    <Plus size={17} />
+        >
+          <Plus size={17} />
 
-                    {addButtonLabel}
-                </button>
-            </div>
+          {addButtonLabel}
+        </button>
+      </div>
 
-            {showForm && form && (
-                <div
-                    className="
+      {showForm && form && (
+        <div
+          className="
             rounded-xl
             border
             border-slate-200
@@ -110,26 +102,22 @@ export function ProductCrudLayout({
             dark:border-slate-800
             dark:bg-slate-900
           "
-                >
-                    <div
-                        className="
+        >
+          <div
+            className="
               mb-4
               flex
               items-center
               justify-between
             "
-                    >
-                        <h2 className="font-semibold">
-                            {addButtonLabel}
-                        </h2>
+          >
+            <h2 className="font-semibold">{addButtonLabel}</h2>
 
-                        <button
-                            type="button"
-                            onClick={() =>
-                                setShowForm(false)
-                            }
-                            aria-label="Close form"
-                            className="
+            <button
+              type="button"
+              onClick={() => setShowForm(false)}
+              aria-label="Close form"
+              className="
                 rounded-lg
                 p-2
                 text-slate-500
@@ -138,16 +126,16 @@ export function ProductCrudLayout({
 
                 dark:hover:bg-slate-800
               "
-                        >
-                            <X size={18} />
-                        </button>
-                    </div>
+            >
+              <X size={18} />
+            </button>
+          </div>
 
-                    {form}
-                </div>
-            )}
-
-            {children}
+          {form}
         </div>
-    );
+      )}
+
+      {children}
+    </div>
+  );
 }

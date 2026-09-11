@@ -20,7 +20,11 @@ createRoot(root).render(
     <ThemeProvider>
       <NotificationProvider position="top-right" maxToasts={5}>
         <TenantProvider tenant={defaultTenant}>
-          <ApiLoadingProvider><BrowserRouter><App /></BrowserRouter></ApiLoadingProvider>
+          <ApiLoadingProvider>
+            <BrowserRouter>
+              <App />
+            </BrowserRouter>
+          </ApiLoadingProvider>
         </TenantProvider>
       </NotificationProvider>
     </ThemeProvider>

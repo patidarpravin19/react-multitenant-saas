@@ -1,6 +1,4 @@
-import type {
-  FormFieldConfig,
-} from "../../../../types/form";
+import type { FormFieldConfig } from "../../../../types/form";
 
 interface VariantFormOptions {
   models: {
@@ -14,55 +12,41 @@ export function createVariantFormConfig({
 }: VariantFormOptions): FormFieldConfig[] {
   return [
     {
-      id:
-        "productModelId",
+      id: "productModelId",
 
-      name:
-        "productModelId",
+      name: "productModelId",
 
-      label:
-        "Product Model",
+      label: "Product Model",
 
-      type:
-        "select",
+      type: "select",
 
-      required:
-        true,
+      required: true,
 
-      options:
-        models.map(
-          model => ({
-            label:
-              model.name,
+      options: models.map((model) => ({
+        label: model.name,
 
-            value:
-              model.id,
-          }),
-        ),
+        value: model.id,
+      })),
     },
 
     {
       id: "name",
       name: "name",
-      label:
-        "Variant Name",
+      label: "Variant Name",
       type: "text",
       required: true,
 
-      placeholder:
-        "8 GB + 128 GB",
+      placeholder: "8 GB + 128 GB",
     },
 
     {
       id: "code",
       name: "code",
-      label:
-        "Variant Code",
+      label: "Variant Code",
       type: "text",
       required: true,
 
-      placeholder:
-        "8-128",
+      placeholder: "8-128",
     },
 
     {
@@ -72,8 +56,7 @@ export function createVariantFormConfig({
       type: "text",
       required: true,
 
-      placeholder:
-        "8 GB",
+      placeholder: "8 GB",
     },
 
     {
@@ -83,56 +66,41 @@ export function createVariantFormConfig({
       type: "text",
       required: true,
 
-      placeholder:
-        "128 GB",
+      placeholder: "128 GB",
     },
 
     {
-      id:
-        "processor",
+      id: "processor",
 
-      name:
-        "processor",
+      name: "processor",
 
-      label:
-        "Processor",
+      label: "Processor",
 
-      type:
-        "text",
+      type: "text",
 
-      placeholder:
-        "Snapdragon 8 Gen 3",
+      placeholder: "Snapdragon 8 Gen 3",
     },
 
     {
-      id:
-        "description",
+      id: "description",
 
-      name:
-        "description",
+      name: "description",
 
-      label:
-        "Description",
+      label: "Description",
 
-      type:
-        "textarea",
+      type: "textarea",
     },
 
     {
-      id:
-        "isActive",
+      id: "isActive",
 
-      name:
-        "isActive",
+      name: "isActive",
 
-      label:
-        "Active",
+      label: "Active",
 
-      type:
-        "toggle",
+      type: "toggle",
 
-      defaultValue:
-        true,
+      defaultValue: true,
     },
   ];
 }

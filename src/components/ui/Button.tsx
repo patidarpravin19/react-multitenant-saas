@@ -4,8 +4,7 @@ import { LoaderCircle } from "lucide-react";
 type ButtonVariant = "primary" | "secondary";
 
 interface ButtonProps
-  extends PropsWithChildren,
-    ButtonHTMLAttributes<HTMLButtonElement> {
+  extends PropsWithChildren, ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: ButtonVariant;
   isLoading?: boolean;
 }
@@ -29,7 +28,9 @@ export function Button({
       disabled={disabled || isLoading}
       className={`inline-flex min-h-10 items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold shadow-sm transition-all duration-300 disabled:cursor-not-allowed disabled:opacity-60 ${variantClass} ${className}`}
     >
-      {isLoading ? <LoaderCircle className="size-4 animate-spin" aria-hidden /> : null}
+      {isLoading ? (
+        <LoaderCircle className="size-4 animate-spin" aria-hidden />
+      ) : null}
       {children}
     </button>
   );

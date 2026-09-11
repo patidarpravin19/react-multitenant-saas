@@ -23,4 +23,3 @@ export interface Product extends BaseMaster {
   tax: number;
   description: string;
 }
-

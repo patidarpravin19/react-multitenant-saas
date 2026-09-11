@@ -36,13 +36,20 @@ export function FormFieldShell({
       {children}
 
       {description ? (
-        <p id={descriptionId} className="text-xs text-slate-500 dark:text-slate-400">
+        <p
+          id={descriptionId}
+          className="text-xs text-slate-500 dark:text-slate-400"
+        >
           {description}
         </p>
       ) : null}
 
       {error ? (
-        <p id={errorId} role="alert" className="text-sm font-medium text-red-600 dark:text-red-400">
+        <p
+          id={errorId}
+          role="alert"
+          className="text-sm font-medium text-red-600 dark:text-red-400"
+        >
           {error}
         </p>
       ) : null}

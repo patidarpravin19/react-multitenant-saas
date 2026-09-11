@@ -1,4 +1,12 @@
-import { Check, ChevronDown, Download, ListFilter, RefreshCw, Search, Settings2 } from "lucide-react";
+import {
+  Check,
+  ChevronDown,
+  Download,
+  ListFilter,
+  RefreshCw,
+  Search,
+  Settings2,
+} from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import type { GridColumn, GridDensity } from "../../../types/grid";
 
@@ -48,7 +56,8 @@ export function GridToolbar<TData>({
 
   useEffect(() => {
     const onPointerDown = (event: MouseEvent) => {
-      if (!menuRef.current?.contains(event.target as Node)) setSettingsOpen(false);
+      if (!menuRef.current?.contains(event.target as Node))
+        setSettingsOpen(false);
     };
     document.addEventListener("mousedown", onPointerDown);
     return () => document.removeEventListener("mousedown", onPointerDown);
@@ -60,14 +69,22 @@ export function GridToolbar<TData>({
         {searchable ? (
           <label className="relative min-w-64 flex-1 lg:max-w-md">
             <span className="sr-only">Search grid</span>
-            <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" aria-hidden />
+            <Search
+              className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400"
+              aria-hidden
+            />
             <input
               value={search}
-              onChange={event => onSearchChange(event.target.value)}
+              onChange={(event) => onSearchChange(event.target.value)}
               placeholder="Search all visible columns..."
               className="h-10 w-full rounded-lg border border-slate-300 bg-white pl-9 pr-9 text-sm text-slate-900 shadow-sm transition-all duration-300 placeholder:text-slate-400 focus:border-[var(--tenant-primary)] dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
             />
-            {isLoading ? <RefreshCw className="absolute right-3 top-1/2 size-4 -translate-y-1/2 animate-spin text-slate-400" aria-hidden /> : null}
+            {isLoading ? (
+              <RefreshCw
+                className="absolute right-3 top-1/2 size-4 -translate-y-1/2 animate-spin text-slate-400"
+                aria-hidden
+              />
+            ) : null}
           </label>
         ) : null}
 
@@ -96,7 +113,11 @@ export function GridToolbar<TData>({
             disabled={isLoading}
             className="inline-flex h-10 items-center gap-2 rounded-lg border border-slate-300 bg-white px-3 text-sm font-semibold text-slate-700 shadow-sm transition-all duration-300 hover:bg-slate-50 disabled:opacity-60 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
           >
-            <RefreshCw className={`size-4 ${isLoading ? "animate-spin" : ""}`} aria-hidden /> Refresh
+            <RefreshCw
+              className={`size-4 ${isLoading ? "animate-spin" : ""}`}
+              aria-hidden
+            />{" "}
+            Refresh
           </button>
         ) : null}
 
@@ -114,21 +135,29 @@ export function GridToolbar<TData>({
           <div className="relative" ref={menuRef}>
             <button
               type="button"
-              onClick={() => setSettingsOpen(value => !value)}
+              onClick={() => setSettingsOpen((value) => !value)}
               aria-haspopup="menu"
               aria-expanded={settingsOpen}
               className="inline-flex h-10 items-center gap-2 rounded-lg border border-slate-300 bg-white px-3 text-sm font-semibold text-slate-700 shadow-sm transition-all duration-300 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
             >
-              <Settings2 className="size-4" aria-hidden /> View <ChevronDown className="size-4" aria-hidden />
+              <Settings2 className="size-4" aria-hidden /> View{" "}
+              <ChevronDown className="size-4" aria-hidden />
             </button>
 
             {settingsOpen ? (
-              <div role="menu" className="absolute right-0 z-30 mt-2 w-64 rounded-xl border border-slate-200 bg-white p-2 shadow-xl dark:border-slate-700 dark:bg-slate-900">
+              <div
+                role="menu"
+                className="absolute right-0 z-30 mt-2 w-64 rounded-xl border border-slate-200 bg-white p-2 shadow-xl dark:border-slate-700 dark:bg-slate-900"
+              >
                 {showDensity ? (
                   <div className="border-b border-slate-200 p-2 dark:border-slate-800">
-                    <p className="mb-2 text-xs font-bold uppercase tracking-wide text-slate-400">Density</p>
+                    <p className="mb-2 text-xs font-bold uppercase tracking-wide text-slate-400">
+                      Density
+                    </p>
                     <div className="grid grid-cols-3 gap-1">
-                      {(["compact", "comfortable", "spacious"] as GridDensity[]).map(item => (
+                      {(
+                        ["compact", "comfortable", "spacious"] as GridDensity[]
+                      ).map((item) => (
                         <button
                           key={item}
                           type="button"
@@ -144,8 +173,10 @@ export function GridToolbar<TData>({
 
                 {showColumnVisibility ? (
                   <div className="max-h-72 overflow-auto p-2">
-                    <p className="mb-2 text-xs font-bold uppercase tracking-wide text-slate-400">Columns</p>
-                    {columns.map(column => (
+                    <p className="mb-2 text-xs font-bold uppercase tracking-wide text-slate-400">
+                      Columns
+                    </p>
+                    {columns.map((column) => (
                       <button
                         key={column.id}
                         type="button"
@@ -155,7 +186,12 @@ export function GridToolbar<TData>({
                         className="flex w-full items-center justify-between rounded-md px-2 py-2 text-left text-sm text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800"
                       >
                         <span>{column.header}</span>
-                        {visibility[column.id] !== false ? <Check className="size-4 text-[var(--tenant-primary)]" aria-hidden /> : null}
+                        {visibility[column.id] !== false ? (
+                          <Check
+                            className="size-4 text-[var(--tenant-primary)]"
+                            aria-hidden
+                          />
+                        ) : null}
                       </button>
                     ))}
                   </div>

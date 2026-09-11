@@ -1,10 +1,6 @@
-import type {
-  GridColumn,
-} from "../../../../types/grid";
+import type { GridColumn } from "../../../../types/grid";
 
-import type {
-  Vendor,
-} from "../types/vendor.types";
+import type { Vendor } from "../types/vendor.types";
 
 export const vendorColumns: GridColumn<Vendor>[] = [
   {
@@ -15,7 +11,6 @@ export const vendorColumns: GridColumn<Vendor>[] = [
     searchable: true,
     editable: true,
   },
-
   {
     id: "code",
     header: "Code",
@@ -24,7 +19,6 @@ export const vendorColumns: GridColumn<Vendor>[] = [
     searchable: true,
     editable: true,
   },
-
   {
     id: "mobile",
     header: "Mobile",
@@ -32,7 +26,6 @@ export const vendorColumns: GridColumn<Vendor>[] = [
     searchable: true,
     editable: true,
   },
-
   {
     id: "email",
     header: "Email",
@@ -40,7 +33,6 @@ export const vendorColumns: GridColumn<Vendor>[] = [
     searchable: true,
     editable: true,
   },
-
   {
     id: "address",
     header: "Address",
@@ -48,13 +40,11 @@ export const vendorColumns: GridColumn<Vendor>[] = [
     searchable: true,
     editable: true,
   },
-
   {
     id: "isActive",
     header: "Status",
     accessorKey: "isActive",
     sortable: true,
-
     cell: (_, row) => (
       <span
         className={[
@@ -76,9 +66,7 @@ export const vendorColumns: GridColumn<Vendor>[] = [
               `,
         ].join(" ")}
       >
-        {row.isActive
-          ? "Active"
-          : "Inactive"}
+        {row.isActive ? "Active" : "Inactive"}
       </span>
     ),
   },

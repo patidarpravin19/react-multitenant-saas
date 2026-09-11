@@ -2,27 +2,14 @@ import type { ReactNode } from "react";
 
 export type GridMode = "client" | "server";
 
-export type GridSortDirection =
-  | "asc"
-  | "desc";
+export type GridSortDirection = "asc" | "desc";
 
-export type GridDensity =
-  | "compact"
-  | "comfortable"
-  | "spacious";
+export type GridDensity = "compact" | "comfortable" | "spacious";
 
-export type GridAlign =
-  | "left"
-  | "center"
-  | "right";
+export type GridAlign = "left" | "center" | "right";
 
 export type GridEditorType =
-  | "text"
-  | "number"
-  | "email"
-  | "tel"
-  | "select"
-  | "textarea";
+  "text" | "number" | "email" | "tel" | "select" | "textarea";
 
 export type GridFilterOperator =
   | "contains"
@@ -99,9 +86,7 @@ export interface GridColumn<TData> {
    */
   accessor?: keyof TData;
 
-  valueGetter?: (
-    row: TData,
-  ) => unknown;
+  valueGetter?: (row: TData) => unknown;
 
   cell?: (
     value: unknown,
@@ -140,44 +125,25 @@ export interface GridColumn<TData> {
 }
 
 export interface GridServerSource<TData> {
-  load: (
-    query: GridQuery,
-    signal?: AbortSignal,
-  ) => Promise<GridResult<TData>>;
+  load: (query: GridQuery, signal?: AbortSignal) => Promise<GridResult<TData>>;
 }
 
-export type GridActionId =
-  | "view"
-  | "edit"
-  | "delete";
+export type GridActionId = "view" | "edit" | "delete";
 
 export interface GridAction<TData> {
   id: GridActionId | string;
 
   label: string;
 
-  icon?:
-  | "view"
-  | "edit"
-  | "delete"
-  | "save"
-  | "cancel";
+  icon?: "view" | "edit" | "delete" | "save" | "cancel";
 
-  onClick: (
-    row: TData,
-  ) => void | Promise<void>;
+  onClick: (row: TData) => void | Promise<void>;
 
-  hidden?: (
-    row: TData,
-  ) => boolean;
+  hidden?: (row: TData) => boolean;
 
-  disabled?: (
-    row: TData,
-  ) => boolean;
+  disabled?: (row: TData) => boolean;
 
-  variant?:
-  | "default"
-  | "danger";
+  variant?: "default" | "danger";
 }
 
 export interface GridEditContext<TData> {
@@ -185,10 +151,7 @@ export interface GridEditContext<TData> {
 
   rowId: string;
 
-  values: Record<
-    string,
-    unknown
-  >;
+  values: Record<string, unknown>;
 }
 
 export interface GridInlineEditConfig<TData> {
@@ -196,17 +159,11 @@ export interface GridInlineEditConfig<TData> {
 
   editableFields?: string[];
 
-  onSave: (
-    context: GridEditContext<TData>,
-  ) => void | Promise<void>;
+  onSave: (context: GridEditContext<TData>) => void | Promise<void>;
 
-  onCancel?: (
-    context: GridEditContext<TData>,
-  ) => void;
+  onCancel?: (context: GridEditContext<TData>) => void;
 
-  validate?: (
-    context: GridEditContext<TData>,
-  ) => Record<string, string>;
+  validate?: (context: GridEditContext<TData>) => Record<string, string>;
 }
 
 export interface DynamicGridProps<TData> {
@@ -222,9 +179,7 @@ export interface DynamicGridProps<TData> {
 
   serverSource?: GridServerSource<TData>;
 
-  getRowId: (
-    row: TData,
-  ) => string;
+  getRowId: (row: TData) => string;
 
   pageSizeOptions?: number[];
 
@@ -249,19 +204,11 @@ export interface DynamicGridProps<TData> {
 
   inlineEdit?: GridInlineEditConfig<TData>;
 
-  onView?: (
-    row: TData,
-  ) => void;
+  onView?: (row: TData) => void;
 
-  onEdit?: (
-    row: TData,
-  ) => void;
+  onEdit?: (row: TData) => void;
 
-  onDelete?: (
-    row: TData,
-  ) => void | Promise<void>;
+  onDelete?: (row: TData) => void | Promise<void>;
 
-  onRowClick?: (
-    row: TData,
-  ) => void;
+  onRowClick?: (row: TData) => void;
 }

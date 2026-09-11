@@ -18,16 +18,11 @@ export function createBrandFormConfig({
       type: "select",
       required: true,
 
-      options:
-        vendors.map(
-          vendor => ({
-            label:
-              vendor.name,
+      options: vendors.map((vendor) => ({
+        label: vendor.name,
 
-            value:
-              vendor.id,
-          }),
-        ),
+        value: vendor.id,
+      })),
     },
 
     {
@@ -36,8 +31,7 @@ export function createBrandFormConfig({
       label: "Brand Name",
       type: "text",
       required: true,
-      placeholder:
-        "Example: Samsung",
+      placeholder: "Example: Samsung",
     },
 
     {
@@ -46,8 +40,7 @@ export function createBrandFormConfig({
       label: "Brand Code",
       type: "text",
       required: true,
-      placeholder:
-        "Example: SAM",
+      placeholder: "Example: SAM",
     },
 
     {

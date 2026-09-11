@@ -6,7 +6,10 @@ import type {
   GridSort,
 } from "../../../types/grid";
 
-export function getColumnValue<TData>(row: TData, column: GridColumn<TData>): unknown {
+export function getColumnValue<TData>(
+  row: TData,
+  column: GridColumn<TData>,
+): unknown {
   if (column.valueGetter) return column.valueGetter(row);
   if (column.accessor) return row[column.accessor];
   return undefined;
@@ -27,9 +30,13 @@ export function applyClientSearch<TData>(
   const term = search.trim().toLocaleLowerCase();
   if (!term) return rows;
 
-  const searchableColumns = columns.filter(column => column.searchable !== false && !column.hidden);
-  return rows.filter(row =>
-    searchableColumns.some(column => normalize(getColumnValue(row, column)).includes(term)),
+  const searchableColumns = columns.filter(
+    (column) => column.searchable !== false && !column.hidden,
+  );
+  return rows.filter((row) =>
+    searchableColumns.some((column) =>
+      normalize(getColumnValue(row, column)).includes(term),
+    ),
   );
 }
 
@@ -39,10 +46,10 @@ export function applyClientFilters<TData>(
   filters: GridColumnFilter[],
 ): TData[] {
   if (filters.length === 0) return rows;
-  const columnMap = new Map(columns.map(column => [column.id, column]));
+  const columnMap = new Map(columns.map((column) => [column.id, column]));
 
-  return rows.filter(row =>
-    filters.every(filter => {
+  return rows.filter((row) =>
+    filters.every((filter) => {
       if (!filter.value.trim()) return true;
       const column = columnMap.get(filter.field);
       if (!column) return true;
@@ -75,7 +82,10 @@ function compare(a: unknown, b: unknown): number {
   if (b === null || b === undefined) return -1;
   if (typeof a === "number" && typeof b === "number") return a - b;
   if (a instanceof Date && b instanceof Date) return a.getTime() - b.getTime();
-  return String(a).localeCompare(String(b), undefined, { numeric: true, sensitivity: "base" });
+  return String(a).localeCompare(String(b), undefined, {
+    numeric: true,
+    sensitivity: "base",
+  });
 }
 
 export function applyClientSorting<TData>(
@@ -84,13 +94,16 @@ export function applyClientSorting<TData>(
   sorting: GridSort[],
 ): TData[] {
   if (sorting.length === 0) return rows;
-  const columnMap = new Map(columns.map(column => [column.id, column]));
+  const columnMap = new Map(columns.map((column) => [column.id, column]));
 
   return [...rows].sort((left, right) => {
     for (const sort of sorting) {
       const column = columnMap.get(sort.field);
       if (!column) continue;
-      const result = compare(getColumnValue(left, column), getColumnValue(right, column));
+      const result = compare(
+        getColumnValue(left, column),
+        getColumnValue(right, column),
+      );
       if (result !== 0) return sort.direction === "asc" ? result : -result;
     }
     return 0;
@@ -118,16 +131,23 @@ export function densityClasses(density: GridDensity): string {
   return "py-3";
 }
 
-export function toCsv<TData>(rows: TData[], columns: GridColumn<TData>[]): string {
-  const visible = columns.filter(column => column.exportable !== false && !column.hidden);
+export function toCsv<TData>(
+  rows: TData[],
+  columns: GridColumn<TData>[],
+): string {
+  const visible = columns.filter(
+    (column) => column.exportable !== false && !column.hidden,
+  );
   const escape = (value: unknown) => {
     const text = value === null || value === undefined ? "" : String(value);
     return `"${text.replaceAll('"', '""')}"`;
   };
 
   return [
-    visible.map(column => escape(column.header)).join(","),
-    ...rows.map(row => visible.map(column => escape(getColumnValue(row, column))).join(",")),
+    visible.map((column) => escape(column.header)).join(","),
+    ...rows.map((row) =>
+      visible.map((column) => escape(getColumnValue(row, column))).join(","),
+    ),
   ].join("\n");
 }
 

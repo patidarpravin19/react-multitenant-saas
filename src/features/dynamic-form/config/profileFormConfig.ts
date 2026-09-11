@@ -31,7 +31,7 @@ export const profileFormConfig: FormFieldConfig[] = [
       { label: "Engineering", value: "engineering" },
       { label: "Product", value: "product" },
       { label: "Sales", value: "sales" },
-      { label: "Operations", value: "operations" }
+      { label: "Operations", value: "operations" },
     ],
   },
   {

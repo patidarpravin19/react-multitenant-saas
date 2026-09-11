@@ -7,42 +7,36 @@ interface ProductModelFormOptions {
   }[];
   brands: {
     id: string;
-    name: string
+    name: string;
   }[];
 }
 
 export function createProductModelFormConfig({
   productTypes,
-  brands
+  brands,
 }: ProductModelFormOptions): FormFieldConfig[] {
-  return [   
+  return [
     {
       id: "brandId",
       name: "brandId",
       label: "Brand",
       type: "select",
       required: true,
-      options:
-        brands.map(
-          type => ({
-            label: type.name,
-            value: type.id,
-          }),
-        ),
+      options: brands.map((type) => ({
+        label: type.name,
+        value: type.id,
+      })),
     },
-     {
+    {
       id: "productTypeId",
       name: "productTypeId",
       label: "Product Type",
       type: "select",
       required: true,
-      options:
-        productTypes.map(
-          type => ({
-            label: type.name,
-            value: type.id,
-          }),
-        ),
+      options: productTypes.map((type) => ({
+        label: type.name,
+        value: type.id,
+      })),
     },
     {
       id: "name",

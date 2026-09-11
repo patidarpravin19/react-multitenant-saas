@@ -1,17 +1,12 @@
-import type {
-  GridColumn,
-} from "../../../../types/grid";
+import type { GridColumn } from "../../../../types/grid";
 
-import type {
-  Brand,
-} from "../types/brand.types";
+import type { Brand } from "../types/brand.types";
 
 export const brandColumns: GridColumn<Brand>[] = [
   {
     id: "vendorName",
     header: "Vendor",
-    accessorKey:
-      "vendorName",
+    accessorKey: "vendorName",
 
     searchable: true,
     sortable: true,
@@ -40,19 +35,16 @@ export const brandColumns: GridColumn<Brand>[] = [
   {
     id: "description",
     header: "Description",
-    accessorKey:
-      "description",
+    accessorKey: "description",
 
     editable: true,
-    editor:
-      "textarea",
+    editor: "textarea",
   },
 
   {
     id: "isActive",
     header: "Status",
-    accessorKey:
-      "isActive",
+    accessorKey: "isActive",
 
     cell: (_, row) => (
       <span
@@ -83,9 +75,7 @@ export const brandColumns: GridColumn<Brand>[] = [
             `
         }
       >
-        {row.isActive
-          ? "Active"
-          : "Inactive"}
+        {row.isActive ? "Active" : "Inactive"}
       </span>
     ),
   },

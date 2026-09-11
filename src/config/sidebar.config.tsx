@@ -1,117 +1,92 @@
 import {
-    Boxes,
-    Factory,
-    FolderTree,
-    LayoutDashboard,
-    Package,
-    Shapes,
-    Tags,
-    Truck,
+  Boxes,
+  Factory,
+  FolderTree,
+  LayoutDashboard,
+  Package,
+  Shapes,
+  Tags,
+  Truck,
 } from "lucide-react";
 
 import type { NavigationItem } from "../types/navigation";
 import { APP_ROUTES } from "./routes";
 
 export const sidebarConfiguration: NavigationItem[] = [
-    {
-        id: "dashboard",
-        label: "Dashboard",
-        path: APP_ROUTES.dashboard,
-        icon: LayoutDashboard,
-    },
+  {
+    id: "dashboard",
+    label: "Dashboard",
+    path: APP_ROUTES.dashboard,
+    icon: LayoutDashboard,
+  },
 
-    {
-        id: "products",
+  {
+    id: "products",
 
-        label: "Product",
+    label: "Product",
 
-        icon: Package,
+    icon: Package,
 
-        children: [
-            {
-                id: "vendors",
+    children: [
+      {
+        id: "vendors",
 
-                label: "Vendors",
+        label: "Vendors",
 
-                path:
-                    APP_ROUTES
-                        .products
-                        .vendors.list,
+        path: APP_ROUTES.products.vendors.list,
 
-                icon: Truck,
-            },
+        icon: Truck,
+      },
 
-            {
-                id: "brands",
+      {
+        id: "brands",
 
-                label: "Brands",
+        label: "Brands",
 
-                path:
-                    APP_ROUTES
-                        .products
-                        .brands.list,
+        path: APP_ROUTES.products.brands.list,
 
-                icon: Factory,
-            },
+        icon: Factory,
+      },
 
-            {
-                id:
-                    "product-types",
+      {
+        id: "product-types",
 
-                label:
-                    "Product Types",
+        label: "Product Types",
 
-                path:
-                    APP_ROUTES
-                        .products
-                        .types.list,
+        path: APP_ROUTES.products.types.list,
 
-                icon: Shapes,
-            },
+        icon: Shapes,
+      },
 
-            {
-                id:
-                    "product-models",
+      {
+        id: "product-models",
 
-                label:
-                    "Categories / Models",
+        label: "Categories / Models",
 
-                path:
-                    APP_ROUTES
-                        .products
-                        .models.list,
+        path: APP_ROUTES.products.models.list,
 
-                icon:
-                    FolderTree,
-            },
+        icon: FolderTree,
+      },
 
-            {
-                id: "variants",
+      {
+        id: "variants",
 
-                label: "Variants",
+        label: "Variants",
 
-                path:
-                    APP_ROUTES
-                        .products
-                        .variants.list,
+        path: APP_ROUTES.products.variants.list,
 
-                icon: Tags,
-            },
+        icon: Tags,
+      },
 
-            {
-                id:
-                    "product-list",
+      {
+        id: "product-list",
 
-                label:
-                    "Products",
+        label: "Products",
 
-                path:
-                    APP_ROUTES
-                        .products
-                        .products.list,
+        path: APP_ROUTES.products.products.list,
 
-                icon: Boxes,
-            },
-        ],
-    },
+        icon: Boxes,
+      },
+    ],
+  },
 ];

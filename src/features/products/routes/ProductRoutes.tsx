@@ -9,75 +9,44 @@ import { VariantPage } from "../variant/pages/VariantPage";
 import { ProductPage } from "../product/pages/ProductPage";
 import { APP_ROUTES } from "../../../config/routes";
 
-
-
 export function ProductRoutes() {
-    return (
-        <>
-            <Route
-                path={
-                    APP_ROUTES.products.vendors.list
-                }
-                element={
-                    <VendorListPage />
-                }
-            />
-            <Route path={APP_ROUTES.products.vendors.add} element={<VendorFormPage mode="create" />} />
-            <Route path="/products/vendors/:id/edit" element={<VendorFormPage mode="edit" />} />
+  return (
+    <>
+      <Route
+        path={APP_ROUTES.products.vendors.list}
+        element={<VendorListPage />}
+      />
+      <Route
+        path={APP_ROUTES.products.vendors.add}
+        element={<VendorFormPage mode="create" />}
+      />
+      <Route
+        path="/products/vendors/:id/edit"
+        element={<VendorFormPage mode="edit" />}
+      />
 
-            <Route
-                path={
-                    APP_ROUTES
-                        .products
-                        .brands.list
-                }
-                element={
-                    <BrandPage />
-                }
-            />
+      <Route path={APP_ROUTES.products.brands.list} element={<BrandPage />} />
 
-            <Route
-                path={
-                    APP_ROUTES
-                        .products
-                        .types.list
-                }
-                element={
-                    <ProductTypePage />
-                }
-            />
+      <Route
+        path={APP_ROUTES.products.types.list}
+        element={<ProductTypePage />}
+      />
 
-            <Route
-                path={
-                    APP_ROUTES
-                        .products
-                        .models.list
-                }
-                element={
-                    <ProductModelPage />
-                }
-            />
+      <Route
+        path={APP_ROUTES.products.models.list}
+        element={<ProductModelPage />}
+      />
 
-            <Route
-                path={
-                    APP_ROUTES
-                        .products
-                        .variants.list
-                }
-                element={
-                    <VariantPage />
-                }
-            />
+      <Route
+        path={APP_ROUTES.products.variants.list}
+        element={<VariantPage />}
+      />
 
-            <Route
-                path={
-                    APP_ROUTES.products.products.list
-                }
-                element={
-                    <ProductPage />
-                }
-            />
-            {/* <Route
+      <Route
+        path={APP_ROUTES.products.products.list}
+        element={<ProductPage />}
+      />
+      {/* <Route
                 path="/products/vendors"
                 element={<VendorPage />}
             />
@@ -101,6 +70,6 @@ export function ProductRoutes() {
                 path="/products/list"
                 element={<ProductPage />}
             /> */}
-        </>
-    );
+    </>
+  );
 }

@@ -18,12 +18,29 @@ export interface RegistryFieldProps extends DynamicFieldProps {
 export type FieldComponent = ComponentType<RegistryFieldProps>;
 
 const registry: Record<FieldType, FieldComponent> = {
-  text: TextField, email: EmailField, password: NativeInputField, number: NativeInputField,
-  tel: NativeInputField, url: NativeInputField, textarea: TextareaField, select: SelectField,
-  multiSelect: MultiSelectField, radio: RadioField, checkbox: CheckboxField, toggle: ToggleField,
-  date: NativeInputField, time: NativeInputField, datetime: NativeInputField, month: NativeInputField,
-  week: NativeInputField, color: NativeInputField, range: NativeInputField, file: FileField,
+  text: TextField,
+  email: EmailField,
+  password: NativeInputField,
+  number: NativeInputField,
+  tel: NativeInputField,
+  url: NativeInputField,
+  textarea: TextareaField,
+  select: SelectField,
+  multiSelect: MultiSelectField,
+  radio: RadioField,
+  checkbox: CheckboxField,
+  toggle: ToggleField,
+  date: NativeInputField,
+  time: NativeInputField,
+  datetime: NativeInputField,
+  month: NativeInputField,
+  week: NativeInputField,
+  color: NativeInputField,
+  range: NativeInputField,
+  file: FileField,
   hidden: () => null,
 };
 
-export function getFieldComponent(type: FieldType): FieldComponent { return registry[type]; }
+export function getFieldComponent(type: FieldType): FieldComponent {
+  return registry[type];
+}

@@ -1,4 +1,9 @@
-import { ChevronFirst, ChevronLast, ChevronLeft, ChevronRight } from "lucide-react";
+import {
+  ChevronFirst,
+  ChevronLast,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
 
 interface GridPaginationProps {
   pageIndex: number;
@@ -28,24 +33,52 @@ export function GridPagination({
         <span>Rows per page</span>
         <select
           value={pageSize}
-          onChange={event => onPageSizeChange(Number(event.target.value))}
+          onChange={(event) => onPageSizeChange(Number(event.target.value))}
           className="h-9 rounded-lg border border-slate-300 bg-white px-2 font-medium text-slate-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200"
           aria-label="Rows per page"
         >
-          {pageSizeOptions.map(size => <option key={size} value={size}>{size}</option>)}
+          {pageSizeOptions.map((size) => (
+            <option key={size} value={size}>
+              {size}
+            </option>
+          ))}
         </select>
-        <span className="hidden sm:inline">{start}-{end} of {totalCount.toLocaleString()}</span>
+        <span className="hidden sm:inline">
+          {start}-{end} of {totalCount.toLocaleString()}
+        </span>
       </div>
 
       <div className="flex items-center justify-between gap-2 sm:justify-end">
-        <span className="text-slate-500 dark:text-slate-400">Page {safePage + 1} of {pageCount}</span>
+        <span className="text-slate-500 dark:text-slate-400">
+          Page {safePage + 1} of {pageCount}
+        </span>
         <div className="flex items-center gap-1">
           {[
-            { label: "First page", icon: ChevronFirst, target: 0, disabled: safePage === 0 },
-            { label: "Previous page", icon: ChevronLeft, target: safePage - 1, disabled: safePage === 0 },
-            { label: "Next page", icon: ChevronRight, target: safePage + 1, disabled: safePage >= pageCount - 1 },
-            { label: "Last page", icon: ChevronLast, target: pageCount - 1, disabled: safePage >= pageCount - 1 },
-          ].map(item => (
+            {
+              label: "First page",
+              icon: ChevronFirst,
+              target: 0,
+              disabled: safePage === 0,
+            },
+            {
+              label: "Previous page",
+              icon: ChevronLeft,
+              target: safePage - 1,
+              disabled: safePage === 0,
+            },
+            {
+              label: "Next page",
+              icon: ChevronRight,
+              target: safePage + 1,
+              disabled: safePage >= pageCount - 1,
+            },
+            {
+              label: "Last page",
+              icon: ChevronLast,
+              target: pageCount - 1,
+              disabled: safePage >= pageCount - 1,
+            },
+          ].map((item) => (
             <button
               key={item.label}
               type="button"

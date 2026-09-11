@@ -2,8 +2,7 @@ export const APP_ROUTES = {
   dashboard: "/",
 
   products: {
-    root:
-      "/products",
+    root: "/products",
 
     vendors: {
       list: "/products/vendors/list",

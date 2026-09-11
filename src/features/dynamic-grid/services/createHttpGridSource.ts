@@ -1,4 +1,8 @@
-import type { GridQuery, GridResult, GridServerSource } from "../../../types/grid";
+import type {
+  GridQuery,
+  GridResult,
+  GridServerSource,
+} from "../../../types/grid";
 
 export interface HttpGridSourceOptions<TData> {
   endpoint: string;
@@ -36,17 +40,24 @@ export function createHttpGridSource<TData>(
       const params = (options.mapQuery ?? defaultQueryMapper)(query);
       const response = await fetch(`${options.endpoint}?${params.toString()}`, {
         method: "GET",
-        headers: typeof options.headers === "function" ? options.headers() : options.headers,
+        headers:
+          typeof options.headers === "function"
+            ? options.headers()
+            : options.headers,
         signal,
       });
 
       if (!response.ok) {
-        throw new Error(`Grid API request failed with HTTP ${response.status}.`);
+        throw new Error(
+          `Grid API request failed with HTTP ${response.status}.`,
+        );
       }
 
       const payload: unknown = await response.json();
       if (!options.mapResponse) {
-        throw new Error("HTTP grid source requires mapResponse so the API DTO can be converted to GridResult<TData>.");
+        throw new Error(
+          "HTTP grid source requires mapResponse so the API DTO can be converted to GridResult<TData>.",
+        );
       }
 
       return options.mapResponse(payload);

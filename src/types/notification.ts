@@ -2,8 +2,12 @@ import type { ReactNode } from "react";
 
 export type NotificationVariant = "success" | "error" | "warning" | "info";
 export type NotificationPosition =
-  | "top-right" | "top-left" | "top-center"
-  | "bottom-right" | "bottom-left" | "bottom-center";
+  | "top-right"
+  | "top-left"
+  | "top-center"
+  | "bottom-right"
+  | "bottom-left"
+  | "bottom-center";
 
 export interface ToastOptions {
   title: string;
@@ -35,10 +39,26 @@ export interface ConfirmOptions {
 
 export interface NotificationApi {
   toast: (options: ToastOptions) => string;
-  success: (title: string, message?: string, options?: Omit<ToastOptions, "title" | "message" | "variant">) => string;
-  error: (title: string, message?: string, options?: Omit<ToastOptions, "title" | "message" | "variant">) => string;
-  warning: (title: string, message?: string, options?: Omit<ToastOptions, "title" | "message" | "variant">) => string;
-  info: (title: string, message?: string, options?: Omit<ToastOptions, "title" | "message" | "variant">) => string;
+  success: (
+    title: string,
+    message?: string,
+    options?: Omit<ToastOptions, "title" | "message" | "variant">,
+  ) => string;
+  error: (
+    title: string,
+    message?: string,
+    options?: Omit<ToastOptions, "title" | "message" | "variant">,
+  ) => string;
+  warning: (
+    title: string,
+    message?: string,
+    options?: Omit<ToastOptions, "title" | "message" | "variant">,
+  ) => string;
+  info: (
+    title: string,
+    message?: string,
+    options?: Omit<ToastOptions, "title" | "message" | "variant">,
+  ) => string;
   alert: (options: AlertOptions) => string;
   dismiss: (id: string) => void;
   confirm: (options: ConfirmOptions) => Promise<boolean>;

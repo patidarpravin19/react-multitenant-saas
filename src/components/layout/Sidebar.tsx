@@ -1,7 +1,4 @@
-import {
-  ChevronLeft,
-  ChevronRight,
-} from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 import { sidebarConfiguration } from "../../config/sidebar.config";
 
@@ -13,10 +10,7 @@ interface SidebarProps {
   onToggle: () => void;
 }
 
-export function Sidebar({
-  collapsed,
-  onToggle,
-}: SidebarProps) {
+export function Sidebar({ collapsed, onToggle }: SidebarProps) {
   return (
     <aside
       className={[
@@ -27,9 +21,7 @@ export function Sidebar({
         "dark:bg-slate-900",
         "transition-all duration-300",
 
-        collapsed
-          ? "w-[72px]"
-          : "w-[260px]",
+        collapsed ? "w-[72px]" : "w-[260px]",
       ].join(" ")}
     >
       <div
@@ -40,16 +32,9 @@ export function Sidebar({
           py-4
         "
       >
-        <nav
-          aria-label="Main navigation"
-          className="space-y-1"
-        >
-          {sidebarConfiguration.map(item => (
-            <SidebarMenuItem
-              key={item.id}
-              item={item}
-              collapsed={collapsed}
-            />
+        <nav aria-label="Main navigation" className="space-y-1">
+          {sidebarConfiguration.map((item) => (
+            <SidebarMenuItem key={item.id} item={item} collapsed={collapsed} />
           ))}
         </nav>
       </div>
@@ -83,17 +68,9 @@ export function Sidebar({
             dark:text-slate-300
             dark:hover:bg-slate-800
           "
-          aria-label={
-            collapsed
-              ? "Expand sidebar"
-              : "Collapse sidebar"
-          }
+          aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
         >
-          {collapsed ? (
-            <ChevronRight size={18} />
-          ) : (
-            <ChevronLeft size={18} />
-          )}
+          {collapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
         </button>
       </div>
     </aside>
