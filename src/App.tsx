@@ -1,64 +1,120 @@
-import { useState } from "react";
-import { useNotifications } from "./context/NotificationContext";
+import {
+  Navigate,
+  Route,
+  Routes,
+} from "react-router-dom";
+
 import { AppShell } from "./components/layout/AppShell";
-import { DynamicForm } from "./features/dynamic-form/DynamicForm";
-import { allControlsFormConfig } from "./features/dynamic-form/config/allControlsFormConfig";
-import { DynamicGrid } from "./features/dynamic-grid/DynamicGrid";
-import { employeeGridColumns } from "./features/dynamic-grid/config/employeeGridColumns";
-import { employees } from "./features/dynamic-grid/data/employees";
-import { mockEmployeeServer } from "./features/dynamic-grid/services/mockEmployeeServer";
-import type { GridMode } from "./types/grid";
+
+import { brandColumns } from "./features/products/brand/config/brand.columns";
+import { createBrandFormConfig } from "./features/products/brand/config/brand.form";
+import type { Brand } from "./features/products/brand/types/brand.types";
+import { productModelColumns } from "./features/products/product-model/config/productModel.columns";
+import { createProductModelFormConfig } from "./features/products/product-model/config/product-model.form";
+import type { ProductModel } from "./features/products/product-model/types/productType.types";
+import { productColumns } from "./features/products/product/config/product.columns";
+import { createProductFormConfig } from "./features/products/product/config/product.form";
+import type { Product } from "./features/products/product/types/product.types";
+import { productTypeColumns } from "./features/products/product-type/config/productType.columns";
+import { createProductTypeFormConfig } from "./features/products/product-type/config/productType.form";
+import type { ProductType } from "./features/products/product-type/types/productType.types";
+import { ResourceFormPage, ResourceListPage } from "./features/products/shared/ResourceCrudPages";
+import { createResourceApi } from "./features/products/shared/resourceApi";
+import { variantColumns } from "./features/products/variant/config/variant.columns";
+import { createVariantFormConfig } from "./features/products/variant/config/variant.form";
+import type { ProductVariant } from "./features/products/variant/types/variant.types";
+import { vendorColumns } from "./features/products/vendor/config/vendor.columns";
+import { vendorFormConfig } from "./features/products/vendor/config/vendor.form";
+import type { Vendor } from "./features/products/vendor/types/vendor.types";
+
+const vendors = [{ id: "vendor-a", name: "Vendor A" }, { id: "vendor-b", name: "Vendor B" }];
+const brands = [{ id: "brand-samsung", name: "Samsung" }, { id: "brand-lg", name: "LG" }];
+const productTypes = [{ id: "type-mobile", name: "Mobile" }, { id: "type-tv", name: "TV" }];
+const models = [{ id: "model-s25", name: "Galaxy S25 FE" }, { id: "model-oled", name: "OLED C4" }];
+
+const vendorResource = { title: "Vendors", description: "Manage product vendors and suppliers.", singular: "Vendor", listPath: "/products/vendors/list", addPath: "/products/vendors/add", editPath: (id: string) => `/products/vendors/${id}/edit`, columns: vendorColumns, fields: vendorFormConfig, api: createResourceApi<Vendor>("/vendors") };
+const brandResource = { title: "Brands", description: "Manage product brands.", singular: "Brand", listPath: "/products/brands/list", addPath: "/products/brands/add", editPath: (id: string) => `/products/brands/${id}/edit`, columns: brandColumns, fields: createBrandFormConfig({ vendors }), api: createResourceApi<Brand>("/brands") };
+const typeResource = { title: "Product Types", description: "Manage product classifications.", singular: "Product Type", listPath: "/products/types/list", addPath: "/products/types/add", editPath: (id: string) => `/products/types/${id}/edit`, columns: productTypeColumns, fields: createProductTypeFormConfig({ brands }), api: createResourceApi<ProductType>("/product-types") };
+const modelResource = { title: "Product Models", description: "Manage product models.", singular: "Product Model", listPath: "/products/models/list", addPath: "/products/models/add", editPath: (id: string) => `/products/models/${id}/edit`, columns: productModelColumns, fields: createProductModelFormConfig({ productTypes, brands }), api: createResourceApi<ProductModel>("/product-models") };
+const variantResource = { title: "Variants", description: "Manage product variants and specifications.", singular: "Variant", listPath: "/products/variants/list", addPath: "/products/variants/add", editPath: (id: string) => `/products/variants/${id}/edit`, columns: variantColumns, fields: createVariantFormConfig({ models }), api: createResourceApi<ProductVariant>("/variants") };
+const productResource = { title: "Products", description: "Manage inventory products, variants, pricing and stock.", singular: "Product", listPath: "/products/list", addPath: "/products/add", editPath: (id: string) => `/products/${id}/edit`, columns: productColumns, fields: createProductFormConfig({ vendors, productTypes, categories: models, variants: models }), api: createResourceApi<Product>("/products") };
+
+function DashboardPage() {
+  return (
+    <div>
+      <h1 className="text-2xl font-semibold">
+        Dashboard
+      </h1>
+    </div>
+  );
+}
 
 export default function App() {
-  const notifications = useNotifications();
-  const [gridMode, setGridMode] = useState<GridMode>("client");
-  const [view, setView] = useState<"grid" | "form">("grid");
-
   return (
-    <AppShell>
-      <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-        <div>
-          <p className="text-sm font-semibold text-[var(--tenant-primary)]">UI platform</p>
-          <h2 className="mt-1 text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100">Dynamic enterprise components</h2>
-          <p className="mt-1 max-w-3xl text-sm leading-6 text-slate-500 dark:text-slate-400">Configuration-driven forms and data grids with reusable contracts for multi-tenant SaaS products.</p>
-        </div>
+    <Routes>
+      <Route element={<AppShell />}>
+        <Route
+          path="/"
+          element={<DashboardPage />}
+        />
 
-        <div className="flex flex-wrap gap-2">
-          <button type="button" onClick={() => notifications.success("Saved successfully", "Your changes have been saved.")} className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200">Toast</button>
-          <button type="button" onClick={() => notifications.alert({ title: "Service notice", message: "This is a persistent shared alert component.", variant: "warning" })} className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200">Alert</button>
-          <button type="button" onClick={async () => { const confirmed = await notifications.confirm({ title: "Delete employee?", message: "This action cannot be undone.", variant: "danger", confirmLabel: "Delete" }); if (confirmed) notifications.success("Confirmed", "The action was approved."); }} className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200">Confirm</button>
-          <button type="button" onClick={() => setView("grid") } className={`rounded-lg px-4 py-2 text-sm font-semibold transition-all duration-300 ${view === "grid" ? "bg-[var(--tenant-primary)] text-white shadow-sm" : "border border-slate-300 bg-white text-slate-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200"}`}>Dynamic Grid</button>
-          <button type="button" onClick={() => setView("form")} className={`rounded-lg px-4 py-2 text-sm font-semibold transition-all duration-300 ${view === "form" ? "bg-[var(--tenant-primary)] text-white shadow-sm" : "border border-slate-300 bg-white text-slate-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200"}`}>Dynamic Form</button>
-        </div>
-      </div>
+        <Route
+          path="/products/vendors"
+          element={<Navigate to="/products/vendors/list" replace />}
+        />
+        <Route path="/products/vendors/list" element={<ResourceListPage {...vendorResource} />} />
+        <Route path="/products/vendors/add" element={<ResourceFormPage {...vendorResource} mode="create" />} />
+        <Route path="/products/vendors/:id/edit" element={<ResourceFormPage {...vendorResource} mode="edit" />} />
 
-      {view === "grid" ? (
-        <div className="space-y-4">
-          <div className="flex items-center justify-between rounded-xl border border-slate-200 bg-white p-3 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-            <div><p className="text-sm font-bold text-slate-900 dark:text-slate-100">Processing mode</p><p className="text-xs text-slate-500 dark:text-slate-400">Use the same grid with either an in-memory dataset or a server data source.</p></div>
-            <div className="flex rounded-lg bg-slate-100 p-1 dark:bg-slate-800">
-              {(["client", "server"] as GridMode[]).map(mode => <button key={mode} type="button" onClick={() => setGridMode(mode)} className={`rounded-md px-3 py-1.5 text-xs font-bold capitalize transition-all duration-300 ${gridMode === mode ? "bg-white text-[var(--tenant-primary)] shadow-sm dark:bg-slate-700" : "text-slate-500 dark:text-slate-400"}`}>{mode}</button>)}
-            </div>
-          </div>
+        <Route
+          path="/products/brands"
+          element={<Navigate to="/products/brands/list" replace />}
+        />
+        <Route path="/products/brands/list" element={<ResourceListPage {...brandResource} />} />
+        <Route path="/products/brands/add" element={<ResourceFormPage {...brandResource} mode="create" />} />
+        <Route path="/products/brands/:id/edit" element={<ResourceFormPage {...brandResource} mode="edit" />} />
 
-          <DynamicGrid
-            key={gridMode}
-            title="Employee directory"
-            description="Search, filter, multi-sort, page, select, customize columns, change density, refresh and export. Hold Shift while sorting to add another sort column."
-            columns={employeeGridColumns}
-            mode={gridMode}
-            data={gridMode === "client" ? employees : undefined}
-            serverSource={gridMode === "server" ? mockEmployeeServer : undefined}
-            getRowId={row => row.id}
-            initialPageSize={10}
-            initialSort={[{ field: "name", direction: "asc" }]}
-            onRowClick={row => console.info("Grid row clicked", row)}
-            onSelectionChange={rows => console.info("Grid selection", rows)}
-          />
-        </div>
-      ) : (
-        <DynamicForm title="Employee profile" description="All supported baseline controls are demonstrated below." fields={allControlsFormConfig} onSubmit={async values => { await new Promise(r => window.setTimeout(r, 900)); console.info("Submitted values", values); }} />
-      )}
-    </AppShell>
+        <Route
+          path="/products/types"
+          element={<Navigate to="/products/types/list" replace />}
+        />
+        <Route path="/products/types/list" element={<ResourceListPage {...typeResource} />} />
+        <Route path="/products/types/add" element={<ResourceFormPage {...typeResource} mode="create" />} />
+        <Route path="/products/types/:id/edit" element={<ResourceFormPage {...typeResource} mode="edit" />} />
+
+        <Route
+          path="/products/models"
+          element={<Navigate to="/products/models/list" replace />}
+        />
+        <Route path="/products/models/list" element={<ResourceListPage {...modelResource} />} />
+        <Route path="/products/models/add" element={<ResourceFormPage {...modelResource} mode="create" />} />
+        <Route path="/products/models/:id/edit" element={<ResourceFormPage {...modelResource} mode="edit" />} />
+
+        <Route
+          path="/products/variants"
+          element={<Navigate to="/products/variants/list" replace />}
+        />
+        <Route path="/products/variants/list" element={<ResourceListPage {...variantResource} />} />
+        <Route path="/products/variants/add" element={<ResourceFormPage {...variantResource} mode="create" />} />
+        <Route path="/products/variants/:id/edit" element={<ResourceFormPage {...variantResource} mode="edit" />} />
+
+        <Route
+          path="/products/list"
+          element={<ResourceListPage {...productResource} />}
+        />
+        <Route path="/products/add" element={<ResourceFormPage {...productResource} mode="create" />} />
+        <Route path="/products/:id/edit" element={<ResourceFormPage {...productResource} mode="edit" />} />
+
+        <Route
+          path="*"
+          element={
+            <Navigate
+              to="/"
+              replace
+            />
+          }
+        />
+      </Route>
+    </Routes>
   );
 }

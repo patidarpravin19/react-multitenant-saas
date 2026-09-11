@@ -1,12 +1,35 @@
-import { ArrowDown, ArrowUp, ArrowUpDown, SearchX, TriangleAlert } from "lucide-react";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+
+import {
+  ArrowDown,
+  ArrowUp,
+  ArrowUpDown,
+  ChevronDown,
+  ChevronUp,
+  ChevronsUpDown,
+  Pencil,
+  SearchX,
+  TriangleAlert,
+} from "lucide-react";
+
 import type {
   DynamicGridProps,
+  GridColumn,
   GridColumnFilter,
   GridDensity,
+  GridEditContext,
   GridQuery,
+  GridResult,
   GridSort,
 } from "../../types/grid";
+
+
 import { GridPagination } from "./components/GridPagination";
 import { GridToolbar } from "./components/GridToolbar";
 import { useDebouncedValue } from "./hooks/useDebouncedValue";
@@ -275,14 +298,58 @@ export function DynamicGrid<TData>({
                       <input type="checkbox" aria-label={`Select row ${rowIndex + 1}`} checked={selected} onChange={() => toggleRow(row)} className="size-4 accent-[var(--tenant-primary)]" />
                     </td>
                   ) : null}
-                  {visibleColumns.map(column => {
+                  {/* {visibleColumns.map(column => {
                     const value = getColumnValue(row, column);
                     return (
                       <td key={column.id} className={`px-4 text-slate-700 dark:text-slate-200 ${densityClasses(density)} ${column.align === "right" ? "text-right" : column.align === "center" ? "text-center" : "text-left"}`}>
                         {column.cell ? column.cell({ row, value, rowIndex }) : value === null || value === undefined ? <span className="text-slate-400">—</span> : String(value)}
                       </td>
                     );
-                  })}
+                  })} */}
+                  {visibleColumns.map(
+                      (
+                        column,
+                        rowIndex,
+                      ) => {
+                        const value =
+                          getValue(
+                            row,
+                            column,
+                          );
+
+                        return (
+                          <td
+                            key={
+                              column.id
+                            }
+                            className="
+                              whitespace-nowrap
+                              px-3
+                              py-3
+                              text-sm
+                              text-slate-700
+
+                              dark:text-slate-200
+                            "
+                          >
+                            {column.cell
+                              ? column.cell(
+                                  value,
+                                  row,
+                                  {
+                                    row,
+                                    value,
+                                    rowIndex,
+                                  },
+                                )
+                              : String(
+                                  value ??
+                                    "",
+                                )}
+                          </td>
+                        );
+                      },
+                    )}
                 </tr>
               );
             })}
@@ -293,4 +360,67 @@ export function DynamicGrid<TData>({
       <GridPagination pageIndex={pageIndex} pageSize={pageSize} totalCount={totalCount} pageSizeOptions={pageSizeOptions} onPageIndexChange={setPageIndex} onPageSizeChange={setPageSize} />
     </section>
   );
+}
+
+
+function getColumnKey<TData>(
+  column: GridColumn<TData>,
+): keyof TData | undefined {
+  return (
+    column.accessorKey ??
+    column.accessor
+  );
+}
+
+function getValue<TData>(
+  row: TData,
+  column: GridColumn<TData>,
+): unknown {
+  if (column.valueGetter) {
+    return column.valueGetter(row);
+  }
+
+  const key =
+    getColumnKey(column);
+
+  if (!key) {
+    return undefined;
+  }
+
+  return row[key];
+}
+
+function matchesSearch<TData>(
+  row: TData,
+  columns: GridColumn<TData>[],
+  search: string,
+): boolean {
+  if (!search.trim()) {
+    return true;
+  }
+
+  const keyword =
+    search
+      .trim()
+      .toLowerCase();
+
+  return columns
+    .filter(
+      column =>
+        column.searchable !==
+        false,
+    )
+    .some(column => {
+      const value =
+        getValue(
+          row,
+          column,
+        );
+
+      return String(
+        value ?? "",
+      )
+        .toLowerCase()
+        .includes(keyword);
+    });
 }

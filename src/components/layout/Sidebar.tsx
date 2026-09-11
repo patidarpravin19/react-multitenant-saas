@@ -1,64 +1,98 @@
 import {
   ChevronLeft,
   ChevronRight,
-  FileText,
-  LayoutDashboard,
-  Settings,
-  Users,
 } from "lucide-react";
 
-const navItems = [
-  { label: "Dashboard", icon: LayoutDashboard },
-  { label: "Users", icon: Users },
-  { label: "Reports", icon: FileText },
-  { label: "Settings", icon: Settings },
-] as const;
+import { sidebarConfiguration } from "../../config/sidebar.config";
+
+import { SidebarMenuItem } from "../navigation/SidebarMenuItem";
 
 interface SidebarProps {
   collapsed: boolean;
+
   onToggle: () => void;
 }
 
-export function Sidebar({ collapsed, onToggle }: SidebarProps) {
+export function Sidebar({
+  collapsed,
+  onToggle,
+}: SidebarProps) {
   return (
     <aside
-      className={`hidden shrink-0 border-r border-slate-200 bg-white shadow-sm transition-all duration-300 md:flex md:flex-col dark:border-slate-800 dark:bg-slate-900 ${
-        collapsed ? "w-20" : "w-64"
-      }`}
-    >
-      <nav aria-label="Primary navigation" className="flex-1 space-y-1 p-3">
-        {navItems.map(({ label, icon: Icon }, index) => (
-          <a
-            key={label}
-            href="#"
-            aria-current={index === 0 ? "page" : undefined}
-            title={collapsed ? label : undefined}
-            className={`flex min-h-11 items-center gap-3 rounded-lg px-3 text-sm font-medium transition-all duration-300 ${
-              index === 0
-                ? "bg-[var(--tenant-secondary)] text-[var(--tenant-primary)]"
-                : "text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white"
-            }`}
-          >
-            <Icon className="size-5 shrink-0" aria-hidden />
-            {!collapsed ? <span>{label}</span> : <span className="sr-only">{label}</span>}
-          </a>
-        ))}
-      </nav>
+      className={[
+        "relative flex h-full flex-col",
+        "border-r border-slate-200",
+        "bg-white",
+        "dark:border-slate-800",
+        "dark:bg-slate-900",
+        "transition-all duration-300",
 
-      <div className="border-t border-slate-200 p-3 dark:border-slate-800">
+        collapsed
+          ? "w-[72px]"
+          : "w-[260px]",
+      ].join(" ")}
+    >
+      <div
+        className="
+          flex-1
+          overflow-y-auto
+          px-3
+          py-4
+        "
+      >
+        <nav
+          aria-label="Main navigation"
+          className="space-y-1"
+        >
+          {sidebarConfiguration.map(item => (
+            <SidebarMenuItem
+              key={item.id}
+              item={item}
+              collapsed={collapsed}
+            />
+          ))}
+        </nav>
+      </div>
+
+      <div
+        className="
+          border-t
+          border-slate-200
+          p-3
+          dark:border-slate-800
+        "
+      >
         <button
           type="button"
           onClick={onToggle}
-          aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-          className="flex min-h-10 w-full items-center justify-center gap-2 rounded-lg border border-slate-200 text-sm font-medium text-slate-600 transition-all duration-300 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
+          className="
+            flex
+            w-full
+            items-center
+            justify-center
+            rounded-lg
+            border
+            border-slate-200
+            p-2
+            text-slate-600
+            transition-all
+            duration-300
+            hover:bg-slate-100
+
+            dark:border-slate-700
+            dark:text-slate-300
+            dark:hover:bg-slate-800
+          "
+          aria-label={
+            collapsed
+              ? "Expand sidebar"
+              : "Collapse sidebar"
+          }
         >
           {collapsed ? (
-            <ChevronRight className="size-4" />
+            <ChevronRight size={18} />
           ) : (
-            <>
-              <ChevronLeft className="size-4" />
-              Collapse
-            </>
+            <ChevronLeft size={18} />
           )}
         </button>
       </div>

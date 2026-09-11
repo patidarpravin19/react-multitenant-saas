@@ -6,6 +6,8 @@ import { ThemeProvider } from "./context/ThemeContext";
 import { NotificationProvider } from "./context/NotificationContext";
 import { defaultTenant } from "./config/tenant";
 import "./styles/index.css";
+import { BrowserRouter } from "react-router-dom";
+import { ApiLoadingProvider } from "./context/ApiLoadingContext";
 
 const root = document.getElementById("root");
 
@@ -18,7 +20,7 @@ createRoot(root).render(
     <ThemeProvider>
       <NotificationProvider position="top-right" maxToasts={5}>
         <TenantProvider tenant={defaultTenant}>
-          <App />
+          <ApiLoadingProvider><BrowserRouter><App /></BrowserRouter></ApiLoadingProvider>
         </TenantProvider>
       </NotificationProvider>
     </ThemeProvider>

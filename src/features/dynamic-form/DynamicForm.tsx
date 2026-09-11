@@ -11,6 +11,9 @@ interface DynamicFormProps {
   description?: string;
   fields: FormFieldConfig[];
   onSubmit: (values: FieldValues) => Promise<void> | void;
+  initialValues?: FieldValues;
+  submitLabel?: string;
+  onCancel?: () => void;
 }
 
 function createDefaultValues(fields: FormFieldConfig[]): FieldValues {
@@ -29,11 +32,14 @@ export function DynamicForm({
   description,
   fields,
   onSubmit,
+  initialValues,
+  submitLabel = "Submit",
+  onCancel,
 }: DynamicFormProps) {
   const [submitError, setSubmitError] = useState<string | null>(null);
 
   const schema = useMemo(() => createDynamicFormSchema(fields), [fields]);
-  const defaultValues = useMemo(() => createDefaultValues(fields), [fields]);
+  const defaultValues = useMemo(() => ({ ...createDefaultValues(fields), ...initialValues }), [fields, initialValues]);
 
   const {
     register,
@@ -106,20 +112,10 @@ export function DynamicForm({
         ) : null}
 
         <div className="flex flex-col-reverse gap-3 border-t border-slate-200 pt-5 sm:flex-row sm:justify-end dark:border-slate-800">
-          <Button
-            type="button"
-            variant="secondary"
-            onClick={() => {
-              reset(defaultValues);
-              setSubmitError(null);
-            }}
-            disabled={isSubmitting}
-          >
-            Reset
-          </Button>
+          <Button type="button" variant="secondary" onClick={() => onCancel ? onCancel() : (reset(defaultValues), setSubmitError(null))} disabled={isSubmitting}>{onCancel ? "Cancel" : "Reset"}</Button>
 
           <Button type="submit" isLoading={isSubmitting}>
-            {isSubmitting ? "Submitting..." : "Submit"}
+            {isSubmitting ? "Submitting..." : submitLabel}
           </Button>
         </div>
       </form>

@@ -15,7 +15,7 @@ export function NotificationProvider({ children, position = "top-right", maxToas
   const counter = useRef(0);
   const nextId = () => `notification-${++counter.current}`;
   const dismiss = useCallback((id: string) => { setToasts(v => v.filter(x => x.id !== id)); setAlerts(v => v.filter(x => x.id !== id)); }, []);
-  const toast = useCallback((options: ToastOptions) => { const id = nextId(); setToasts(v => [...v, { duration: 5000, dismissible: true, variant: "info", ...options, id }].slice(-maxToasts)); return id; }, [maxToasts]);
+  const toast = useCallback((options: ToastOptions) => { const id = nextId(); const record: ToastRecord = { duration: 5000, dismissible: true, variant: "info", ...options, id }; setToasts(v => [...v, record].slice(-maxToasts)); return id; }, [maxToasts]);
   const createVariant = useCallback((variant: ToastOptions["variant"], title: string, message?: string, options?: Omit<ToastOptions, "title" | "message" | "variant">) => toast({ ...options, title, message, variant }), [toast]);
   const alert = useCallback((options: AlertOptions) => { const id = nextId(); setAlerts(v => [...v, { dismissible: true, variant: "info", ...options, id }]); return id; }, []);
   const confirm = useCallback((options: ConfirmOptions) => new Promise<boolean>(resolve => setConfirmDialog({ id: nextId(), variant: "danger", confirmLabel: "Confirm", cancelLabel: "Cancel", closeOnBackdrop: true, ...options, resolve })), []);
