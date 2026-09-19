@@ -69,10 +69,8 @@ export function VendorPage() {
       address: String(values.address ?? ""),
       mobile: String(values.mobile ?? ""),
       email: String(values.email ?? ""),
-
       isActive: Boolean(values.isActive),
-
-      isDelete: false,
+      isDelete: false
     };
 
     setVendors((current) => [vendor, ...current]);
@@ -95,9 +93,9 @@ export function VendorPage() {
       current.map((item) =>
         item.id === rowId
           ? ({
-              ...item,
-              ...values,
-            } as Vendor)
+            ...item,
+            ...values,
+          } as Vendor)
           : item,
       ),
     );
@@ -126,12 +124,10 @@ export function VendorPage() {
       current.map((item) =>
         item.id === vendor.id
           ? {
-              ...item,
-
-              isDelete: true,
-
-              isActive: false,
-            }
+            ...item,
+            isDelete: true,
+            isActive: false,
+          }
           : item,
       ),
     );

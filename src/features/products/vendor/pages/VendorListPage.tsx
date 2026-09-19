@@ -17,7 +17,7 @@ export function VendorListPage() {
   const loadVendors = useCallback(async () => {
     try {
       setError(null);
-      setVendors((await vendorApi.list()).filter((vendor) => !vendor.isDelete));
+      setVendors(await vendorApi.list());//.filter((vendor) => !vendor.isDelete));
     } catch (reason) {
       const message =
         reason instanceof Error ? reason.message : "Unable to load vendors.";
