@@ -33,7 +33,7 @@ export const vendorFormConfig: FormFieldConfig[] = [
     placeholder: "Enter address",
   },
   {
-    id: "code",
+    id: "mobile",
     name: "mobile",
     label: "Mobile",
     type: "tel",
@@ -41,7 +41,7 @@ export const vendorFormConfig: FormFieldConfig[] = [
     required: true,
   },
   {
-    id: "code",
+    id: "email",
     name: "email",
     label: "Email",
     type: "email",

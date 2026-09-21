@@ -3,7 +3,7 @@ import type { Vendor } from "../types/vendor.types";
 
 export type SaveVendorInput = Omit<
   Vendor,
-  "id" | "isDelete" | "createdAt" | "createdBy" | "updatedAt" | "updatedBy"
+  "isDelete" | "createdAt" | "createdBy" | "updatedAt" | "updatedBy"
 >;
 
 export const vendorApi = {

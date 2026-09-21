@@ -8,6 +8,7 @@ import type { Vendor } from "../types/vendor.types";
 
 function toInput(values: Record<string, unknown>): SaveVendorInput {
   return {
+    id: String(values.id ?? ""),
     name: String(values.name ?? ""),
     code: String(values.code ?? ""),
     description: String(values.description ?? ""),
