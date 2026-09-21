@@ -53,7 +53,7 @@ export const productColumns: GridColumn<Product>[] = [
     editor: "number",
 
     cell: (_, row) =>
-      `₹${row.purchasePrice.toLocaleString("en-IN", {
+      `₹${row.purchasePrice?.toLocaleString("en-IN", {
         minimumFractionDigits: 2,
       })}`,
   },

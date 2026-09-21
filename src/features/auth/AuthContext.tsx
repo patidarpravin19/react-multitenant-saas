@@ -13,6 +13,7 @@ import type { AuthSession, LoginInput } from "./auth.types";
 
 const sessionKey = "auth_session";
 const tokenKey = "auth_token";
+const tenantIdKey = "tenant_id";
 
 function readStoredSession(): AuthSession | null {
   try {
@@ -21,6 +22,7 @@ function readStoredSession(): AuthSession | null {
   } catch {
     localStorage.removeItem(sessionKey);
     localStorage.removeItem(tokenKey);
+    localStorage.removeItem(tenantIdKey);
     return null;
   }
 }
@@ -40,6 +42,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
   const clearSession = useCallback(() => {
     localStorage.removeItem(sessionKey);
     localStorage.removeItem(tokenKey);
+    localStorage.removeItem(tenantIdKey);
     setSession(null);
   }, []);
 
@@ -47,6 +50,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
     const nextSession = await authService.login(input);
     localStorage.setItem(tokenKey, nextSession.token);
     localStorage.setItem(sessionKey, JSON.stringify(nextSession));
+    localStorage.setItem(tenantIdKey, nextSession.tenantId ?? "");
     setSession(nextSession);
   }, []);
 

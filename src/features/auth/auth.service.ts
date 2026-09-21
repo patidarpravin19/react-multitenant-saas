@@ -7,6 +7,7 @@ const logoutEndpoint = import.meta.env.VITE_AUTH_LOGOUT_ENDPOINT ?? "/auth/logou
 type LoginResponse = {
   token?: string;
   accessToken?: string;
+  tenantId?: string;
   access_token?: string;
   user?: Partial<AuthUser>;
   data?: LoginResponse;
@@ -19,6 +20,7 @@ function toSession(response: LoginResponse, input: LoginInput): AuthSession {
 
   return {
     token,
+    tenantId: body.tenantId,
     user: {
       username: body.user?.username ?? input.username,
       tenantSlug: body.user?.tenantSlug ?? input.tenantSlug,

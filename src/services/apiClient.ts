@@ -78,7 +78,10 @@ addRequestInterceptor((_, config) => {
   if (config.authenticate === false) return config;
   const token = localStorage.getItem("auth_token");
   if (!token) return config;
+  const tenantId = localStorage.getItem("tenant_id");
+  if (!tenantId) return config;
   const headers = new Headers(config.headers);
+  headers.set("X-Tenant-ID", tenantId);
   headers.set("Authorization", `Bearer ${token}`);
   return { ...config, headers };
 });
