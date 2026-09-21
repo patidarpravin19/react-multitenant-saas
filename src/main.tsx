@@ -8,6 +8,7 @@ import { defaultTenant } from "./config/tenant";
 import "./styles/index.css";
 import { BrowserRouter } from "react-router-dom";
 import { ApiLoadingProvider } from "./context/ApiLoadingContext";
+import { AuthProvider } from "./features/auth/AuthContext";
 
 const root = document.getElementById("root");
 
@@ -22,7 +23,9 @@ createRoot(root).render(
         <TenantProvider tenant={defaultTenant}>
           <ApiLoadingProvider>
             <BrowserRouter>
-              <App />
+              <AuthProvider>
+                <App />
+              </AuthProvider>
             </BrowserRouter>
           </ApiLoadingProvider>
         </TenantProvider>

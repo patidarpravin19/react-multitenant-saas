@@ -1,10 +1,21 @@
-import { Moon, Search, Sun, UserRound, ChevronDown } from "lucide-react";
+import { Moon, Search, Sun, UserRound, ChevronDown, LogOut } from "lucide-react";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../features/auth/AuthContext";
 import { useTenant } from "../../context/TenantContext";
 import { useTheme } from "../../context/ThemeContext";
 
 export function Header() {
   const { tenant } = useTenant();
   const { theme, toggleTheme } = useTheme();
+  const { session, logout } = useAuth();
+  const navigate = useNavigate();
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  async function handleLogout() {
+    await logout();
+    navigate("/login", { replace: true });
+  }
 
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center gap-3 border-b border-slate-200 bg-white/95 px-4 shadow-sm backdrop-blur sm:px-6 dark:border-slate-800 dark:bg-slate-900/95">
@@ -48,20 +59,28 @@ export function Header() {
           )}
         </button>
 
+        <div className="relative">
         <button
           type="button"
           aria-haspopup="menu"
-          aria-expanded="false"
+          aria-expanded={menuOpen}
+          onClick={() => setMenuOpen((open) => !open)}
           className="flex h-10 items-center gap-2 rounded-lg border border-slate-200 px-2.5 text-slate-700 transition-all duration-300 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
         >
           <span className="grid size-7 place-items-center rounded-full bg-[var(--tenant-secondary)] text-[var(--tenant-primary)]">
             <UserRound className="size-4" />
           </span>
           <span className="hidden text-sm font-medium lg:inline">
-            Demo User
+            {session?.user.displayName ?? session?.user.username}
           </span>
           <ChevronDown className="size-4" aria-hidden />
         </button>
+        {menuOpen && (
+          <div role="menu" className="absolute right-0 mt-2 w-44 rounded-lg border border-slate-200 bg-white p-1 shadow-lg dark:border-slate-700 dark:bg-slate-900">
+            <button type="button" role="menuitem" onClick={handleLogout} className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30"><LogOut className="size-4" />Sign out</button>
+          </div>
+        )}
+        </div>
       </div>
     </header>
   );

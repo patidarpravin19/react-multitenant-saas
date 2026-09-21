@@ -62,6 +62,7 @@ export interface PasswordFieldConfig extends BaseFieldConfig {
   placeholder?: string;
   minLength?: number;
   maxLength?: number;
+  autoComplete?: string;
 }
 export interface NumberFieldConfig extends BaseFieldConfig {
   type: "number";

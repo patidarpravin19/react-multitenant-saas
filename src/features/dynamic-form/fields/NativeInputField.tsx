@@ -46,6 +46,7 @@ export function NativeInputField({
     type: typeMap[field.type],
     disabled: field.disabled,
     placeholder: "placeholder" in field ? field.placeholder : undefined,
+    autoComplete: "autoComplete" in field ? field.autoComplete : undefined,
     min: "min" in field ? field.min : undefined,
     max: "max" in field ? field.max : undefined,
     step: "step" in field ? field.step : undefined,

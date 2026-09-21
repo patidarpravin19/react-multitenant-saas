@@ -25,6 +25,21 @@ npm run dev
 npm run build
 ```
 
+## Authentication
+
+Protected application routes redirect unauthenticated users to `/login`. The login form sends
+`{ tenantSlug, username, password }` to `POST /auth/login` and accepts `token`, `accessToken`,
+or `access_token` in the response (including inside a `data` object). The returned bearer token
+is persisted for subsequent API requests. Signing out calls `POST /auth/logout` and clears the
+local session even if that request fails.
+
+Configure different endpoint paths when needed:
+
+```env
+VITE_AUTH_LOGIN_ENDPOINT=/auth/login
+VITE_AUTH_LOGOUT_ENDPOINT=/auth/logout
+```
+
 ## Architecture
 
 ```text

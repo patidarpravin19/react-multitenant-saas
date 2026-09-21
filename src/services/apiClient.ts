@@ -52,15 +52,17 @@ async function parseBody(response: Response): Promise<unknown> {
 /** Add a request interceptor. Return the unsubscribe function when it is no longer needed. */
 export function addRequestInterceptor(interceptor: RequestInterceptor) {
   requestInterceptors.push(interceptor);
-  return () =>
+  return () => {
     requestInterceptors.splice(requestInterceptors.indexOf(interceptor), 1);
+  };
 }
 
 /** Add a response interceptor. It runs before non-2xx responses are converted to ApiError. */
 export function addResponseInterceptor(interceptor: ResponseInterceptor) {
   responseInterceptors.push(interceptor);
-  return () =>
+  return () => {
     responseInterceptors.splice(responseInterceptors.indexOf(interceptor), 1);
+  };
 }
 
 export function subscribeToApiLoading(listener: LoadingListener) {
