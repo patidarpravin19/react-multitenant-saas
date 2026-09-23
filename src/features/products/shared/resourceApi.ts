@@ -1,8 +1,37 @@
 import { apiClient } from "../../../services/apiClient";
+import type { GridQuery, GridResult, GridServerSource } from "../../../types/grid";
 
 export interface ResourceRecord {
   id: string;
   isDelete: boolean;
+}
+
+type PagedResponse<T> = {
+  items?: T[];
+  rows?: T[];
+  data?: T[];
+  totalCount?: number;
+  total?: number;
+};
+
+function toPageQuery(query: GridQuery) {
+  const params = new URLSearchParams({
+    page: String(query.pageIndex + 1),
+    pageSize: String(query.pageSize),
+    search: query.search,
+  });
+
+  query.sort.forEach((sort, index) => {
+    params.set(`sort[${index}].field`, sort.field);
+    params.set(`sort[${index}].direction`, sort.direction);
+  });
+
+  query.filters.forEach((filter, index) => {
+    params.set(`filters[${index}].field`, filter.field);
+    params.set(`filters[${index}].operator`, filter.operator ?? "contains");
+    params.set(`filters[${index}].value`, filter.value);
+  });
+  return params;
 }
 
 export function createResourceApi<T extends ResourceRecord>(endpoint: string) {
@@ -26,8 +55,22 @@ export function createResourceApi<T extends ResourceRecord>(endpoint: string) {
     return request;
   }
 
+  const serverSource: GridServerSource<T> = {
+    async load(query, signal): Promise<GridResult<T>> {
+      const response = await apiClient.get<PagedResponse<T> | T[]>(
+        `${endpoint}?${toPageQuery(query)}`,
+        { signal },
+      );
+      if (Array.isArray(response))
+        return { rows: response, totalCount: response.length };
+      const rows = response.items ?? response.rows ?? response.data ?? [];
+      return { rows, totalCount: response.totalCount ?? response.total ?? rows.length };
+    },
+  };
+
   return {
     list,
+    serverSource,
     getById: (id: string) =>
       apiClient.get<T>(`${endpoint}/${encodeURIComponent(id)}`),
     create: async (values: Record<string, unknown>) => {

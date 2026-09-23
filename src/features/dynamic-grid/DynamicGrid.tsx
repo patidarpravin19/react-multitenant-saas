@@ -44,6 +44,7 @@ export function DynamicGrid<TData>({
   mode = "client",
   data = [],
   serverSource,
+  refreshKey,
   getRowId,
   initialPageSize = 10,
   pageSizeOptions = [10, 25, 50, 100],
@@ -145,7 +146,7 @@ export function DynamicGrid<TData>({
       });
 
     return () => controller.abort();
-  }, [mode, serverSource, query, reloadKey]);
+  }, [mode, serverSource, query, reloadKey, refreshKey]);
 
   const clientResult = useMemo(
     () => processClientRows(data, columns, query),

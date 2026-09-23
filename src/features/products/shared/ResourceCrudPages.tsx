@@ -6,11 +6,12 @@ import { useNotifications } from "../../../context/NotificationContext";
 import { DynamicForm } from "../../dynamic-form/DynamicForm";
 import { DynamicGrid } from "../../dynamic-grid/DynamicGrid";
 import type { FormFieldConfig } from "../../../types/form";
-import type { GridColumn } from "../../../types/grid";
+import type { GridColumn, GridServerSource } from "../../../types/grid";
 import { type ResourceRecord } from "./resourceApi";
 
 interface ResourceApi<T extends ResourceRecord> {
   list: (force?: boolean) => Promise<T[]>;
+  serverSource: GridServerSource<T>;
   getById: (id: string) => Promise<T>;
   create: (values: Record<string, unknown>) => Promise<T>;
   update: (id: string, values: Record<string, unknown>) => Promise<T>;
@@ -37,36 +38,8 @@ export function ResourceListPage<T extends ResourceRecord>(
     props;
   const navigate = useNavigate();
   const notifications = useNotifications();
-  const [records, setRecords] = useState<T[]>([]);
   const [error, setError] = useState<string | null>(null);
-  const loaded = useRef(false);
-
-  // The callback has no notification/context dependency. Consequently a toast or other
-  // provider re-render cannot cause another GET request.
-  const load = useCallback(
-    async (force = false) => {
-      try {
-        setError(null);
-        setRecords(
-          (await api.list(force)).filter((record) => !record.isDelete),
-        );
-      } catch (reason) {
-        setError(
-          reason instanceof Error
-            ? reason.message
-            : `Unable to load ${title.toLowerCase()}.`,
-        );
-        setRecords([]);
-      }
-    },
-    [api, title],
-  );
-
-  useEffect(() => {
-    // if (loaded.current) return;
-    // loaded.current = true;
-    void load();
-  }, [load]);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   const deleteRecord = async (record: T) => {
     const confirmed = await notifications.confirm({
@@ -78,7 +51,7 @@ export function ResourceListPage<T extends ResourceRecord>(
     if (!confirmed) return;
     try {
       await api.remove(record.id);
-      await load(true);
+      setRefreshKey((key) => key + 1);
       notifications.success(`${singular} deleted`, "The record was deleted successfully.");
     } catch (reason) {
       const message = reason instanceof Error ? reason.message : `Unable to delete ${singular.toLowerCase()}.`;
@@ -97,7 +70,7 @@ export function ResourceListPage<T extends ResourceRecord>(
           </p>
         </div>
         <div className="flex gap-2">
-          <Button variant="secondary" onClick={() => void load(true)}>
+          <Button variant="secondary" onClick={() => setRefreshKey((key) => key + 1)}>
             <RefreshCw size={16} /> Refresh
           </Button>
           <Button onClick={() => navigate(addPath)}>
@@ -116,8 +89,9 @@ export function ResourceListPage<T extends ResourceRecord>(
       <DynamicGrid
         title={`${title} List`}
         columns={columns}
-        data={records}
-        mode="client"
+        mode="server"
+        serverSource={api.serverSource}
+        refreshKey={refreshKey}
         getRowId={(record) => record.id}
         onRowClick={(record) => navigate(editPath(record.id))}
         onDelete={deleteRecord}

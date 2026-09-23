@@ -179,6 +179,9 @@ export interface DynamicGridProps<TData> {
 
   serverSource?: GridServerSource<TData>;
 
+  /** Changes to this value trigger a server-data reload. */
+  refreshKey?: number;
+
   getRowId: (row: TData) => string;
 
   pageSizeOptions?: number[];
