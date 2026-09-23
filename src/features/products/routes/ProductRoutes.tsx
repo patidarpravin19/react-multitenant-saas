@@ -26,7 +26,7 @@ import type { Vendor } from "../vendor/types/vendor.types";
 
 type LookupRecord = ResourceRecord & { name: string };
 
-const vendorLookupApi = createResourceApi<LookupRecord>("/vendors");
+const vendorLookupApi = createResourceApi<LookupRecord>("/vendors/all");
 const brandLookupApi = createResourceApi<LookupRecord>("/brands");
 const typeLookupApi = createResourceApi<LookupRecord>("/product-types");
 const modelLookupApi = createResourceApi<LookupRecord>("/product-models");
@@ -35,20 +35,23 @@ const variantLookupApi = createResourceApi<LookupRecord>("/variants");
 const resources = {
   vendors: {
     title: "Vendors", description: "Manage product vendors and suppliers.", singular: "Vendor",
-    listPath: "/products/vendors/list", addPath: "/products/vendors/add",
+    listPath: "/products/vendors/list",
+    addPath: "/products/vendors/add",
     editPath: (id: string) => `/products/vendors/${id}/edit`, columns: vendorColumns,
     fields: vendorFormConfig, api: createResourceApi<Vendor>("/vendors"),
   },
   brands: {
     title: "Brands", description: "Manage product brands.", singular: "Brand",
-    listPath: "/products/brands/list", addPath: "/products/brands/add",
+    listPath: "/products/brands/list",
+    addPath: "/products/brands/add",
     editPath: (id: string) => `/products/brands/${id}/edit`, columns: brandColumns,
     loadFields: async () => createBrandFormConfig({ vendors: await vendorLookupApi.list() }),
     api: createResourceApi<Brand>("/brands"),
   },
   types: {
     title: "Product Types", description: "Manage product classifications.", singular: "Product Type",
-    listPath: "/products/types/list", addPath: "/products/types/add",
+    listPath: "/products/types/list",
+    addPath: "/products/types/add",
     editPath: (id: string) => `/products/types/${id}/edit`, columns: productTypeColumns,
     loadFields: async () => {
       const [vendors, brands] = await Promise.all([vendorLookupApi.list(), brandLookupApi.list()]);
@@ -57,7 +60,8 @@ const resources = {
   },
   models: {
     title: "Product Models", description: "Manage product models.", singular: "Product Model",
-    listPath: "/products/models/list", addPath: "/products/models/add",
+    listPath: "/products/models/list",
+    addPath: "/products/models/add",
     editPath: (id: string) => `/products/models/${id}/edit`, columns: productModelColumns,
     loadFields: async () => {
       const [productTypes, brands] = await Promise.all([typeLookupApi.list(), brandLookupApi.list()]);
@@ -66,14 +70,16 @@ const resources = {
   },
   variants: {
     title: "Variants", description: "Manage product variants and specifications.", singular: "Variant",
-    listPath: "/products/variants/list", addPath: "/products/variants/add",
+    listPath: "/products/variants/list",
+    addPath: "/products/variants/add",
     editPath: (id: string) => `/products/variants/${id}/edit`, columns: variantColumns,
     loadFields: async () => createVariantFormConfig({ models: await modelLookupApi.list() }),
     api: createResourceApi<ProductVariant>("/variants"),
   },
   products: {
     title: "Products", description: "Manage inventory products, variants, pricing and stock.", singular: "Product",
-    listPath: "/products/list", addPath: "/products/add",
+    listPath: "/products/list",
+    addPath: "/products/add",
     editPath: (id: string) => `/products/${id}/edit`, columns: productColumns,
     loadFields: async () => {
       const [vendors, productTypes, categories, variants] = await Promise.all([

@@ -7,40 +7,24 @@ export const brandColumns: GridColumn<Brand>[] = [
     id: "vendorName",
     header: "Vendor",
     accessorKey: "vendorName",
-
     searchable: true,
     sortable: true,
   },
-
   {
     id: "name",
     header: "Brand",
     accessorKey: "name",
-
     searchable: true,
     sortable: true,
-
     editable: true,
   },
-
-  {
-    id: "code",
-    header: "Code",
-    accessorKey: "code",
-
-    searchable: true,
-    editable: true,
-  },
-
   {
     id: "description",
     header: "Description",
     accessorKey: "description",
-
     editable: true,
     editor: "textarea",
   },
-
   {
     id: "isActive",
     header: "Status",
