@@ -1,4 +1,4 @@
-import { Plus, RefreshCw } from "lucide-react";
+import { Plus, RefreshCw, X } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Button } from "../../../components/ui/Button";
@@ -31,6 +31,14 @@ export interface ResourcePageProps<T extends ResourceRecord> {
   api: ResourceApi<T>;
 }
 
+function detailValue<T extends ResourceRecord>(record: T, column: GridColumn<T>) {
+  const value = column.valueGetter
+    ? column.valueGetter(record)
+    : record[column.accessorKey ?? column.accessor ?? (column.id as keyof T)];
+  if (value === null || value === undefined || value === "") return "—";
+  return typeof value === "boolean" ? (value ? "Yes" : "No") : String(value);
+}
+
 export function ResourceListPage<T extends ResourceRecord>(
   props: ResourcePageProps<T>,
 ) {
@@ -40,6 +48,16 @@ export function ResourceListPage<T extends ResourceRecord>(
   const notifications = useNotifications();
   const [error, setError] = useState<string | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [viewingRecord, setViewingRecord] = useState<T | null>(null);
+
+  useEffect(() => {
+    if (!viewingRecord) return;
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setViewingRecord(null);
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [viewingRecord]);
 
   const deleteRecord = async (record: T) => {
     const confirmed = await notifications.confirm({
@@ -94,10 +112,33 @@ export function ResourceListPage<T extends ResourceRecord>(
         serverSource={api.serverSource}
         refreshKey={refreshKey}
         getRowId={(record) => record.id}
-        onRowClick={(record) => navigate(editPath(record.id))}
+        onView={setViewingRecord}
+        onEdit={(record) => navigate(editPath(record.id))}
         onDelete={deleteRecord}
         emptyMessage={`No ${title.toLowerCase()} have been created yet.`}
       />
+      {viewingRecord ? (
+        <div
+          role="presentation"
+          className="fixed inset-0 z-[110] flex items-center justify-center bg-slate-950/45 p-4 backdrop-blur-[2px]"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) setViewingRecord(null);
+          }}
+        >
+          <div role="dialog" aria-modal="true" aria-labelledby="record-details-title" className="w-full max-w-2xl overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl dark:border-slate-700 dark:bg-slate-900">
+            <div className="flex items-center justify-between border-b border-slate-200 px-6 py-4 dark:border-slate-800">
+              <h3 id="record-details-title" className="text-lg font-bold text-slate-900 dark:text-slate-100">{singular} details</h3>
+              <button type="button" aria-label="Close details" onClick={() => setViewingRecord(null)} className="rounded-lg p-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800"><X size={18} /></button>
+            </div>
+            <dl className="grid max-h-[70vh] grid-cols-1 gap-x-6 gap-y-4 overflow-y-auto p-6 sm:grid-cols-2">
+              {columns.map((column) => <div key={column.id}>
+                <dt className="text-xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">{column.header}</dt>
+                <dd className="mt-1 break-words text-sm text-slate-800 dark:text-slate-100">{detailValue(viewingRecord, column)}</dd>
+              </div>)}
+            </dl>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }

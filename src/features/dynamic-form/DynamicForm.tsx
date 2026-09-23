@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { ArrowLeft } from "lucide-react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, type FieldValues } from "react-hook-form";
 import type { FormFieldConfig } from "../../types/form";
@@ -78,12 +79,26 @@ export function DynamicForm({
       className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition-all duration-300 sm:p-6 dark:border-slate-800 dark:bg-slate-900"
     >
       <div className="mb-6 border-b border-slate-200 pb-5 dark:border-slate-800">
-        <h1
-          id="dynamic-form-title"
-          className="text-xl font-bold tracking-tight text-slate-900 dark:text-slate-100"
-        >
-          {title}
-        </h1>
+        <div className="flex items-center justify-between gap-4">
+          <h1
+            id="dynamic-form-title"
+            className="text-xl font-bold tracking-tight text-slate-900 dark:text-slate-100"
+          >
+            {title}
+          </h1>
+          {onCancel ? (
+            <button
+              type="button"
+              aria-label="Back to list"
+              title="Back to list"
+              onClick={onCancel}
+              disabled={isSubmitting}
+              className="inline-flex size-10 cursor-pointer items-center justify-center rounded-lg border border-slate-300 text-slate-600 transition-colors hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
+            >
+              <ArrowLeft size={18} />
+            </button>
+          ) : null}
+        </div>
         {description ? (
           <p className="mt-1 text-sm leading-6 text-slate-500 dark:text-slate-400">
             {description}
