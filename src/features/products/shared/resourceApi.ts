@@ -43,5 +43,9 @@ export function createResourceApi<T extends ResourceRecord>(endpoint: string) {
       cachedList = undefined;
       return record;
     },
+    remove: async (id: string) => {
+      await apiClient.delete<void>(`${endpoint}/${encodeURIComponent(id)}`);
+      cachedList = undefined;
+    },
   };
 }

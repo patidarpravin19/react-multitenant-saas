@@ -8,6 +8,8 @@ import {
   ChevronUp,
   ChevronsUpDown,
   Pencil,
+  Trash2,
+  Eye,
   SearchX,
   TriangleAlert,
 } from "lucide-react";
@@ -16,6 +18,7 @@ import type {
   DynamicGridProps,
   GridColumn,
   GridColumnFilter,
+  GridAction,
   GridDensity,
   GridEditContext,
   GridQuery,
@@ -53,10 +56,26 @@ export function DynamicGrid<TData>({
   showDensity = true,
   showExport = true,
   stickyHeader = true,
+  actions,
+  onView,
+  onEdit,
+  onDelete,
   onRowClick,
   onSelectionChange,
   emptyMessage = "No records match the current query.",
 }: DynamicGridProps<TData>) {
+  const rowActions = useMemo<GridAction<TData>[]>(
+    () => {
+      if (actions) return actions;
+      const builtInActions: GridAction<TData>[] = [];
+      if (onView) builtInActions.push({ id: "view", label: "View", icon: "view", onClick: onView });
+      if (onEdit) builtInActions.push({ id: "edit", label: "Edit", icon: "edit", onClick: onEdit });
+      if (onDelete) builtInActions.push({ id: "delete", label: "Delete", icon: "delete", variant: "danger", onClick: onDelete });
+      return builtInActions;
+    },
+    [actions, onDelete, onEdit, onView],
+  );
+  const hasActions = rowActions.length > 0;
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(initialPageSize);
   const [search, setSearch] = useState(initialSearch);
@@ -206,7 +225,7 @@ export function DynamicGrid<TData>({
   const exportRows = mode === "client" ? data : rows;
   const exportCsv = () =>
     downloadCsv("grid-export.csv", toCsv(exportRows, visibleColumns));
-  const colSpan = visibleColumns.length + (selectable ? 1 : 0);
+  const colSpan = visibleColumns.length + (selectable ? 1 : 0) + (hasActions ? 1 : 0);
 
   return (
     <section
@@ -327,6 +346,7 @@ export function DynamicGrid<TData>({
                   </th>
                 );
               })}
+              {hasActions ? <th className="w-28 px-4 py-3 text-right text-xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">Actions</th> : null}
             </tr>
 
             {filtersVisible ? (
@@ -369,6 +389,7 @@ export function DynamicGrid<TData>({
                     </th>
                   );
                 })}
+                {hasActions ? <th /> : null}
               </tr>
             ) : null}
           </thead>
@@ -478,6 +499,24 @@ export function DynamicGrid<TData>({
                       </td>
                     );
                   })}
+                  {hasActions ? (
+                    <td className={`px-3 text-right ${densityClasses(density)}`} onClick={(event) => event.stopPropagation()}>
+                      <div className="inline-flex items-center gap-1">
+                        {rowActions.filter((action) => !action.hidden?.(row)).map((action) => {
+                          const Icon = action.icon === "delete" ? Trash2 : action.icon === "view" ? Eye : Pencil;
+                          return <button
+                            key={action.id}
+                            type="button"
+                            aria-label={action.label}
+                            title={action.label}
+                            disabled={action.disabled?.(row)}
+                            onClick={() => void action.onClick(row)}
+                            className={`rounded-md p-2 transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${action.variant === "danger" ? "text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/40" : "text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"}`}
+                          ><Icon size={16} /></button>;
+                        })}
+                      </div>
+                    </td>
+                  ) : null}
                 </tr>
               );
             })}
