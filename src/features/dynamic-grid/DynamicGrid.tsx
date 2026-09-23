@@ -124,6 +124,8 @@ export function DynamicGrid<TData>({
     const currentRequest = ++requestId.current;
     setIsLoading(true);
     setError(null);
+    setServerRows([]);
+    setServerTotal(0);
 
     void serverSource
       .load(query, controller.signal)

@@ -87,6 +87,7 @@ export function ResourceListPage<T extends ResourceRecord>(
         </div>
       ) : null}
       <DynamicGrid
+        key={title}
         title={`${title} List`}
         columns={columns}
         mode="server"
