@@ -31,6 +31,7 @@ export interface SelectOption {
   label: string;
   value: string;
   disabled?: boolean;
+  parentValue?: string;
 }
 
 export interface BaseFieldConfig {
@@ -91,6 +92,8 @@ export interface SelectFieldConfig extends BaseFieldConfig {
   type: "select";
   placeholder?: string;
   options: SelectOption[];
+  dependsOn?: string;
+  loadOptions?: (parentValue: string) => Promise<SelectOption[]>;
 }
 export interface MultiSelectFieldConfig extends BaseFieldConfig {
   type: "multiSelect";

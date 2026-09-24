@@ -5,15 +5,12 @@ interface ProductTypeFormOptions {
     id: string;
     name: string;
   }[];
-  brands: {
-    id: string;
-    name: string;
-  }[];
+  loadBrands: (vendorId: string) => Promise<{ label: string; value: string }[]>;
 }
 
 export function createProductTypeFormConfig({
   vendors,
-  brands,
+  loadBrands,
 }: ProductTypeFormOptions): FormFieldConfig[] {
   return [
     {
@@ -33,10 +30,9 @@ export function createProductTypeFormConfig({
       label: "Brand",
       type: "select",
       required: true,
-      options: brands.map((brand) => ({
-        label: brand.name,
-        value: brand.id,
-      })),
+      dependsOn: "vendorId",
+      options: [],
+      loadOptions: loadBrands,
     },
     {
       id: "name",
@@ -45,14 +41,6 @@ export function createProductTypeFormConfig({
       type: "text",
       required: true,
       placeholder: "Example: Mobile",
-    },
-    {
-      id: "code",
-      name: "code",
-      label: "Code",
-      type: "text",
-      required: true,
-      placeholder: "Example: MOBILE",
     },
     {
       id: "description",

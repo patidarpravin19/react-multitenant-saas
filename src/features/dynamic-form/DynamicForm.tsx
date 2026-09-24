@@ -1,8 +1,8 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { ArrowLeft } from "lucide-react";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm, type FieldValues } from "react-hook-form";
-import type { FormFieldConfig } from "../../types/form";
+import { useForm, useWatch, type FieldValues } from "react-hook-form";
+import type { FormFieldConfig, SelectOption } from "../../types/form";
 import { Button } from "../../components/ui/Button";
 import { getFieldComponent } from "./registry/fieldRegistry";
 import { createDynamicFormSchema } from "./validation/schemaFactory";
@@ -40,8 +40,24 @@ export function DynamicForm({
   onCancel,
 }: DynamicFormProps) {
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [dependentOptions, setDependentOptions] = useState<
+    Record<string, SelectOption[]>
+  >({});
+  const [loadingDependentOptions, setLoadingDependentOptions] = useState<
+    Record<string, boolean>
+  >({});
 
-  const schema = useMemo(() => createDynamicFormSchema(fields), [fields]);
+  const schema = useMemo(
+    () =>
+      createDynamicFormSchema(
+        fields.map((field) =>
+          field.type === "select" && field.loadOptions
+            ? { ...field, options: dependentOptions[field.name] ?? [] }
+            : field,
+        ),
+      ),
+    [dependentOptions, fields],
+  );
   const defaultValues = useMemo(
     () => ({ ...createDefaultValues(fields), ...initialValues }),
     [fields, initialValues],
@@ -52,6 +68,8 @@ export function DynamicForm({
     control,
     handleSubmit,
     reset,
+    setValue,
+    getValues,
     formState: { errors, isSubmitting },
   } = useForm<FieldValues>({
     resolver: zodResolver(schema),
@@ -59,6 +77,57 @@ export function DynamicForm({
     mode: "onBlur",
     reValidateMode: "onChange",
   });
+  const values = useWatch({ control });
+  const previousValues = useRef(values);
+  const dependencyKey = fields
+    .filter((field) => field.type === "select" && field.dependsOn)
+    .map((field) =>
+      field.type === "select"
+        ? `${field.name}:${String(values[field.dependsOn!] ?? "")}`
+        : "",
+    )
+    .join("|");
+
+  useEffect(() => {
+    for (const field of fields) {
+      if (field.type !== "select" || !field.dependsOn) continue;
+      if (previousValues.current[field.dependsOn] !== values[field.dependsOn]) {
+        setValue(field.name, "", { shouldValidate: true, shouldDirty: true });
+      }
+    }
+    previousValues.current = values;
+  }, [fields, setValue, values]);
+
+  useEffect(() => {
+    let cancelled = false;
+    for (const field of fields) {
+      if (field.type !== "select" || !field.dependsOn || !field.loadOptions)
+        continue;
+      const parentValue = String(getValues(field.dependsOn) ?? "");
+      if (!parentValue) {
+        setDependentOptions((current) => ({ ...current, [field.name]: [] }));
+        setLoadingDependentOptions((current) => ({ ...current, [field.name]: false }));
+        continue;
+      }
+      setLoadingDependentOptions((current) => ({ ...current, [field.name]: true }));
+      void field.loadOptions(parentValue)
+        .then((options) => {
+          if (!cancelled)
+            setDependentOptions((current) => ({ ...current, [field.name]: options }));
+        })
+        .catch(() => {
+          if (!cancelled)
+            setDependentOptions((current) => ({ ...current, [field.name]: [] }));
+        })
+        .finally(() => {
+          if (!cancelled)
+            setLoadingDependentOptions((current) => ({ ...current, [field.name]: false }));
+        });
+    }
+    return () => {
+      cancelled = true;
+    };
+  }, [dependencyKey, fields, getValues]);
 
   const submit = handleSubmit(async (values) => {
     setSubmitError(null);
@@ -110,20 +179,44 @@ export function DynamicForm({
         <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
           {fields.map((field) => {
             const Component = getFieldComponent(field.type);
+            const renderedField =
+              field.type === "select" && field.dependsOn
+                ? {
+                    ...field,
+                    disabled:
+                      field.disabled ||
+                      !values[field.dependsOn] ||
+                      loadingDependentOptions[field.name],
+                    placeholder: !values[field.dependsOn]
+                      ? "Select a vendor first"
+                      : loadingDependentOptions[field.name]
+                        ? "Loading options..."
+                        : field.placeholder,
+                    options: field.loadOptions
+                      ? dependentOptions[field.name] ?? []
+                      : values[field.dependsOn]
+                        ? field.options.filter(
+                            (option) =>
+                              option.parentValue ===
+                              String(values[field.dependsOn!]),
+                          )
+                        : [],
+                  }
+                : field;
 
             return (
               <div
                 key={field.id}
                 className={
                   field.colSpan === 2 ||
-                  field.type === "checkbox" ||
-                  field.type === "toggle"
+                    field.type === "checkbox" ||
+                    field.type === "toggle"
                     ? "md:col-span-2"
                     : ""
                 }
               >
                 <Component
-                  field={field}
+                  field={renderedField}
                   register={register}
                   control={control}
                   errors={errors}
