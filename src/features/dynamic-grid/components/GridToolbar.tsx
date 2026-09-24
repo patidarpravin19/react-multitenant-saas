@@ -56,7 +56,8 @@ export function GridToolbar<TData>({
 
   useEffect(() => {
     const onPointerDown = (event: MouseEvent) => {
-      if (!menuRef.current?.contains(event.target as Node))
+      const target = event.target as Node;
+      if (!menuRef.current?.contains(target))
         setSettingsOpen(false);
     };
     document.addEventListener("mousedown", onPointerDown);
@@ -132,7 +133,7 @@ export function GridToolbar<TData>({
         ) : null}
 
         {showColumnVisibility || showDensity ? (
-          <div className="relative" ref={menuRef}>
+          <div className={`relative ${settingsOpen ? "z-50" : ""}`} ref={menuRef}>
             <button
               type="button"
               onClick={() => setSettingsOpen((value) => !value)}
@@ -147,7 +148,7 @@ export function GridToolbar<TData>({
             {settingsOpen ? (
               <div
                 role="menu"
-                className="absolute right-0 z-30 mt-2 w-64 rounded-xl border border-slate-200 bg-white p-2 shadow-xl dark:border-slate-700 dark:bg-slate-900"
+                className="absolute right-0 top-full z-50 mt-2 flex max-h-[min(80vh,32rem)] w-72 max-w-[calc(100vw-1rem)] flex-col overflow-hidden rounded-xl border border-slate-200 bg-white p-2 shadow-xl dark:border-slate-700 dark:bg-slate-900"
               >
                 {showDensity ? (
                   <div className="border-b border-slate-200 p-2 dark:border-slate-800">
@@ -172,7 +173,7 @@ export function GridToolbar<TData>({
                 ) : null}
 
                 {showColumnVisibility ? (
-                  <div className="max-h-72 overflow-auto p-2">
+                  <div className="max-h-[min(70vh,28rem)] min-h-0 flex-1 overflow-y-auto overscroll-contain p-2">
                     <p className="mb-2 text-xs font-bold uppercase tracking-wide text-slate-400">
                       Columns
                     </p>

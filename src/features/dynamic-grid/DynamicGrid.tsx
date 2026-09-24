@@ -243,7 +243,7 @@ export function DynamicGrid<TData>({
 
   return (
     <section
-      className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900"
+      className="overflow-visible rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900"
       aria-label={title ?? "Data grid"}
     >
       {title || description ? (
@@ -294,7 +294,7 @@ export function DynamicGrid<TData>({
         selectedCount={selectedIds.size}
       />
 
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto rounded-b-xl">
         <table
           className="w-full border-collapse text-left text-sm"
           role="grid"
