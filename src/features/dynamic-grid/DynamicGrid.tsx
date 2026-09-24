@@ -84,7 +84,7 @@ export function DynamicGrid<TData>({
   const [sorting, setSorting] = useState<GridSort[]>(initialSort);
   const [filters, setFilters] = useState<GridColumnFilter[]>([]);
   const [filtersVisible, setFiltersVisible] = useState(false);
-  const [density, setDensity] = useState<GridDensity>("comfortable");
+  const [density, setDensity] = useState<GridDensity>("compact");
   const [visibility, setVisibility] = useState<Record<string, boolean>>(() =>
     Object.fromEntries(
       columns.map((column) => [column.id, column.hidden !== true]),
