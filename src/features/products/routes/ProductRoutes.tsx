@@ -45,7 +45,8 @@ const resources = {
     listPath: "/products/brands/list",
     addPath: "/products/brands/add",
     editPath: (id: string) => `/products/brands/${id}/edit`, columns: brandColumns,
-    loadFields: async () => createBrandFormConfig({ vendors: await vendorLookupApi.list() }),
+    loadFields: async () =>
+      createBrandFormConfig({ vendors: await vendorLookupApi.list(true) }),
     api: createResourceApi<Brand>("/brands"),
   },
   types: {
