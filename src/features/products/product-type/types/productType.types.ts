@@ -9,6 +9,7 @@ import { BaseMaster } from "../../shared/master.types";
 
 export interface ProductType extends BaseMaster {
   vendorId: string;
+  vendorName: string;
   brandId: string;
-  brandName?: string;
+  brandName: string;
 }
