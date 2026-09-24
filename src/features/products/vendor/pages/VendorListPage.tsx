@@ -1,5 +1,5 @@
 import { Plus } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "../../../../components/ui/Button";
 import { useNotifications } from "../../../../context/NotificationContext";
@@ -11,6 +11,8 @@ import type { Vendor } from "../types/vendor.types";
 export function VendorListPage() {
   const navigate = useNavigate();
   const notifications = useNotifications();
+  const notificationsRef = useRef(notifications);
+  notificationsRef.current = notifications;
   const [vendors, setVendors] = useState<Vendor[]>([]);
   const [error, setError] = useState<string | null>(null);
 
@@ -22,9 +24,9 @@ export function VendorListPage() {
       const message =
         reason instanceof Error ? reason.message : "Unable to load vendors.";
       setError(message);
-      notifications.error("Vendors could not be loaded", message);
+      notificationsRef.current.error("Vendors could not be loaded", message);
     }
-  }, [notifications]);
+  }, []);
 
   useEffect(() => {
     void loadVendors();

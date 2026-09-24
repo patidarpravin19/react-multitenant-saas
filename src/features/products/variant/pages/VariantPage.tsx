@@ -28,6 +28,7 @@ const initialVariants: ProductVariant[] = [
 ];
 
 export function VariantPage() {
+  const mode = "server"; // Change to "client" for client-side mode
   const notifications = useNotifications();
   const [variants, setVariants] = useState(initialVariants);
   const fields = useMemo(() => createVariantFormConfig({ models }), []);
@@ -64,7 +65,7 @@ export function VariantPage() {
         title="Variant List"
         columns={variantColumns}
         data={variants.filter((variant) => !variant.isDelete)}
-        mode="client"
+        mode={mode}
         getRowId={(variant) => variant.id}
       />
     </ProductCrudLayout>

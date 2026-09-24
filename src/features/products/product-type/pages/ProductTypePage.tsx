@@ -30,6 +30,7 @@ const initialProductTypes: ProductType[] = [
 ];
 
 export function ProductTypePage() {
+  const mode = "server"; // Change to "client" for client-side mode
   const notifications = useNotifications();
   const [productTypes, setProductTypes] = useState(initialProductTypes);
   const fields = useMemo(
@@ -69,7 +70,7 @@ export function ProductTypePage() {
         title="Product Type List"
         columns={productTypeColumns}
         data={productTypes.filter((type) => !type.isDelete)}
-        mode="client"
+        mode={mode}
         getRowId={(type) => type.id}
       />
     </ProductCrudLayout>

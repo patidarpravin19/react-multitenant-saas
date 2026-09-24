@@ -15,6 +15,7 @@ import type { Product } from "../types/product.types";
 import { ProductCrudLayout } from "../../shared/ProductCrudLayout";
 
 export function ProductPage() {
+  const mode = "server"; // Change to "client" for client-side mode
   const notifications = useNotifications();
 
   const [products, setProducts] = useState<Product[]>([]);
@@ -94,49 +95,27 @@ export function ProductPage() {
 
     const product: Product = {
       id: crypto.randomUUID(),
-
       name: String(values.serialNumber ?? ""),
-
       brandId: vendorId,
-
       productModelId: categoryId,
-
       vendorId,
-
       vendorName: vendors.find((x) => x.id === vendorId)?.name,
-
       productTypeId,
-
       productTypeName: productTypes.find((x) => x.id === productTypeId)?.name,
-
       categoryId,
-
       categoryName: categories.find((x) => x.id === categoryId)?.name,
-
       variantId,
-
       variantName: variants.find((x) => x.id === variantId)?.name,
-
       code: String(values.code ?? ""),
-
       uniqueNumber: String(values.emi ?? ""),
-
       uniqueNumber1: String(values.uniqueNumber1 ?? ""),
-
       serialNumber: String(values.serialNumber ?? ""),
-
       quantity: Number(values.quantity ?? 0),
-
       purchasePrice: Number(values.purchasePrice ?? 0),
-
       discount: Number(values.discount ?? 0),
-
       tax: Number(values.tax ?? 0),
-
       description: String(values.description ?? ""),
-
       isActive: Boolean(values.isActive),
-
       isDelete: false,
     };
 
@@ -160,9 +139,9 @@ export function ProductPage() {
       current.map((product) =>
         product.id === rowId
           ? ({
-              ...product,
-              ...values,
-            } as Product)
+            ...product,
+            ...values,
+          } as Product)
           : product,
       ),
     );
@@ -176,11 +155,8 @@ export function ProductPage() {
   const deleteProduct = async (product: Product) => {
     const confirmed = await notifications.confirm({
       title: "Delete product?",
-
       message: `Delete serial number ${product.serialNumber}?`,
-
       variant: "danger",
-
       confirmLabel: "Delete",
     });
 
@@ -192,12 +168,10 @@ export function ProductPage() {
       current.map((item) =>
         item.id === product.id
           ? {
-              ...item,
-
-              isDelete: true,
-
-              isActive: false,
-            }
+            ...item,
+            isDelete: true,
+            isActive: false,
+          }
           : item,
       ),
     );
@@ -213,39 +187,27 @@ export function ProductPage() {
       title="Products"
       description="Manage inventory products, variants, pricing and stock."
       addButtonLabel="Add Product"
-
       form={<DynamicForm title="" fields={formConfig} onSubmit={saveProduct} />}
     >
       <DynamicGrid
         title="Product List"
-
         columns={productColumns}
-
-        data={products.filter((x) => !x.isDelete)}
-
-        mode="client"
-
+        data={products}
+        mode={mode}
         getRowId={(row) => row.id}
-
         inlineEdit={{
           enabled: true,
-
           editableFields: ["quantity", "purchasePrice", "discount", "tax"],
-
           validate: ({ values }) => {
             const errors: Record<string, string> = {};
-
             if (Number(values.quantity) < 0) {
               errors.quantity = "Quantity cannot be negative.";
             }
-
             if (Number(values.purchasePrice) < 0) {
               errors.purchasePrice = "Purchase price cannot be negative.";
             }
-
             return errors;
           },
-
           onSave: updateProduct,
         }}
 

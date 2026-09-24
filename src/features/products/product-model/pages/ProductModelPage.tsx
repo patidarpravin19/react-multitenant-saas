@@ -29,6 +29,7 @@ const initialModels: ProductModel[] = [
 ];
 
 export function ProductModelPage() {
+  const mode = "server"; // Change to "client" for client-side mode
   const notifications = useNotifications();
   const [models, setModels] = useState(initialModels);
   const fields = useMemo(
@@ -67,7 +68,7 @@ export function ProductModelPage() {
         title="Product Model List"
         columns={productModelColumns}
         data={models.filter((model) => !model.isDelete)}
-        mode="client"
+        mode={mode}
         getRowId={(model) => model.id}
       />
     </ProductCrudLayout>
