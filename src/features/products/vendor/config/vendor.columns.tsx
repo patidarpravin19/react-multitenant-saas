@@ -23,6 +23,7 @@ export const vendorColumns: GridColumn<Vendor>[] = [
     id: "mobile",
     header: "Mobile",
     accessorKey: "mobile",
+    sortable: true,
     searchable: true,
     editable: true,
   },
@@ -30,6 +31,7 @@ export const vendorColumns: GridColumn<Vendor>[] = [
     id: "email",
     header: "Email",
     accessorKey: "email",
+    sortable: true,
     searchable: true,
     editable: true,
   },
@@ -39,6 +41,15 @@ export const vendorColumns: GridColumn<Vendor>[] = [
     accessorKey: "address",
     searchable: true,
     editable: true,
+    hidden: true
+  },
+  {
+    id: "description",
+    header: "Description",
+    accessorKey: "description",
+    searchable: true,
+    editable: true,
+    hidden: true
   },
   {
     id: "isActive",

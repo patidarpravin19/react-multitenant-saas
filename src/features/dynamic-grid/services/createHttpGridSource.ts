@@ -18,10 +18,11 @@ function defaultQueryMapper(query: GridQuery): URLSearchParams {
     search: query.search,
   });
 
-  query.sort.forEach((sort, index) => {
-    params.set(`sort[${index}].field`, sort.field);
-    params.set(`sort[${index}].direction`, sort.direction);
-  });
+  const sort = query.sort[0];
+  if (sort) {
+    params.set("sortBy", sort.field);
+    params.set("sortDirection", sort.direction);
+  }
 
   query.filters.forEach((filter, index) => {
     params.set(`filters[${index}].field`, filter.field);

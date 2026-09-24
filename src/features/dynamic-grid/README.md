@@ -30,7 +30,7 @@ Do all sorting/filtering against the same server-side dataset as pagination. Do 
 
 ## Real API adapter
 
-Use `createHttpGridSource<T>()` when the backend exposes a GET endpoint. The default mapper sends one-based `page`, `pageSize`, `search`, sort entries, and filter entries. Use `mapQuery` when your backend contract differs and `mapResponse` to map your API envelope into `{ rows, totalCount }`.
+Use `createHttpGridSource<T>()` when the backend exposes a GET endpoint. The default mapper sends one-based `page`, `pageSize`, `search`, `sortBy`, `sortDirection`, and filter entries. It sends the primary sort because the API contract uses singular sort parameters. Use `mapQuery` when your backend contract differs and `mapResponse` to map your API envelope into `{ rows, totalCount }`.
 
 Example:
 
