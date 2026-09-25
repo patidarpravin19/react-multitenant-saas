@@ -1,19 +1,19 @@
 import type { FormFieldConfig } from "../../../../types/form";
 
 interface ProductModelFormOptions {
-  productTypes: {
+  brands: {
     id: string;
     name: string;
   }[];
-  brands: {
+  productTypes: {
     id: string;
     name: string;
   }[];
 }
 
 export function createProductModelFormConfig({
-  productTypes,
   brands,
+  productTypes,
 }: ProductModelFormOptions): FormFieldConfig[] {
   return [
     {
