@@ -81,4 +81,40 @@ export const vendorColumns: GridColumn<Vendor>[] = [
       </span>
     ),
   },
+  // {
+  //   id: "createdAt",
+  //   header: "Created At",
+  //   accessorKey: "createdAt",
+  //   sortable: true,
+  //   searchable: true,
+  //   editable: true,
+  //   hidden: true
+  // },
+  // {
+  //   id: "createdBy",
+  //   header: "Created By",
+  //   accessorKey: "createdBy",
+  //   sortable: true,
+  //   searchable: true,
+  //   editable: true,
+  //   hidden: true
+  // },
+  // {
+  //   id: "updatedAt",
+  //   header: "Updated At",
+  //   accessorKey: "updatedAt",
+  //   sortable: true,
+  //   searchable: true,
+  //   editable: true,
+  //   hidden: true
+  // },
+  // {
+  //   id: "updatedBy",
+  //   header: "Updated By",
+  //   accessorKey: "updatedBy",
+  //   sortable: true,
+  //   searchable: true,
+  //   editable: true,
+  //   hidden: true
+  // },
 ];
