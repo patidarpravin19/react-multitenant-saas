@@ -23,8 +23,7 @@ const initialModels: ProductModel[] = [
     name: "Galaxy S25 FE",
     code: "S25-FE",
     description: "Samsung Galaxy model",
-    isActive: true,
-    isDelete: false,
+    isActive: true
   },
 ];
 
@@ -46,8 +45,7 @@ export function ProductModelPage() {
       name: String(values.name ?? ""),
       code: String(values.code ?? ""),
       description: String(values.description ?? ""),
-      isActive: Boolean(values.isActive),
-      isDelete: false,
+      isActive: Boolean(values.isActive)
     };
     setModels((current) => [model, ...current]);
     notifications.success(
@@ -67,7 +65,7 @@ export function ProductModelPage() {
       <DynamicGrid
         title="Product Model List"
         columns={productModelColumns}
-        data={models.filter((model) => !model.isDelete)}
+        data={models}
         mode={mode}
         getRowId={(model) => model.id}
       />

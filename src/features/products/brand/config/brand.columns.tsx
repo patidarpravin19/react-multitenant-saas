@@ -4,13 +4,6 @@ import type { Brand } from "../types/brand.types";
 
 export const brandColumns: GridColumn<Brand>[] = [
   {
-    id: "vendorName",
-    header: "Vendor",
-    accessorKey: "vendorName",
-    searchable: true,
-    sortable: true,
-  },
-  {
     id: "name",
     header: "Brand",
     accessorKey: "name",

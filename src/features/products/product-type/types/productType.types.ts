@@ -8,8 +8,4 @@ import { BaseMaster } from "../../shared/master.types";
 // Washing Machine
 
 export interface ProductType extends BaseMaster {
-  vendorId: string;
-  vendorName: string;
-  brandId: string;
-  brandName: string;
 }

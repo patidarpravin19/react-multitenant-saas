@@ -3,7 +3,6 @@ import type { GridQuery, GridResult, GridServerSource } from "../../../types/gri
 
 export interface ResourceRecord {
   id: string;
-  isDelete: boolean;
 }
 
 type PagedResponse<T> = {

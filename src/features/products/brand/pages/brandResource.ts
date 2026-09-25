@@ -1,10 +1,7 @@
 import { brandColumns } from "../config/brand.columns";
-import { createBrandFormConfig } from "../config/brand.form";
 import type { Brand } from "../types/brand.types";
 import { createResourceApi, type ResourceRecord } from "../../shared/resourceApi";
-
-type LookupRecord = ResourceRecord & { name: string };
-const vendorsApi = createResourceApi<LookupRecord>("/vendors/all");
+import { brandFormConfig } from "../config/brand.form";
 
 export const brandResource = {
   title: "Brands",
@@ -14,6 +11,6 @@ export const brandResource = {
   addPath: "/products/brands/add",
   editPath: (id: string) => `/products/brands/${id}/edit`,
   columns: brandColumns,
-  loadFields: async () => createBrandFormConfig({ vendors: await vendorsApi.list(true) }),
+  fields: brandFormConfig,
   api: createResourceApi<Brand>("/brands"),
 };

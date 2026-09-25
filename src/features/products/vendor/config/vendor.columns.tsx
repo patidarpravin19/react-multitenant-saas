@@ -5,7 +5,7 @@ import type { Vendor } from "../types/vendor.types";
 export const vendorColumns: GridColumn<Vendor>[] = [
   {
     id: "name",
-    header: "Vendor Name",
+    header: "Name",
     accessorKey: "name",
     sortable: true,
     searchable: true,

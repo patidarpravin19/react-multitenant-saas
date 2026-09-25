@@ -4,5 +4,8 @@ export interface BaseMaster {
   code: string;
   description: string;
   isActive: boolean;
-  isDelete: boolean;
+  createdBy?: string;
+  createdAt?: Date;
+  modifiedBy?: string;
+  modifiedAt?: Date;
 }
