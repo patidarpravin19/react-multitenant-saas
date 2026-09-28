@@ -1,13 +1,13 @@
 import type { FormFieldConfig } from "../../../../types/form";
 
-export const variantFormConfig: FormFieldConfig[] = [
+export const colorFormConfig: FormFieldConfig[] = [
   {
     id: "name",
     name: "name",
-    label: "Variant Name",
+    label: "Color Name",
     type: "text",
     required: true,
-    placeholder: "Example: Standard",
+    placeholder: "Example: Midnight Black",
   },
   {
     id: "description",

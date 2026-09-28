@@ -3,6 +3,7 @@ import {
   Factory,
   FolderTree,
   LayoutDashboard,
+  Palette,
   Package,
   Shapes,
   Tags,
@@ -76,6 +77,13 @@ export const sidebarConfiguration: NavigationItem[] = [
         path: APP_ROUTES.products.variants.list,
 
         icon: Tags,
+      },
+
+      {
+        id: "colors",
+        label: "Colors",
+        path: APP_ROUTES.products.colors.list,
+        icon: Palette,
       },
 
       {

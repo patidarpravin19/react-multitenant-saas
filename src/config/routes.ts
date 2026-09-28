@@ -34,6 +34,12 @@ export const APP_ROUTES = {
       edit: (id: string) => `/products/variants/${id}/edit`,
     },
 
+    colors: {
+      list: "/products/colors/list",
+      add: "/products/colors/add",
+      edit: (id: string) => `/products/colors/${id}/edit`,
+    },
+
     products: {
       list: "/products/list",
       add: "/products/add",

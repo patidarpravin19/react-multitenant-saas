@@ -3,9 +3,6 @@ import type { GridColumn } from "../../../types/grid";
 interface NamedMaster {
   id: string;
   name: string;
-  code: string,
-  brandName: string;
-  productTypeName: string;
   description: string;
   isActive: boolean;
 }
@@ -18,30 +15,6 @@ export function createNamedMasterColumns<
       id: "name",
       header: "Name",
       accessor: "name",
-      searchable: true,
-      sortable: true,
-      editable: true,
-    },
-    {
-      id: "code",
-      header: "Code",
-      accessor: "code",
-      searchable: true,
-      sortable: true,
-      editable: true,
-    },
-    {
-      id: "brandName",
-      header: "Brand Name",
-      accessor: "brandName",
-      searchable: true,
-      sortable: true,
-      editable: true,
-    },
-    {
-      id: "productTypeName",
-      header: "Product Type",
-      accessor: "productTypeName",
       searchable: true,
       sortable: true,
       editable: true,
