@@ -7,13 +7,14 @@ import {
   useState,
   type PropsWithChildren,
 } from "react";
-import { addResponseInterceptor } from "../../services/apiClient";
+import { setUnauthorizedHandler } from "../../services/apiClient";
 import { authService } from "./auth.service";
 import type { AuthSession, LoginInput } from "./auth.types";
 
 const sessionKey = "auth_session";
 const tokenKey = "auth_token";
 const tenantIdKey = "tenant_id";
+let refreshInFlight: Promise<string | null> | null = null;
 
 function readStoredSession(): AuthSession | null {
   try {
@@ -63,11 +64,33 @@ export function AuthProvider({ children }: PropsWithChildren) {
   }, [clearSession]);
 
   useEffect(
-    () =>
-      addResponseInterceptor((response) => {
-        if (response.status === 401) clearSession();
-        return response;
-      }),
+    () => setUnauthorizedHandler(async () => {
+      const refreshToken = readStoredSession()?.refreshToken;
+      if (!refreshToken) {
+        clearSession();
+        return false;
+      }
+      if (!refreshInFlight) {
+        refreshInFlight = authService.refresh(refreshToken)
+          .then((tokens) => {
+            const current = readStoredSession();
+            if (!current) return null;
+            const next = { ...current, ...tokens };
+            localStorage.setItem(tokenKey, next.token);
+            localStorage.setItem(sessionKey, JSON.stringify(next));
+            localStorage.setItem(tenantIdKey, next.tenantId ?? "");
+            setSession(next);
+            return next.token;
+          })
+          .catch(() => {
+            clearSession();
+            return null;
+          })
+          .finally(() => { refreshInFlight = null; });
+      }
+      const token = await refreshInFlight;
+      return token !== null;
+    }),
     [clearSession],
   );
 

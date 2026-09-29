@@ -3,12 +3,15 @@ import type { AuthSession, AuthUser, LoginInput } from "./auth.types";
 
 const loginEndpoint = import.meta.env.VITE_AUTH_LOGIN_ENDPOINT ?? "/auth/login";
 const logoutEndpoint = import.meta.env.VITE_AUTH_LOGOUT_ENDPOINT ?? "/auth/logout";
+const refreshEndpoint = import.meta.env.VITE_AUTH_REFRESH_ENDPOINT ?? "/auth/refresh";
 
 type LoginResponse = {
   token?: string;
   accessToken?: string;
   tenantId?: string;
   access_token?: string;
+  refreshToken?: string;
+  refresh_token?: string;
   user?: Partial<AuthUser>;
   data?: LoginResponse;
 };
@@ -20,6 +23,7 @@ function toSession(response: LoginResponse, input: LoginInput): AuthSession {
 
   return {
     token,
+    refreshToken: body.refreshToken ?? body.refresh_token,
     tenantId: body.tenantId,
     user: {
       username: body.user?.username ?? input.username,
@@ -38,4 +42,18 @@ export const authService = {
     return toSession(response, input);
   },
   logout: () => apiClient.post<void>(logoutEndpoint, undefined),
+  async refresh(refreshToken: string) {
+    const response = await apiClient.post<LoginResponse>(
+      refreshEndpoint,
+      { refreshToken },
+      { authenticate: false, skipAuthRefresh: true },
+    );
+    const body = response.data ?? response;
+    const token = body.accessToken ?? body.access_token ?? body.token;
+    if (!token) throw new Error("The refresh response did not include an access token.");
+    return {
+      token,
+      refreshToken: body.refreshToken ?? body.refresh_token ?? refreshToken,
+    };
+  },
 };

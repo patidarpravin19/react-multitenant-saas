@@ -30,15 +30,21 @@ npm run build
 Protected application routes redirect unauthenticated users to `/login`. The login form sends
 `{ tenantSlug, username, password }` to `POST /auth/login` and accepts `token`, `accessToken`,
 or `access_token` in the response (including inside a `data` object). The returned bearer token
-is persisted for subsequent API requests. Signing out calls `POST /auth/logout` and clears the
-local session even if that request fails.
+is persisted for subsequent API requests. When an API request returns 401, the client posts the
+stored refresh token to `/auth/refresh`, saves the returned access token, and retries the request.
+Login and refresh responses may include `refreshToken` or `refresh_token`; refresh responses may
+also rotate the refresh token. A failed refresh clears the local session. Signing out calls
+`POST /auth/logout` and clears the local session even if that request fails.
 
 Configure different endpoint paths when needed:
 
 ```env
 VITE_AUTH_LOGIN_ENDPOINT=/auth/login
 VITE_AUTH_LOGOUT_ENDPOINT=/auth/logout
+VITE_AUTH_REFRESH_ENDPOINT=/auth/refresh
 ```
+
+The refresh request body is `{ refreshToken }`.
 
 ## Architecture
 

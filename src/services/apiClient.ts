@@ -12,6 +12,8 @@ export class ApiError extends Error {
 export interface ApiRequestConfig extends RequestInit {
   /** Set false for endpoints such as sign-in that do not accept a bearer token. */
   authenticate?: boolean;
+  /** Prevent auth refresh requests and their retries from entering the refresh flow. */
+  skipAuthRefresh?: boolean;
 }
 
 type RequestInterceptor = (
@@ -19,11 +21,13 @@ type RequestInterceptor = (
   config: ApiRequestConfig,
 ) => Promise<ApiRequestConfig> | ApiRequestConfig;
 type ResponseInterceptor = (response: Response) => Promise<Response> | Response;
+type UnauthorizedHandler = () => Promise<boolean>;
 type LoadingListener = (isLoading: boolean) => void;
 
 const requestInterceptors: RequestInterceptor[] = [];
 const responseInterceptors: ResponseInterceptor[] = [];
 const loadingListeners = new Set<LoadingListener>();
+let unauthorizedHandler: UnauthorizedHandler | undefined;
 let activeRequests = 0;
 
 const baseUrl = (import.meta.env.VITE_API_BASE_URL ?? "/api").replace(
@@ -62,6 +66,13 @@ export function addResponseInterceptor(interceptor: ResponseInterceptor) {
   responseInterceptors.push(interceptor);
   return () => {
     responseInterceptors.splice(responseInterceptors.indexOf(interceptor), 1);
+  };
+}
+
+export function setUnauthorizedHandler(handler?: UnauthorizedHandler) {
+  unauthorizedHandler = handler;
+  return () => {
+    if (unauthorizedHandler === handler) unauthorizedHandler = undefined;
   };
 }
 
@@ -105,6 +116,19 @@ async function request<T>(
   notifyLoading();
   try {
     let response = await fetch(toUrl(path), finalConfig);
+    if (
+      response.status === 401 &&
+      finalConfig.authenticate !== false &&
+      !finalConfig.skipAuthRefresh &&
+      unauthorizedHandler
+    ) {
+      if (await unauthorizedHandler()) {
+        const retryConfig = { ...config, headers: new Headers(config.headers) };
+        for (const interceptor of requestInterceptors)
+          finalConfig = await interceptor(toUrl(path), retryConfig);
+        response = await fetch(toUrl(path), finalConfig);
+      }
+    }
     for (const interceptor of responseInterceptors)
       response = await interceptor(response);
     const body = await parseBody(response);
