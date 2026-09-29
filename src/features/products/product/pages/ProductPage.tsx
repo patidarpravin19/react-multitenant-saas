@@ -49,6 +49,10 @@ export function ProductPage() {
     },
   ];
 
+  const brands = productTypes;
+  const models = categories.map((model) => ({ ...model, productTypeId: "" }));
+  const colors = [{ id: "black", name: "Black" }, { id: "white", name: "White" }];
+
   const categories = [
     {
       id: "galaxy-5",
@@ -77,9 +81,11 @@ export function ProductPage() {
     () =>
       createProductFormConfig({
         vendors,
+        brands,
         productTypes,
-        categories,
+        models,
         variants,
+        colors,
       }),
     [],
   );
@@ -89,30 +95,37 @@ export function ProductPage() {
 
     const productTypeId = String(values.productTypeId ?? "");
 
-    const categoryId = String(values.categoryId ?? "");
+    const productModelId = String(values.productModelId ?? "");
 
     const variantId = String(values.variantId ?? "");
 
     const product: Product = {
       id: crypto.randomUUID(),
       name: String(values.serialNumber ?? ""),
-      brandId: vendorId,
-      productModelId: categoryId,
+      brandId: String(values.brandId ?? ""),
+      brandName: brands.find((x) => x.id === String(values.brandId ?? ""))?.name,
+      productModelId,
+      productModelName: models.find((x) => x.id === productModelId)?.name,
+      colorId: String(values.colorId ?? ""),
+      colorName: colors.find((x) => x.id === String(values.colorId ?? ""))?.name,
       vendorId,
       vendorName: vendors.find((x) => x.id === vendorId)?.name,
       productTypeId,
       productTypeName: productTypes.find((x) => x.id === productTypeId)?.name,
-      categoryId,
-      categoryName: categories.find((x) => x.id === categoryId)?.name,
+      categoryId: productModelId,
+      categoryName: models.find((x) => x.id === productModelId)?.name,
       variantId,
       variantName: variants.find((x) => x.id === variantId)?.name,
       code: String(values.code ?? ""),
       uniqueNumber: String(values.emi ?? ""),
       uniqueNumber1: String(values.uniqueNumber1 ?? ""),
       serialNumber: String(values.serialNumber ?? ""),
+      serialNumber1: String(values.serialNumber1 ?? ""),
       quantity: Number(values.quantity ?? 0),
       purchasePrice: Number(values.purchasePrice ?? 0),
       discount: Number(values.discount ?? 0),
+      cgst: Number(values.cgst ?? 0),
+      sgst: Number(values.sgst ?? 0),
       tax: Number(values.tax ?? 0),
       description: String(values.description ?? ""),
       isActive: Boolean(values.isActive),
@@ -187,7 +200,7 @@ export function ProductPage() {
       title="Products"
       description="Manage inventory products, variants, pricing and stock."
       addButtonLabel="Add Product"
-      form={<DynamicForm title="" fields={formConfig} onSubmit={saveProduct} />}
+      form={<DynamicForm title="" fields={formConfig} columnsPerRow={3} onSubmit={saveProduct} />}
     >
       <DynamicGrid
         title="Product List"
@@ -197,7 +210,7 @@ export function ProductPage() {
         getRowId={(row) => row.id}
         inlineEdit={{
           enabled: true,
-          editableFields: ["quantity", "purchasePrice", "discount", "tax"],
+          editableFields: ["quantity", "purchasePrice", "discount", "cgst", "sgst", "tax"],
           validate: ({ values }) => {
             const errors: Record<string, string> = {};
             if (Number(values.quantity) < 0) {

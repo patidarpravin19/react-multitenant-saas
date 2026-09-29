@@ -13,13 +13,18 @@ export interface Product extends BaseMaster {
   brandName?: string;
   productModelId: string;
   productModelName?: string;
+  colorId: string;
+  colorName?: string;
   code: string;
   uniqueNumber: string;
   uniqueNumber1: string;
+  serialNumber1: string;
   serialNumber: string;
   quantity: number;
   purchasePrice: number;
   discount: number;
+  cgst: number;
+  sgst: number;
   tax: number;
   description: string;
 }

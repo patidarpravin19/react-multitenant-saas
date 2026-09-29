@@ -15,6 +15,8 @@ interface DynamicFormProps {
   initialValues?: FieldValues;
   submitLabel?: string;
   onCancel?: () => void;
+  /** Number of form columns at desktop widths. Defaults to two. */
+  columnsPerRow?: 2 | 3 | 4;
 }
 
 function createDefaultValues(fields: FormFieldConfig[]): FieldValues {
@@ -38,7 +40,13 @@ export function DynamicForm({
   initialValues,
   submitLabel = "Submit",
   onCancel,
+  columnsPerRow = 2,
 }: DynamicFormProps) {
+  const columnClass = {
+    2: "md:grid-cols-2",
+    3: "md:grid-cols-3",
+    4: "md:grid-cols-4",
+  }[columnsPerRow];
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [dependentOptions, setDependentOptions] = useState<
     Record<string, SelectOption[]>
@@ -145,9 +153,9 @@ export function DynamicForm({
   return (
     <section
       aria-labelledby="dynamic-form-title"
-      className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition-all duration-300 sm:p-6 dark:border-slate-800 dark:bg-slate-900"
+      className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition-all duration-300 sm:p-5 dark:border-slate-800 dark:bg-slate-900"
     >
-      <div className="mb-6 border-b border-slate-200 pb-5 dark:border-slate-800">
+      <div className="mb-4 border-b border-slate-200 pb-4 dark:border-slate-800">
         <div className="flex items-center justify-between gap-4">
           <h1
             id="dynamic-form-title"
@@ -175,8 +183,8 @@ export function DynamicForm({
         ) : null}
       </div>
 
-      <form onSubmit={submit} noValidate className="space-y-5">
-        <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+      <form onSubmit={submit} noValidate className="space-y-4">
+        <div className={`grid grid-cols-1 gap-3 ${columnClass}`}>
           {fields.map((field) => {
             const Component = getFieldComponent(field.type);
             const renderedField =
@@ -188,7 +196,7 @@ export function DynamicForm({
                       !values[field.dependsOn] ||
                       loadingDependentOptions[field.name],
                     placeholder: !values[field.dependsOn]
-                      ? "Select a vendor first"
+                      ? `Select ${fields.find((candidate) => candidate.name === field.dependsOn)?.label.toLowerCase() ?? "a parent option"} first`
                       : loadingDependentOptions[field.name]
                         ? "Loading options..."
                         : field.placeholder,
@@ -208,10 +216,18 @@ export function DynamicForm({
               <div
                 key={field.id}
                 className={
-                  field.colSpan === 2 ||
+                  field.colSpan === "full" ||
                     field.type === "checkbox" ||
                     field.type === "toggle"
-                    ? "md:col-span-2"
+                    ? "md:col-span-full"
+                    : field.colSpan === 1
+                      ? "md:col-span-1"
+                      : field.colSpan === 2
+                        ? "md:col-span-2"
+                        : field.colSpan === 3
+                          ? "md:col-span-3"
+                          : field.colSpan === 4
+                            ? "md:col-span-4"
                     : ""
                 }
               >
@@ -235,7 +251,7 @@ export function DynamicForm({
           </div>
         ) : null}
 
-        <div className="flex flex-col-reverse gap-3 border-t border-slate-200 pt-5 sm:flex-row sm:justify-end dark:border-slate-800">
+        <div className="flex flex-col-reverse gap-3 border-t border-slate-200 pt-4 sm:flex-row sm:justify-end dark:border-slate-800">
           <Button
             type="button"
             variant="secondary"

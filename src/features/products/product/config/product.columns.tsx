@@ -18,9 +18,9 @@ export const productColumns: GridColumn<Product>[] = [
     sortable: true,
   },
   {
-    id: "categoryName",
-    header: "Category",
-    accessor: "categoryName",
+    id: "productModelName",
+    header: "Model",
+    accessor: "productModelName",
     searchable: true,
   },
   {
@@ -30,9 +30,21 @@ export const productColumns: GridColumn<Product>[] = [
     searchable: true,
   },
   {
+    id: "colorName",
+    header: "Color",
+    accessor: "colorName",
+    searchable: true,
+  },
+  {
     id: "serialNumber",
     header: "Serial Number",
     accessor: "serialNumber",
+    searchable: true,
+  },
+  {
+    id: "serialNumber1",
+    header: "Serial Number 1",
+    accessor: "serialNumber1",
     searchable: true,
   },
   {
@@ -70,6 +82,20 @@ export const productColumns: GridColumn<Product>[] = [
     id: "tax",
     header: "Tax %",
     accessor: "tax",
+    editable: true,
+    editor: "number",
+  },
+  {
+    id: "cgst",
+    header: "CGST %",
+    accessor: "cgst",
+    editable: true,
+    editor: "number",
+  },
+  {
+    id: "sgst",
+    header: "SGST %",
+    accessor: "sgst",
     editable: true,
     editor: "number",
   },

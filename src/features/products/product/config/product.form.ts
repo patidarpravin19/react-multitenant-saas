@@ -1,99 +1,56 @@
-import type { FormFieldConfig } from "../../../../types/form";
+import type { FormFieldConfig, SelectOption } from "../../../../types/form";
+
+export interface ProductLookup {
+  id: string;
+  name: string;
+  brandId?: string;
+  productTypeId?: string;
+}
 
 interface ProductFormOptions {
-  vendors: { id: string; name: string }[];
-  productTypes: { id: string; name: string }[];
-  categories: { id: string; name: string }[];
-  variants: { id: string; name: string }[];
+  vendors: ProductLookup[];
+  brands: ProductLookup[];
+  productTypes: ProductLookup[];
+  models: ProductLookup[];
+  variants: ProductLookup[];
+  colors: ProductLookup[];
 }
+
+const toOptions = (items: ProductLookup[]): SelectOption[] =>
+  items.map(({ id, name }) => ({ label: name, value: id }));
 
 export function createProductFormConfig({
   vendors,
+  brands,
   productTypes,
-  categories,
+  models,
   variants,
+  colors,
 }: ProductFormOptions): FormFieldConfig[] {
-  const optionFields = [
-    ["vendorId", "Vendor", vendors],
-    ["productTypeId", "Product Type", productTypes],
-    ["categoryId", "Category", categories],
-    ["variantId", "Variant", variants],
-  ] as const;
   return [
-    ...optionFields.map(([name, label, options]) => ({
-      id: name,
-      name,
-      label,
-      type: "select" as const,
-      required: true,
-      options: options.map((option) => ({
-        label: option.name,
-        value: option.id,
-      })),
-    })),
+    { id: "vendorId", name: "vendorId", label: "Vendor", type: "select", required: true, options: toOptions(vendors) },
+    { id: "brandId", name: "brandId", label: "Brand", type: "select", required: true, options: toOptions(brands) },
     {
-      id: "code",
-      name: "code",
-      label: "Product Code",
-      type: "text",
-      required: true,
+      id: "productTypeId", name: "productTypeId", label: "Product Type", type: "select", required: true,
+      dependsOn: "brandId", placeholder: "Select a brand first",
+      options: productTypes.map((item) => ({ label: item.name, value: item.id, parentValue: item.brandId })),
+      loadOptions: async (brandId) => toOptions(productTypes.filter((item) => !item.brandId || item.brandId === brandId)),
     },
     {
-      id: "emi",
-      name: "emi",
-      label: "Unique Number",
-      type: "text",
-      required: true,
+      id: "productModelId", name: "productModelId", label: "Model", type: "select", required: true,
+      dependsOn: "productTypeId", placeholder: "Select a product type first",
+      options: models.map((item) => ({ label: item.name, value: item.id, parentValue: item.productTypeId })),
+      loadOptions: async (productTypeId) => toOptions(models.filter((item) => !item.productTypeId || item.productTypeId === productTypeId)),
     },
-    {
-      id: "uniqueNumber1",
-      name: "uniqueNumber1",
-      label: "Secondary Unique Number",
-      type: "text",
-    },
-    {
-      id: "serialNumber",
-      name: "serialNumber",
-      label: "Serial Number",
-      type: "text",
-      required: true,
-    },
-    {
-      id: "quantity",
-      name: "quantity",
-      label: "Quantity",
-      type: "number",
-      required: true,
-      min: 0,
-    },
-    {
-      id: "purchasePrice",
-      name: "purchasePrice",
-      label: "Purchase Price",
-      type: "number",
-      required: true,
-      min: 0,
-    },
-    {
-      id: "discount",
-      name: "discount",
-      label: "Discount",
-      type: "number",
-      min: 0,
-    },
-    { id: "tax", name: "tax", label: "Tax (%)", type: "number", min: 0 },
-    {
-      id: "description",
-      name: "description",
-      label: "Description",
-      type: "textarea",
-    },
-    {
-      id: "isActive",
-      name: "isActive",
-      label: "Active",
-      type: "toggle",
-      defaultValue: true,
-    },
+    { id: "variantId", name: "variantId", label: "Variant", type: "select", required: true, options: toOptions(variants) },
+    { id: "colorId", name: "colorId", label: "Color", type: "select", required: true, options: toOptions(colors) },
+    { id: "serialNumber", name: "serialNumber", label: "Serial Number", type: "text", required: true },
+    { id: "serialNumber1", name: "serialNumber1", label: "Serial Number 1", type: "text" },
+    { id: "quantity", name: "quantity", label: "Quantity", type: "number", required: true, min: 1, step: 1, defaultValue: 1 },
+    { id: "purchasePrice", name: "purchasePrice", label: "Purchase Price", type: "number", required: true, min: 0, step: 0.01 },
+    { id: "discount", name: "discount", label: "Discount", type: "number", min: 0, step: 0.01 },
+    { id: "cgst", name: "cgst", label: "CGST (%)", type: "number", min: 0, step: 0.01 },
+    { id: "sgst", name: "sgst", label: "SGST (%)", type: "number", min: 0, step: 0.01 },
+    { id: "tax", name: "tax", label: "Tax (%)", type: "number", min: 0, step: 0.01 },
   ];
 }

@@ -28,6 +28,7 @@ export interface ResourcePageProps<T extends ResourceRecord> {
   columns: GridColumn<T>[];
   fields?: FormFieldConfig[];
   loadFields?: () => Promise<FormFieldConfig[]>;
+  columnsPerRow?: 2 | 3 | 4;
   api: ResourceApi<T>;
 }
 
@@ -146,7 +147,7 @@ export function ResourceListPage<T extends ResourceRecord>(
 export function ResourceFormPage<T extends ResourceRecord>(
   props: ResourcePageProps<T> & { mode: "create" | "edit" },
 ) {
-  const { mode, title, singular, listPath, fields, loadFields, api } = props;
+  const { mode, title, singular, listPath, fields, loadFields, columnsPerRow = 2, api } = props;
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [record, setRecord] = useState<T | null>(null);
@@ -217,6 +218,7 @@ export function ResourceFormPage<T extends ResourceRecord>(
           : `Update the ${singular.toLowerCase()} details.`
       }
       fields={formFields}
+      columnsPerRow={columnsPerRow}
       initialValues={record ?? undefined}
       submitLabel={mode === "create" ? `Create ${singular}` : "Save Changes"}
       onCancel={() => navigate(listPath)}

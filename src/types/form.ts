@@ -43,7 +43,7 @@ export interface BaseFieldConfig {
   disabled?: boolean;
   description?: string;
   defaultValue?: unknown;
-  colSpan?: 1 | 2;
+  colSpan?: 1 | 2 | 3 | 4 | "full";
 }
 
 export interface TextFieldConfig extends BaseFieldConfig {
