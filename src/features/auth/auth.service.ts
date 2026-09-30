@@ -45,7 +45,11 @@ export const authService = {
   async refresh(refreshToken: string, expiredAccessToken: string) {
     const response = await apiClient.post<LoginResponse>(
       refreshEndpoint,
-      { refreshToken, expiredAccessToken },
+      {
+        refreshToken,
+        accessToken: expiredAccessToken,
+        expiredAccessToken,
+      },
       { authenticate: false, skipAuthRefresh: true },
     );
     const body = response.data ?? response;

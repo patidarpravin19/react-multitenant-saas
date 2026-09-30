@@ -12,7 +12,7 @@ const typesApi = createResourceApi<LookupRecord>("/product-types/all");
 const modelsApi = createResourceApi<LookupRecord>("/product-models/all");
 const variantsApi = createResourceApi<LookupRecord>("/variants/all");
 const colorsApi = createResourceApi<LookupRecord>("/colors/all");
-const taxRatesApi = createResourceApi<TaxRate>("/taxes");
+const taxRatesApi = createResourceApi<TaxRate>("/taxes/all");
 const productsApi = createResourceApi<Product>("/products");
 
 async function getCurrentTaxRates() {
