@@ -6,6 +6,7 @@ import {
   Palette,
   Package,
   Shapes,
+  Settings as SettingsIcon,
   Tags,
   Truck,
 } from "lucide-react";
@@ -94,6 +95,19 @@ export const sidebarConfiguration: NavigationItem[] = [
         path: APP_ROUTES.products.products.list,
 
         icon: Boxes,
+      },
+    ],
+  },
+  {
+    id: "settings",
+    label: "Settings",
+    icon: SettingsIcon,
+    children: [
+      {
+        id: "gst",
+        label: "GST",
+        path: APP_ROUTES.settings.gst.list,
+        icon: Tags,
       },
     ],
   },

@@ -44,6 +44,10 @@ export interface BaseFieldConfig {
   description?: string;
   defaultValue?: unknown;
   colSpan?: 1 | 2 | 3 | 4 | "full";
+  readOnly?: boolean;
+  computed?: {
+    calculate: (values: Record<string, unknown>) => number;
+  };
 }
 
 export interface TextFieldConfig extends BaseFieldConfig {

@@ -46,4 +46,12 @@ export const APP_ROUTES = {
       edit: (id: string) => `/products/${id}/edit`,
     },
   },
+
+  settings: {
+    gst: {
+      list: "/settings/gst/list",
+      add: "/settings/gst/add",
+      edit: (id: string) => `/settings/gst/${id}/edit`,
+    },
+  },
 } as const;

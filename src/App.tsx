@@ -3,6 +3,8 @@ import { AppShell } from "./components/layout/AppShell";
 import { LoginPage } from "./features/auth/LoginPage";
 import { ProtectedRoute } from "./features/auth/ProtectedRoute";
 import { productRoutes } from "./features/products/routes/ProductRoutes";
+import { GstFormPage } from "./features/settings/gst/pages/GstFormPage";
+import { GstListPage } from "./features/settings/gst/pages/GstListPage";
 
 function DashboardPage() {
   return (
@@ -20,6 +22,12 @@ export default function App() {
         <Route element={<AppShell />}>
           <Route path="/" element={<DashboardPage />} />
           {productRoutes}
+          <Route path="/settings/gst">
+            <Route index element={<Navigate to="list" replace />} />
+            <Route path="list" element={<GstListPage />} />
+            <Route path="add" element={<GstFormPage mode="create" />} />
+            <Route path=":id/edit" element={<GstFormPage mode="edit" />} />
+          </Route>
 
           <Route path="**" element={<Navigate to="/" replace />} />
         </Route>

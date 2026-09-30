@@ -98,6 +98,16 @@ export function DynamicForm({
 
   useEffect(() => {
     for (const field of fields) {
+      if (!field.computed) continue;
+      const calculated = field.computed.calculate(values);
+      if (values[field.name] !== calculated) {
+        setValue(field.name, calculated, { shouldValidate: true });
+      }
+    }
+  }, [fields, setValue, values]);
+
+  useEffect(() => {
+    for (const field of fields) {
       if (field.type !== "select" || !field.dependsOn) continue;
       if (previousValues.current[field.dependsOn] !== values[field.dependsOn]) {
         setValue(field.name, "", { shouldValidate: true, shouldDirty: true });
