@@ -39,11 +39,13 @@ export const APP_ROUTES = {
       add: "/products/colors/add",
       edit: (id: string) => `/products/colors/${id}/edit`,
     },
+  },
 
+  purchase: {
     products: {
-      list: "/products/list",
-      add: "/products/add",
-      edit: (id: string) => `/products/${id}/edit`,
+      list: "/purchase/products/list",
+      add: "/purchase/products/add",
+      edit: (id: string) => `/purchase/products/${id}/edit`,
     },
   },
 

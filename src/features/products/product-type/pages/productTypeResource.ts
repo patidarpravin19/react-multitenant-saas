@@ -1,6 +1,6 @@
 import { productTypeColumns } from "../config/productType.columns";
 import type { ProductType } from "../types/productType.types";
-import { createResourceApi } from "../../shared/resourceApi";
+import { createResourceApi } from "../../../shared/resourceApi";
 import { createProductTypeFormConfig } from "../config/productType.form";
 
 export const productTypeResource = {

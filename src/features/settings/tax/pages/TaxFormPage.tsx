@@ -1,4 +1,4 @@
-import { ResourceFormPage } from "../../../products/shared/ResourceCrudPages";
+import { ResourceFormPage } from "../../../shared/ResourceCrudPages";
 import { taxResource } from "./taxResource";
 
 export function TaxFormPage({ mode }: { mode: "create" | "edit" }) {

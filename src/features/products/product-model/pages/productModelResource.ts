@@ -1,7 +1,7 @@
 import { productModelColumns } from "../config/productModel.columns";
 import { createProductModelFormConfig } from "../config/product-model.form";
 import type { ProductModel } from "../types/productModel.types";
-import { createResourceApi, type ResourceRecord } from "../../shared/resourceApi";
+import { createResourceApi, type ResourceRecord } from "../../../shared/resourceApi";
 
 type LookupRecord = ResourceRecord & { name: string };
 const typesApi = createResourceApi<LookupRecord>("/product-types/all");

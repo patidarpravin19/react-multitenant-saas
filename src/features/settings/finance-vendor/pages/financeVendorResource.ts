@@ -1,5 +1,5 @@
 import { APP_ROUTES } from "../../../../config/routes";
-import { createResourceApi } from "../../../products/shared/resourceApi";
+import { createResourceApi } from "../../../shared/resourceApi";
 import { financeVendorColumns } from "../config/financeVendor.columns";
 import { financeVendorFormConfig } from "../config/financeVendor.form";
 import type { FinanceVendor } from "../types/financeVendor.types";

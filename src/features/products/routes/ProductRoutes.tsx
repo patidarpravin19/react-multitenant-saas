@@ -3,8 +3,6 @@ import { BrandFormPage } from "../brand/pages/BrandFormPage";
 import { BrandListPage } from "../brand/pages/BrandListPage";
 import { ColorFormPage } from "../color/pages/ColorFormPage";
 import { ColorListPage } from "../color/pages/ColorListPage";
-import { ProductFormPage } from "../product/pages/ProductFormPage";
-import { ProductListPage } from "../product/pages/ProductListPage";
 import { ProductModelFormPage } from "../product-model/pages/ProductModelFormPage";
 import { ProductModelListPage } from "../product-model/pages/ProductModelListPage";
 import { ProductTypeFormPage } from "../product-type/pages/ProductTypeFormPage";
@@ -50,11 +48,5 @@ export const productRoutes = <>
     <Route path="list" element={<ColorListPage />} />
     <Route path="add" element={<ColorFormPage mode="create" />} />
     <Route path=":id/edit" element={<ColorFormPage mode="edit" />} />
-  </Route>
-  <Route path="/products">
-    <Route index element={<Navigate to="list" replace />} />
-    <Route path="list" element={<ProductListPage />} />
-    <Route path="add" element={<ProductFormPage mode="create" />} />
-    <Route path=":id/edit" element={<ProductFormPage mode="edit" />} />
   </Route>
 </>;

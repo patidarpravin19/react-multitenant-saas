@@ -1,12 +1,12 @@
 import { Plus, RefreshCw, X } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Button } from "../../../components/ui/Button";
-import { useNotifications } from "../../../context/NotificationContext";
-import { DynamicForm } from "../../dynamic-form/DynamicForm";
-import { DynamicGrid } from "../../dynamic-grid/DynamicGrid";
-import type { FormFieldConfig } from "../../../types/form";
-import type { GridColumn, GridServerSource } from "../../../types/grid";
+import { Button } from "../../components/ui/Button";
+import { useNotifications } from "../../context/NotificationContext";
+import { DynamicForm } from "../dynamic-form/DynamicForm";
+import { DynamicGrid } from "../dynamic-grid/DynamicGrid";
+import type { FormFieldConfig } from "../../types/form";
+import type { GridColumn, GridServerSource } from "../../types/grid";
 import { type ResourceRecord } from "./resourceApi";
 
 interface ResourceApi<T extends ResourceRecord> {

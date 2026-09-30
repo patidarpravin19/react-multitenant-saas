@@ -1,5 +1,5 @@
-import { apiClient } from "../../../services/apiClient";
-import type { GridQuery, GridResult, GridServerSource } from "../../../types/grid";
+import { apiClient } from "../../services/apiClient";
+import type { GridQuery, GridResult, GridServerSource } from "../../types/grid";
 
 export interface ResourceRecord {
   id: string;

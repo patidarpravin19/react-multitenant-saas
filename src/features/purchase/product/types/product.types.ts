@@ -1,4 +1,5 @@
-import { BaseMaster } from "../../shared/master.types";
+import { BaseMaster } from "../../../shared/master.types";
+
 
 export interface Product extends BaseMaster {
   vendorId: string;

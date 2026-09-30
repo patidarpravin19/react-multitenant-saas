@@ -74,7 +74,7 @@ export const sidebarConfiguration: NavigationItem[] = [
       {
         id: "product-list",
         label: "Products",
-        path: APP_ROUTES.products.products.list,
+        path: APP_ROUTES.purchase.products.list,
         icon: Boxes,
       },
     ],

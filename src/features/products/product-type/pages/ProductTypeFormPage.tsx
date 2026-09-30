@@ -5,7 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useFieldArray, useForm } from "react-hook-form";
 import { z } from "zod";
 import { Button } from "../../../../components/ui/Button";
-import { ResourceFormPage } from "../../shared/ResourceCrudPages";
+import { ResourceFormPage } from "../../../shared/ResourceCrudPages";
 import { productTypeResource } from "./productTypeResource";
 
 export function ProductTypeFormPage({ mode }: { mode: "create" | "edit" }) {

@@ -1,6 +1,6 @@
 import { brandColumns } from "../config/brand.columns";
 import type { Brand } from "../types/brand.types";
-import { createResourceApi, type ResourceRecord } from "../../shared/resourceApi";
+import { createResourceApi, type ResourceRecord } from "../../../shared/resourceApi";
 import { brandFormConfig } from "../config/brand.form";
 
 export const brandResource = {

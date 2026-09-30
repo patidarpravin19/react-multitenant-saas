@@ -1,4 +1,4 @@
-import { ResourceListPage } from "../../shared/ResourceCrudPages";
+import { ResourceListPage } from "../../../shared/ResourceCrudPages";
 import { variantResource } from "./variantResource";
 
 export function VariantListPage() {

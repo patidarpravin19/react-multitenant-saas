@@ -2,7 +2,7 @@ import { APP_ROUTES } from "../../../../config/routes";
 import { taxColumns } from "../config/tax.columns";
 import { taxFormConfig } from "../config/tax.form";
 import type { TaxRate } from "../types/tax.types";
-import { createResourceApi } from "../../../products/shared/resourceApi";
+import { createResourceApi } from "../../../shared/resourceApi";
 
 export const taxResource = {
   title: "Tax",

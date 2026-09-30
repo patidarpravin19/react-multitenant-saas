@@ -1,4 +1,4 @@
-import { BaseMaster } from "../../../products/shared/master.types";
+import { BaseMaster } from "../../../shared/master.types";
 
 export interface FinanceVendor extends BaseMaster {
   mobile: string;

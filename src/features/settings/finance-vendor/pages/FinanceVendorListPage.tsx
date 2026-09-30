@@ -1,4 +1,4 @@
-import { ResourceListPage } from "../../../products/shared/ResourceCrudPages";
+import { ResourceListPage } from "../../../shared/ResourceCrudPages";
 import { financeVendorResource } from "./financeVendorResource";
 
 export function FinanceVendorListPage() {

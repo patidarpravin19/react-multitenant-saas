@@ -1,8 +1,9 @@
 import { productColumns } from "../config/product.columns";
 import { createProductFormConfig } from "../config/product.form";
 import type { Product } from "../types/product.types";
-import { createResourceApi, type ResourceRecord } from "../../shared/resourceApi";
+import { createResourceApi, type ResourceRecord } from "../../../shared/resourceApi";
 import type { TaxRate } from "../../../settings/tax/types/tax.types";
+import { APP_ROUTES } from "../../../../config/routes";
 
 type LookupRecord = ResourceRecord & { name: string; brandId?: string; productTypeId?: string };
 const vendorsApi = createResourceApi<LookupRecord>("/vendors/all");
@@ -22,8 +23,9 @@ async function getCurrentTaxRates() {
 
 export const productResource = {
   title: "Products", description: "Manage inventory products, variants, pricing and stock.", singular: "Product",
-  listPath: "/products/list", addPath: "/products/add",
-  editPath: (id: string) => `/products/${id}/edit`, columns: productColumns,
+  listPath: APP_ROUTES.purchase.products.list,
+  addPath: APP_ROUTES.purchase.products.add,
+  editPath: APP_ROUTES.purchase.products.edit, columns: productColumns,
   columnsPerRow: 3 as const,
   loadFields: async () => {
     const [vendors, brands, productTypes, models, variants, colors, taxRates] = await Promise.all([

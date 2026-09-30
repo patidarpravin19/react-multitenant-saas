@@ -1,7 +1,7 @@
 import { vendorColumns } from "../config/vendor.columns";
 import { vendorFormConfig } from "../config/vendor.form";
 import type { Vendor } from "../types/vendor.types";
-import { createResourceApi } from "../../shared/resourceApi";
+import { createResourceApi } from "../../../shared/resourceApi";
 
 export const vendorResource = {
   title: "Vendors",

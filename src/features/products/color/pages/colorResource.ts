@@ -1,4 +1,4 @@
-import { createResourceApi } from "../../shared/resourceApi";
+import { createResourceApi } from "../../../shared/resourceApi";
 import { colorColumns } from "../config/color.columns";
 import { colorFormConfig } from "../config/color.form";
 import type { ProductColor } from "../types/color.types";

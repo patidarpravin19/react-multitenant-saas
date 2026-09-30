@@ -1,4 +1,4 @@
-import { ResourceFormPage } from "../../shared/ResourceCrudPages";
+import { ResourceFormPage } from "../../../shared/ResourceCrudPages";
 import { vendorResource } from "./vendorResource";
 
 export function VendorFormPage({ mode }: { mode: "create" | "edit" }) {

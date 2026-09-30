@@ -1,7 +1,7 @@
 import { variantColumns } from "../config/variant.columns";
 import { variantFormConfig } from "../config/variant.form";
 import type { ProductVariant } from "../types/variant.types";
-import { createResourceApi } from "../../shared/resourceApi";
+import { createResourceApi } from "../../../shared/resourceApi";
 
 export const variantResource = {
   title: "Variants",
