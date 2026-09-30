@@ -105,9 +105,9 @@ export const sidebarConfiguration: NavigationItem[] = [
     icon: SettingsIcon,
     children: [
       {
-        id: "gst",
-        label: "GST",
-        path: APP_ROUTES.settings.gst.list,
+        id: "tax",
+        label: "Tax",
+        path: APP_ROUTES.settings.tax.list,
         icon: Tags,
       },
       {

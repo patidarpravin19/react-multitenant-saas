@@ -48,10 +48,10 @@ export const APP_ROUTES = {
   },
 
   settings: {
-    gst: {
-      list: "/settings/gst/list",
-      add: "/settings/gst/add",
-      edit: (id: string) => `/settings/gst/${id}/edit`,
+    tax: {
+      list: "/settings/taxes/list",
+      add: "/settings/taxes/add",
+      edit: (id: string) => `/settings/taxes/${id}/edit`,
     },
     financeVendors: {
       list: "/settings/finance-vendors/list",

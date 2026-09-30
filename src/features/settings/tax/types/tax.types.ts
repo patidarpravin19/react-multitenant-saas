@@ -1,7 +1,7 @@
-export interface GstRate {
+export interface TaxRate {
   id: string;
   cgst: number;
   sgst: number;
-  totalGst: number;
+  totalTax: number;
   isActive: boolean;
 }

@@ -1,6 +1,6 @@
 import type { FormFieldConfig } from "../../../../types/form";
 
-export const gstFormConfig: FormFieldConfig[] = [
+export const taxFormConfig: FormFieldConfig[] = [
   {
     id: "cgst",
     name: "cgst",
@@ -24,9 +24,9 @@ export const gstFormConfig: FormFieldConfig[] = [
     defaultValue: 0,
   },
   {
-    id: "totalGst",
-    name: "totalGst",
-    label: "Total GST (%)",
+    id: "totalTax",
+    name: "totalTax",
+    label: "Total Tax (%)",
     type: "number",
     readOnly: true,
     defaultValue: 0,
