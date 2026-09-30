@@ -66,12 +66,13 @@ export function AuthProvider({ children }: PropsWithChildren) {
   useEffect(
     () => setUnauthorizedHandler(async () => {
       const refreshToken = readStoredSession()?.refreshToken;
-      if (!refreshToken) {
+      const expiredAccessToken = localStorage.getItem(tokenKey);
+      if (!refreshToken || !expiredAccessToken) {
         clearSession();
         return false;
       }
       if (!refreshInFlight) {
-        refreshInFlight = authService.refresh(refreshToken)
+        refreshInFlight = authService.refresh(refreshToken, expiredAccessToken)
           .then((tokens) => {
             const current = readStoredSession();
             if (!current) return null;

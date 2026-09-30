@@ -42,10 +42,10 @@ export const authService = {
     return toSession(response, input);
   },
   logout: () => apiClient.post<void>(logoutEndpoint, undefined),
-  async refresh(refreshToken: string) {
+  async refresh(refreshToken: string, expiredAccessToken: string) {
     const response = await apiClient.post<LoginResponse>(
       refreshEndpoint,
-      { refreshToken },
+      { refreshToken, expiredAccessToken },
       { authenticate: false, skipAuthRefresh: true },
     );
     const body = response.data ?? response;

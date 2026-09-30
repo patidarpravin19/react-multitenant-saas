@@ -44,7 +44,8 @@ VITE_AUTH_LOGOUT_ENDPOINT=/auth/logout
 VITE_AUTH_REFRESH_ENDPOINT=/auth/refresh
 ```
 
-The refresh request body is `{ refreshToken }`.
+The refresh request body is `{ refreshToken, expiredAccessToken }`, where
+`expiredAccessToken` is the access token that received the unauthorized response.
 
 ## Architecture
 
