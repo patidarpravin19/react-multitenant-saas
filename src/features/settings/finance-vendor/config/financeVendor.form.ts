@@ -16,7 +16,7 @@ export const financeVendorFormConfig: FormFieldConfig[] = [
     label: "Code",
     type: "text",
     placeholder: "Enter vendor code",
-    required: true,
+    //required: true,
   },
   {
     id: "mobile",
@@ -24,7 +24,7 @@ export const financeVendorFormConfig: FormFieldConfig[] = [
     label: "Mobile",
     type: "tel",
     placeholder: "Enter mobile number",
-    required: true,
+    //required: true,
   },
   {
     id: "email",
@@ -32,7 +32,7 @@ export const financeVendorFormConfig: FormFieldConfig[] = [
     label: "Email",
     type: "email",
     placeholder: "vendor@example.com",
-    required: true,
+    //required: true,
   },
   {
     id: "contactName",
@@ -40,7 +40,7 @@ export const financeVendorFormConfig: FormFieldConfig[] = [
     label: "Contact Name",
     type: "text",
     placeholder: "Enter contact name",
-    required: true,
+    //required: true,
   },
   {
     id: "contactMobile",
@@ -48,7 +48,7 @@ export const financeVendorFormConfig: FormFieldConfig[] = [
     label: "Contact Mobile",
     type: "tel",
     placeholder: "Enter contact mobile number",
-    required: true,
+    //required: true,
   },
   {
     id: "description",
