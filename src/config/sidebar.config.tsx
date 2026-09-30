@@ -11,6 +11,7 @@ import {
   Tags,
   Truck,
   ShoppingCart,
+  Receipt,
 } from "lucide-react";
 
 import type { NavigationItem } from "../types/navigation";
@@ -75,6 +76,19 @@ export const sidebarConfiguration: NavigationItem[] = [
         id: "product-list",
         label: "Products",
         path: APP_ROUTES.purchase.products.list,
+        icon: Boxes,
+      },
+    ],
+  },
+  {
+    id: "sale",
+    label: "Sale",
+    icon: Receipt,
+    children: [
+      {
+        id: "sale-products",
+        label: "Products",
+        path: APP_ROUTES.sale.products.list,
         icon: Boxes,
       },
     ],

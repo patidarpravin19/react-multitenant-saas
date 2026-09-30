@@ -49,6 +49,14 @@ export const APP_ROUTES = {
     },
   },
 
+  sale: {
+    products: {
+      list: "/sales/products/list",
+      add: "/sales/products/add",
+      edit: (id: string) => `/sales/products/${id}/edit`,
+    },
+  },
+
   settings: {
     tax: {
       list: "/settings/taxes/list",

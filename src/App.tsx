@@ -8,6 +8,7 @@ import { TaxListPage } from "./features/settings/tax/pages/TaxListPage";
 import { FinanceVendorFormPage } from "./features/settings/finance-vendor/pages/FinanceVendorFormPage";
 import { FinanceVendorListPage } from "./features/settings/finance-vendor/pages/FinanceVendorListPage";
 import { purchaseRoutes } from "./features/purchase/routes/PurchaseRoutes";
+import { saleRoutes } from "./features/sale/routes/SaleRoutes";
 
 function DashboardPage() {
   return (
@@ -26,6 +27,7 @@ export default function App() {
           <Route path="/" element={<DashboardPage />} />
           {productRoutes}
           {purchaseRoutes}
+          {saleRoutes}
           <Route path="/settings/taxes">
             <Route index element={<Navigate to="list" replace />} />
             <Route path="list" element={<TaxListPage />} />
