@@ -10,6 +10,7 @@ import {
   Settings as SettingsIcon,
   Tags,
   Truck,
+  ShoppingCart,
 } from "lucide-react";
 
 import type { NavigationItem } from "../types/navigation";
@@ -22,79 +23,58 @@ export const sidebarConfiguration: NavigationItem[] = [
     path: APP_ROUTES.dashboard,
     icon: LayoutDashboard,
   },
-
   {
     id: "products",
-
     label: "Product",
-
     icon: Package,
-
     children: [
       {
         id: "vendors",
-
         label: "Vendors",
-
         path: APP_ROUTES.products.vendors.list,
-
         icon: Truck,
       },
-
       {
         id: "brands",
-
         label: "Brands",
-
         path: APP_ROUTES.products.brands.list,
-
         icon: Factory,
       },
-
       {
         id: "product-types",
-
         label: "Product Types",
-
         path: APP_ROUTES.products.types.list,
-
         icon: Shapes,
       },
-
       {
         id: "product-models",
-
         label: "Categories / Models",
-
         path: APP_ROUTES.products.models.list,
-
         icon: FolderTree,
       },
-
       {
         id: "variants",
-
         label: "Variants",
-
         path: APP_ROUTES.products.variants.list,
-
         icon: Tags,
       },
-
       {
         id: "colors",
         label: "Colors",
         path: APP_ROUTES.products.colors.list,
         icon: Palette,
-      },
-
+      }
+    ],
+  },
+  {
+    id: "purchase",
+    label: "Purchase",
+    icon: ShoppingCart,
+    children: [
       {
         id: "product-list",
-
         label: "Products",
-
         path: APP_ROUTES.products.products.list,
-
         icon: Boxes,
       },
     ],

@@ -13,6 +13,16 @@ interface SidebarMenuItemProps {
   level?: number;
 }
 
+function hasActiveDescendant(item: NavigationItem, pathname: string): boolean {
+  if (
+    item.path &&
+    (pathname === item.path || pathname.startsWith(`${item.path}/`))
+  ) {
+    return true;
+  }
+  return item.children?.some((child) => hasActiveDescendant(child, pathname)) ?? false;
+}
+
 export function SidebarMenuItem({
   item,
   collapsed = false,
@@ -22,11 +32,8 @@ export function SidebarMenuItem({
 
   const hasChildren = Boolean(item.children?.length);
 
-  const isChildActive = item.children?.some(
-    (child) =>
-      child.path &&
-      (location.pathname === child.path ||
-        location.pathname.startsWith(`${child.path}/`)),
+  const isChildActive = item.children?.some((child) =>
+    hasActiveDescendant(child, location.pathname),
   );
 
   const [expanded, setExpanded] = useState(Boolean(isChildActive));

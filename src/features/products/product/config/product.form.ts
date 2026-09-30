@@ -14,6 +14,8 @@ interface ProductFormOptions {
   models: ProductLookup[];
   variants: ProductLookup[];
   colors: ProductLookup[];
+  cgst?: number;
+  sgst?: number;
 }
 
 const toOptions = (items: ProductLookup[]): SelectOption[] =>
@@ -26,6 +28,8 @@ export function createProductFormConfig({
   models,
   variants,
   colors,
+  cgst = 0,
+  sgst = 0,
 }: ProductFormOptions): FormFieldConfig[] {
   return [
     { id: "vendorId", name: "vendorId", label: "Vendor", type: "select", required: true, options: toOptions(vendors) },
@@ -49,8 +53,8 @@ export function createProductFormConfig({
     { id: "quantity", name: "quantity", label: "Quantity", type: "number", required: true, min: 1, step: 1, defaultValue: 1 },
     { id: "purchasePrice", name: "purchasePrice", label: "Purchase Price", type: "number", required: true, min: 0, step: 0.01 },
     { id: "discount", name: "discount", label: "Discount", type: "number", min: 0, step: 0.01 },
-    { id: "cgst", name: "cgst", label: "CGST (%)", type: "number", min: 0, step: 0.01 },
-    { id: "sgst", name: "sgst", label: "SGST (%)", type: "number", min: 0, step: 0.01 },
+    { id: "cgst", name: "cgst", label: "CGST (%)", type: "number", min: 0, step: 0.01, defaultValue: cgst },
+    { id: "sgst", name: "sgst", label: "SGST (%)", type: "number", min: 0, step: 0.01, defaultValue: sgst },
     { id: "tax", name: "tax", label: "Tax (%)", type: "number", min: 0, step: 0.01 },
   ];
 }
