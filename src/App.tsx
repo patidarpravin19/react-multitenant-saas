@@ -5,6 +5,8 @@ import { ProtectedRoute } from "./features/auth/ProtectedRoute";
 import { productRoutes } from "./features/products/routes/ProductRoutes";
 import { GstFormPage } from "./features/settings/gst/pages/GstFormPage";
 import { GstListPage } from "./features/settings/gst/pages/GstListPage";
+import { FinanceVendorFormPage } from "./features/settings/finance-vendor/pages/FinanceVendorFormPage";
+import { FinanceVendorListPage } from "./features/settings/finance-vendor/pages/FinanceVendorListPage";
 
 function DashboardPage() {
   return (
@@ -27,6 +29,12 @@ export default function App() {
             <Route path="list" element={<GstListPage />} />
             <Route path="add" element={<GstFormPage mode="create" />} />
             <Route path=":id/edit" element={<GstFormPage mode="edit" />} />
+          </Route>
+          <Route path="/settings/finance-vendors">
+            <Route index element={<Navigate to="list" replace />} />
+            <Route path="list" element={<FinanceVendorListPage />} />
+            <Route path="add" element={<FinanceVendorFormPage mode="create" />} />
+            <Route path=":id/edit" element={<FinanceVendorFormPage mode="edit" />} />
           </Route>
 
           <Route path="**" element={<Navigate to="/" replace />} />

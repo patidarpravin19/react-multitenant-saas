@@ -53,5 +53,10 @@ export const APP_ROUTES = {
       add: "/settings/gst/add",
       edit: (id: string) => `/settings/gst/${id}/edit`,
     },
+    financeVendors: {
+      list: "/settings/finance-vendors/list",
+      add: "/settings/finance-vendors/add",
+      edit: (id: string) => `/settings/finance-vendors/${id}/edit`,
+    },
   },
 } as const;

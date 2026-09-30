@@ -1,6 +1,7 @@
 import {
   Boxes,
   Factory,
+  HandCoins,
   FolderTree,
   LayoutDashboard,
   Palette,
@@ -108,6 +109,12 @@ export const sidebarConfiguration: NavigationItem[] = [
         label: "GST",
         path: APP_ROUTES.settings.gst.list,
         icon: Tags,
+      },
+      {
+        id: "finance-vendors",
+        label: "Finance Vendors",
+        path: APP_ROUTES.settings.financeVendors.list,
+        icon: HandCoins,
       },
     ],
   },
