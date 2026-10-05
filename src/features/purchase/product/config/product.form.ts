@@ -52,6 +52,18 @@ export function createProductFormConfig({
     { id: "serialNumber1", name: "serialNumber1", label: "Serial Number 1", type: "text" },
     { id: "quantity", name: "quantity", label: "Quantity", type: "number", required: true, min: 1, step: 1, defaultValue: 1 },
     { id: "purchasePrice", name: "purchasePrice", label: "Purchase Price", type: "number", required: true, min: 0, step: 0.01 },
+    {
+      id: "totalAmount", name: "totalAmount", label: "Total Amount", type: "number", readOnly: true,
+      step: 0.01,
+      computed: {
+        calculate: (values) => {
+          const purchasePrice = Number(values.purchasePrice ?? 0);
+          const cgst = Number(values.cgst ?? 0);
+          const sgst = Number(values.sgst ?? 0);
+          return Number((purchasePrice * (1 + (cgst + sgst) / 100)).toFixed(2));
+        },
+      },
+    },
     { id: "discount", name: "discount", label: "Discount", type: "number", min: 0, step: 0.01 },
     { id: "cgst", name: "cgst", label: "CGST (%)", type: "number", min: 0, step: 0.01, defaultValue: cgst },
     { id: "sgst", name: "sgst", label: "SGST (%)", type: "number", min: 0, step: 0.01, defaultValue: sgst },

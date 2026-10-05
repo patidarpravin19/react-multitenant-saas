@@ -23,6 +23,7 @@ export interface Product extends BaseMaster {
   serialNumber: string;
   quantity: number;
   purchasePrice: number;
+  totalAmount: number;
   discount: number;
   cgst: number;
   sgst: number;

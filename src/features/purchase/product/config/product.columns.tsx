@@ -69,6 +69,17 @@ export const productColumns: GridColumn<Product>[] = [
         minimumFractionDigits: 2,
       })}`,
   },
+  {
+    id: "totalAmount",
+    header: "Total Amount",
+    accessor: "totalAmount",
+    sortable: true,
+    cell: (_, row) =>
+      `₹${row.totalAmount?.toLocaleString("en-IN", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      })}`,
+  },
 
   {
     id: "discount",

@@ -40,7 +40,7 @@ export const productResource = {
         productsApi.getById(id),
         getCurrentTaxRates(),
       ]);
-      return { ...product, ...taxRates };
+      return { ...taxRates, ...product };
     },
   },
 };
