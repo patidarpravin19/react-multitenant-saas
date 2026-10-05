@@ -27,7 +27,7 @@ export interface ResourcePageProps<T extends ResourceRecord> {
   editPath: (id: string) => string;
   columns: GridColumn<T>[];
   fields?: FormFieldConfig[];
-  loadFields?: () => Promise<FormFieldConfig[]>;
+  loadFields?: (record?: T) => Promise<FormFieldConfig[]>;
   columnsPerRow?: 2 | 3 | 4;
   api: ResourceApi<T>;
 }
@@ -183,14 +183,15 @@ export function ResourceFormPage<T extends ResourceRecord>(
       return;
     }
     if (!loadFields) return;
-    void loadFields()
+    if (mode === "edit" && !record) return;
+    void loadFields(record ?? undefined)
       .then(setFormFields)
       .catch((reason) =>
         setError(
           reason instanceof Error ? reason.message : "Unable to load form data.",
         ),
       );
-  }, [fields, loadFields]);
+  }, [fields, loadFields, mode, record]);
 
   if (error)
     return (

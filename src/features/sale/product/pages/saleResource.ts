@@ -1,5 +1,6 @@
 import { APP_ROUTES } from "../../../../config/routes";
 import { createResourceApi } from "../../../shared/resourceApi";
+import { apiClient } from "../../../../services/apiClient";
 import { saleColumns } from "../config/sale.columns";
 import { createSaleFormConfig } from "../config/sale.form";
 import type { SaleProductOption, SaleRecord } from "../types/sale.types";
@@ -15,9 +16,10 @@ export const saleResource = {
   editPath: APP_ROUTES.sale.products.edit,
   columns: saleColumns,
   columnsPerRow: 2 as const,
-  loadFields: async () =>
-    createSaleFormConfig(
-      await createResourceApi<SaleProductOption>("/products/all").list(),
-    ),
+  loadFields: async (record?: SaleRecord) => {
+    const currentSale = record ? `?currentSaleId=${encodeURIComponent(record.id)}` : "";
+    const products = await apiClient.get<SaleProductOption[]>(`/products/all${currentSale}`);
+    return createSaleFormConfig(products);
+  },
   api: salesApi,
 };

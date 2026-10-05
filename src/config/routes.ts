@@ -42,6 +42,7 @@ export const APP_ROUTES = {
   },
 
   purchase: {
+    stock: "/purchase/stock",
     products: {
       list: "/purchase/products/list",
       add: "/purchase/products/add",

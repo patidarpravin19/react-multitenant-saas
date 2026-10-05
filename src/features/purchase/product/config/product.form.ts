@@ -50,7 +50,7 @@ export function createProductFormConfig({
     { id: "colorId", name: "colorId", label: "Color", type: "select", required: true, options: toOptions(colors) },
     { id: "serialNumber", name: "serialNumber", label: "Serial Number", type: "text", required: true },
     { id: "serialNumber1", name: "serialNumber1", label: "Serial Number 1", type: "text" },
-    { id: "quantity", name: "quantity", label: "Quantity", type: "number", required: true, min: 1, step: 1, defaultValue: 1 },
+    { id: "quantity", name: "quantity", label: "Quantity", type: "number", required: true, min: 0, step: 1, defaultValue: 1 },
     { id: "purchasePrice", name: "purchasePrice", label: "Purchase Price", type: "number", required: true, min: 0, step: 0.01 },
     {
       id: "totalAmount", name: "totalAmount", label: "Total Amount", type: "number", readOnly: true,

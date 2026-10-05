@@ -78,6 +78,12 @@ export const sidebarConfiguration: NavigationItem[] = [
         path: APP_ROUTES.purchase.products.list,
         icon: Boxes,
       },
+      {
+        id: "stock-inventory",
+        label: "Stock Inventory",
+        path: APP_ROUTES.purchase.stock,
+        icon: Boxes,
+      },
     ],
   },
   {
