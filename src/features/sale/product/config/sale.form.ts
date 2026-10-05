@@ -8,7 +8,7 @@ export function createSaleFormConfig(
     const serial = product.serialNumber || product.serialNumber1;
     return {
       value: product.id,
-      label: serial ? `${product.name} — ${serial}` : product.name,
+      label: serial ? `${product.brand} - ${product.productModel} - ${product.variant} - ${product.color} — ${serial}` : product.brand,
     };
   });
 

@@ -14,9 +14,9 @@ async function addProductDetails(values: Record<string, unknown>) {
   );
   return {
     ...values,
-    productName: product?.name ?? "",
-    serialNumber: product?.serialNumber ?? product?.serialNumber1 ?? "",
-    productPrice: product?.purchasePrice ?? product?.sellingPrice ?? 0,
+    // productName: product?.name ?? "",
+    // serialNumber: product?.serialNumber ?? product?.serialNumber1 ?? "",
+    // productPrice: product?.purchasePrice ?? product?.sellingPrice ?? 0,
   };
 }
 
