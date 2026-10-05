@@ -5,8 +5,29 @@ const currency = (value: number) =>
   `₹${value?.toLocaleString("en-IN", { minimumFractionDigits: 2 })}`;
 
 export const saleColumns: GridColumn<SaleRecord>[] = [
-  { id: "productName", header: "Product", accessor: "productName", searchable: true, sortable: true },
-  { id: "serialNumber", header: "Serial Number", accessor: "serialNumber", searchable: true },
+  {
+    id: "productName",
+    header: "Product",
+    accessor: "productName",
+    searchable: true,
+    sortable: true,
+    cell: (value) => (
+      <span className="block max-w-64 truncate" title={String(value ?? "")}>
+        {String(value ?? "—")}
+      </span>
+    ),
+  },
+  {
+    id: "serialNumber",
+    header: "Serial Number",
+    accessor: "serialNumber",
+    searchable: true,
+    cell: (value) => (
+      <span className="block max-w-48 truncate" title={String(value ?? "")}>
+        {String(value ?? "—")}
+      </span>
+    ),
+  },
   { id: "customerName", header: "Customer", accessor: "customerName", searchable: true, sortable: true },
   { id: "customerMobile", header: "Mobile", accessor: "customerMobile", searchable: true },
   { id: "saleDate", header: "Sale Date", accessor: "saleDate", sortable: true },
