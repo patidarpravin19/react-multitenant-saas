@@ -56,12 +56,12 @@ export function createSaleFormConfig(
     {
       id: "productPrice",
       name: "productPrice",
-      label: "Product Price",
+      label: "Purchase Price",
       type: "number",
       required: true,
       min: 0,
-      step: 0.01,
-      readOnly: true,
+      step: 1,
+      // readOnly: true,
       computed: {
         calculate: (values) => {
           const product = products.find(
@@ -76,9 +76,17 @@ export function createSaleFormConfig(
       name: "sellingPrice",
       label: "Selling Price",
       type: "number",
-      required: true,
+      // required: true,
       min: 0,
-      step: 0.01,
+      step: 1,
+      computed: {
+        calculate: (values) => {
+          const product = products.find(
+            (item) => item.id === String(values.productId ?? ""),
+          );
+          return product?.purchasePrice ?? product?.sellingPrice ?? 0;
+        },
+      },
     },
     {
       id: "discount",
@@ -87,7 +95,7 @@ export function createSaleFormConfig(
       type: "number",
       required: true,
       min: 0,
-      step: 0.01,
+      step: 1,
       defaultValue: 0,
     },
   ];
