@@ -1,4 +1,6 @@
 import type { GridColumn } from "../../../../types/grid";
+import { Link } from "react-router-dom";
+import { APP_ROUTES } from "../../../../config/routes";
 import type { SaleRecord } from "../types/sale.types";
 
 const currency = (value: number) =>
@@ -34,4 +36,18 @@ export const saleColumns: GridColumn<SaleRecord>[] = [
   { id: "productPrice", header: "Product Price", accessor: "productPrice", cell: (_, row) => currency(row.productPrice) },
   { id: "sellingPrice", header: "Selling Price", accessor: "sellingPrice", sortable: true, cell: (_, row) => currency(row.sellingPrice) },
   { id: "discount", header: "Discount", accessor: "discount", cell: (_, row) => currency(row.discount) },
+  { id: "paymentMode", header: "Payment Mode", accessor: "paymentMode", cell: (value) => String(value ?? "Not recorded") },
+  {
+    id: "paymentDetails",
+    header: "Payment Details",
+    accessor: "paymentMode",
+    cell: (_, row) => (
+      <Link
+        to={APP_ROUTES.sale.products.payment(row.id)}
+        className="font-medium text-[var(--tenant-primary)] hover:underline"
+      >
+        {row.paymentMode ? "Edit payment" : "Add payment"}
+      </Link>
+    ),
+  },
 ];

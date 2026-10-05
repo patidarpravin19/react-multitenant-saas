@@ -14,6 +14,7 @@ export const saleResource = {
   listPath: APP_ROUTES.sale.products.list,
   addPath: APP_ROUTES.sale.products.add,
   editPath: APP_ROUTES.sale.products.edit,
+  afterCreatePath: (record: SaleRecord) => APP_ROUTES.sale.products.payment(record.id),
   columns: saleColumns,
   columnsPerRow: 2 as const,
   loadFields: async (record?: SaleRecord) => {

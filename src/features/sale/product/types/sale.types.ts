@@ -11,6 +11,7 @@ export interface SaleRecord extends ResourceRecord {
   productPrice: number;
   sellingPrice: number;
   discount: number;
+  paymentMode?: "Cash" | "Finance" | null;
 }
 
 export interface SaleProductOption extends ResourceRecord {

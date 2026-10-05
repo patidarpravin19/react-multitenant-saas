@@ -28,6 +28,7 @@ export interface ResourcePageProps<T extends ResourceRecord> {
   columns: GridColumn<T>[];
   fields?: FormFieldConfig[];
   loadFields?: (record?: T) => Promise<FormFieldConfig[]>;
+  afterCreatePath?: (record: T) => string;
   columnsPerRow?: 2 | 3 | 4;
   api: ResourceApi<T>;
 }
@@ -147,7 +148,7 @@ export function ResourceListPage<T extends ResourceRecord>(
 export function ResourceFormPage<T extends ResourceRecord>(
   props: ResourcePageProps<T> & { mode: "create" | "edit" },
 ) {
-  const { mode, title, singular, listPath, fields, loadFields, columnsPerRow = 2, api } = props;
+  const { mode, title, singular, listPath, fields, loadFields, afterCreatePath, columnsPerRow = 2, api } = props;
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [record, setRecord] = useState<T | null>(null);
@@ -224,7 +225,11 @@ export function ResourceFormPage<T extends ResourceRecord>(
       submitLabel={mode === "create" ? `Create ${singular}` : "Save Changes"}
       onCancel={() => navigate(listPath)}
       onSubmit={async (values) => {
-        if (mode === "create") await api.create(values);
+        if (mode === "create") {
+          const created = await api.create(values);
+          navigate(afterCreatePath?.(created) ?? listPath);
+          return;
+        }
         else {
           // `id` is not a visible/registered form field. Preserve the canonical
           // identifier returned by GET so APIs that require it in a PUT payload

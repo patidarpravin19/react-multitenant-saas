@@ -45,6 +45,7 @@ export interface BaseFieldConfig {
   defaultValue?: unknown;
   colSpan?: 1 | 2 | 3 | 4 | "full";
   readOnly?: boolean;
+  visibleWhen?: { field: string; value: string | boolean };
   computed?: {
     calculate: (values: Record<string, unknown>) => number;
   };

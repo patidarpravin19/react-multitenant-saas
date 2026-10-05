@@ -55,6 +55,7 @@ export const APP_ROUTES = {
       list: "/sales/products/list",
       add: "/sales/products/add",
       edit: (id: string) => `/sales/products/${id}/edit`,
+      payment: (id: string) => `/sales/products/${id}/payment`,
     },
   },
 

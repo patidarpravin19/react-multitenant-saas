@@ -195,7 +195,10 @@ export function DynamicForm({
 
       <form onSubmit={submit} noValidate className="space-y-4">
         <div className={`grid grid-cols-1 gap-3 ${columnClass}`}>
-          {fields.map((field) => {
+          {fields.filter((field) =>
+            !field.visibleWhen
+            || String(values[field.visibleWhen.field] ?? "") === String(field.visibleWhen.value),
+          ).map((field) => {
             const Component = getFieldComponent(field.type);
             const renderedField =
               field.type === "select" && field.dependsOn
