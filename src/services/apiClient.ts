@@ -9,6 +9,22 @@ export class ApiError extends Error {
   }
 }
 
+export interface ApiResponse<T> {
+  success: boolean;
+  message: string;
+  data: T;
+  errors?: Record<string, string[]> | null;
+  metadata?: Record<string, string> | null;
+}
+
+export interface PagedData<T> {
+  items: T[];
+  page: number;
+  pageSize: number;
+  totalCount: number;
+  totalPages: number;
+}
+
 export interface ApiRequestConfig extends RequestInit {
   /** Set false for endpoints such as sign-in that do not accept a bearer token. */
   authenticate?: boolean;
@@ -103,6 +119,15 @@ function getErrorMessage(body: unknown, status: number) {
   return `Request failed (${status}). Please try again.`;
 }
 
+function unwrapApiResponse<T>(body: unknown, status: number): T {
+  if (!isRecord(body) || typeof body.success !== "boolean" || typeof body.message !== "string" || !("data" in body))
+    return body as T;
+
+  if (!body.success)
+    throw new ApiError(getErrorMessage(body, status), status, body);
+  return body.data as T;
+}
+
 /** Add a request interceptor. Return the unsubscribe function when it is no longer needed. */
 export function addRequestInterceptor(interceptor: RequestInterceptor) {
   requestInterceptors.push(interceptor);
@@ -185,7 +210,7 @@ async function request<T>(
     if (!response.ok) {
       throw new ApiError(getErrorMessage(body, response.status), response.status, body);
     }
-    return body as T;
+    return unwrapApiResponse<T>(body, response.status);
   } finally {
     activeRequests -= 1;
     notifyLoading();

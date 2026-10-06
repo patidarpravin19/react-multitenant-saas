@@ -1,15 +1,14 @@
 import { apiClient } from "../../services/apiClient";
+import type { PagedData } from "../../services/apiClient";
 import type { GridQuery, GridResult, GridServerSource } from "../../types/grid";
 
 export interface ResourceRecord {
   id: string;
 }
 
-type PagedResponse<T> = {
-  items?: T[];
+type PagedResponse<T> = Partial<PagedData<T>> & {
   rows?: T[];
   data?: T[];
-  totalCount?: number;
   total?: number;
 };
 
@@ -62,9 +61,16 @@ export function createResourceApi<T extends ResourceRecord>(endpoint: string) {
         { signal },
       );
       if (Array.isArray(response))
-        return { rows: response, totalCount: response.length };
+        return { rows: response, totalCount: response.length, page: query.pageIndex + 1, pageSize: query.pageSize, totalPages: Math.ceil(response.length / query.pageSize) };
       const rows = response.items ?? response.rows ?? response.data ?? [];
-      return { rows, totalCount: response.totalCount ?? response.total ?? rows.length };
+      const totalCount = response.totalCount ?? response.total ?? rows.length;
+      return {
+        rows,
+        totalCount,
+        page: response.page ?? query.pageIndex + 1,
+        pageSize: response.pageSize ?? query.pageSize,
+        totalPages: response.totalPages ?? Math.ceil(totalCount / (response.pageSize ?? query.pageSize)),
+      };
     },
   };
 

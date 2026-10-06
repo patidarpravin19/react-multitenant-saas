@@ -43,6 +43,9 @@ export interface GridQuery {
 export interface GridResult<TData> {
   rows: TData[];
   totalCount: number;
+  page?: number;
+  pageSize?: number;
+  totalPages?: number;
 }
 
 export interface GridOption {
