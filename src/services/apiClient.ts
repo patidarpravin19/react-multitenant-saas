@@ -48,9 +48,59 @@ function toUrl(path: string) {
 async function parseBody(response: Response): Promise<unknown> {
   if (response.status === 204) return undefined;
   const contentType = response.headers.get("content-type") ?? "";
-  return contentType.includes("application/json")
-    ? response.json()
-    : response.text();
+  const text = await response.text();
+  if (!contentType.includes("json")) return text;
+  if (!text.trim()) return undefined;
+  try {
+    return JSON.parse(text) as unknown;
+  } catch {
+    return text;
+  }
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function readablePropertyName(property: string) {
+  const productMatch = property.match(/Products\[(\d+)\]\.([\w]+)/i);
+  const name = productMatch?.[2] ?? property;
+  const labels: Record<string, string> = {
+    SerialNumber: "Serial Number",
+    SerialNumber1: "Serial Number 1",
+    VendorId: "Vendor",
+    BrandId: "Brand",
+    ProductTypeId: "Product Type",
+    ProductModelId: "Model",
+    VariantId: "Variant",
+    ColorId: "Color",
+    Quantity: "Quantity",
+    PurchasePrice: "Purchase Price",
+  };
+  const label = labels[name] ?? name.replace(/([a-z0-9])([A-Z])/g, "$1 $2");
+  return productMatch ? `Unit ${Number(productMatch[1]) + 1} · ${label}` : label;
+}
+
+function getErrorMessage(body: unknown, status: number) {
+  if (isRecord(body)) {
+    const errors = body.errors;
+    if (isRecord(errors)) {
+      const messages = Object.entries(errors).flatMap(([property, value]) => {
+        const values = Array.isArray(value) ? value : [value];
+        return values
+          .filter((message): message is string => typeof message === "string" && Boolean(message.trim()))
+          .map((message) => `${readablePropertyName(property)}: ${message}`);
+      });
+      if (messages.length) return messages.join("\n");
+    }
+
+    for (const key of ["detail", "message", "title"]) {
+      const value = body[key];
+      if (typeof value === "string" && value.trim()) return value;
+    }
+  }
+  if (typeof body === "string" && body.trim()) return body;
+  return `Request failed (${status}). Please try again.`;
 }
 
 /** Add a request interceptor. Return the unsubscribe function when it is no longer needed. */
@@ -133,11 +183,7 @@ async function request<T>(
       response = await interceptor(response);
     const body = await parseBody(response);
     if (!response.ok) {
-      const message =
-        typeof body === "object" && body && "message" in body
-          ? String(body.message)
-          : `Request failed (${response.status}).`;
-      throw new ApiError(message, response.status, body);
+      throw new ApiError(getErrorMessage(body, response.status), response.status, body);
     }
     return body as T;
   } finally {
