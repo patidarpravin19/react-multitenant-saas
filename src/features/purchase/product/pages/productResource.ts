@@ -4,6 +4,7 @@ import type { Product } from "../types/product.types";
 import { createResourceApi, type ResourceRecord } from "../../../shared/resourceApi";
 import type { TaxRate } from "../../../settings/tax/types/tax.types";
 import { APP_ROUTES } from "../../../../config/routes";
+import { apiClient } from "../../../../services/apiClient";
 
 type LookupRecord = ResourceRecord & { name: string; brandId?: string; productTypeId?: string };
 const vendorsApi = createResourceApi<LookupRecord>("/vendors/all");
@@ -31,10 +32,34 @@ export const productResource = {
     const [vendors, brands, productTypes, models, variants, colors, taxRates] = await Promise.all([
       vendorsApi.list(), brandsApi.list(), typesApi.list(), modelsApi.list(), variantsApi.list(), colorsApi.list(), getCurrentTaxRates(),
     ]);
-    return createProductFormConfig({ vendors, brands, productTypes, models, variants, colors, ...taxRates });
+    const fields = createProductFormConfig({ vendors, brands, productTypes, models, variants, colors, ...taxRates });
+    return fields;
   },
   api: {
     ...productsApi,
+    create: async (values: Record<string, unknown>) => {
+      const serialPairs = values.serialPairs as { serialNumber: string; serialNumber1: string }[];
+      if (!serialPairs?.length || serialPairs.length > 500)
+        throw new Error("Add between 1 and 500 product units.");
+      const normalizedSerials = serialPairs.flatMap(({ serialNumber, serialNumber1 }) => [serialNumber, serialNumber1])
+        .map((serial) => serial.trim().toLocaleLowerCase());
+      if (normalizedSerials.some((serial) => !serial))
+        throw new Error("Enter both serial numbers for every unit.");
+      if (new Set(normalizedSerials).size !== normalizedSerials.length)
+        throw new Error("Serial Number and Serial Number 1 must all be unique.");
+
+      const { serialPairs: _serialPairs, ...shared } = values;
+      const products = serialPairs.map(({ serialNumber, serialNumber1 }) => ({
+        ...shared,
+        serialNumber: serialNumber.trim(),
+        serialNumber1: serialNumber1.trim(),
+        quantity: 1,
+      }));
+      const created = await apiClient.post<Product[]>("/products/bulk", { products });
+      const firstCreated = created[0];
+      if (!firstCreated) throw new Error("No products were returned after saving the purchase.");
+      return firstCreated;
+    },
     getById: async (id: string) => {
       const [product, taxRates] = await Promise.all([
         productsApi.getById(id),

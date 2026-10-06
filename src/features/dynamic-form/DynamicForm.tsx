@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { ArrowLeft } from "lucide-react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, useWatch, type FieldValues } from "react-hook-form";
@@ -17,6 +17,7 @@ interface DynamicFormProps {
   onCancel?: () => void;
   /** Number of form columns at desktop widths. Defaults to two. */
   columnsPerRow?: 2 | 3 | 4;
+  children?: ReactNode;
 }
 
 function createDefaultValues(fields: FormFieldConfig[]): FieldValues {
@@ -41,6 +42,7 @@ export function DynamicForm({
   submitLabel = "Submit",
   onCancel,
   columnsPerRow = 2,
+  children,
 }: DynamicFormProps) {
   const columnClass = {
     2: "md:grid-cols-2",
@@ -254,6 +256,8 @@ export function DynamicForm({
             );
           })}
         </div>
+
+        {children}
 
         {submitError ? (
           <div
