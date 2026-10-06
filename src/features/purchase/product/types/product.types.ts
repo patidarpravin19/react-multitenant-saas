@@ -21,7 +21,7 @@ export interface Product extends BaseMaster {
   uniqueNumber1: string;
   serialNumber1: string;
   serialNumber: string;
-  quantity: number;
+  isSold: boolean;
   purchasePrice: number;
   totalAmount: number;
   discount: number;

@@ -15,13 +15,12 @@ function BulkProductCreateForm() {
   const navigate = useNavigate();
   const [fields, setFields] = useState<Awaited<ReturnType<typeof productResource.loadFields>> | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
-  const [quantity, setQuantity] = useState("1");
   const [serialPairs, setSerialPairs] = useState<SerialPair[]>([{ serialNumber: "", serialNumber1: "" }]);
 
   useEffect(() => {
     let active = true;
     void productResource.loadFields().then((loadedFields) => {
-      if (active) setFields(loadedFields.filter((field) => !["serialNumber", "serialNumber1", "quantity"].includes(field.name)));
+      if (active) setFields(loadedFields.filter((field) => !["serialNumber", "serialNumber1"].includes(field.name)));
     }).catch((reason: unknown) => {
       if (active) setLoadError(reason instanceof Error ? reason.message : "Unable to load product form data.");
     });
@@ -37,12 +36,6 @@ function BulkProductCreateForm() {
   const resizeSerialPairs = (count: number) => {
     setSerialPairs((current) => Array.from({ length: count }, (_, index) => current[index] ?? { serialNumber: "", serialNumber1: "" }));
   };
-  const setUnitCount = (value: string) => {
-    setQuantity(value);
-    const count = Number(value);
-    if (Number.isInteger(count) && count >= 1 && count <= 500) resizeSerialPairs(count);
-  };
-
   return (
     <DynamicForm
       title="Add Products"
@@ -52,8 +45,8 @@ function BulkProductCreateForm() {
       submitLabel={`Save ${serialPairs.length} ${serialPairs.length === 1 ? "unit" : "units"}`}
       onCancel={() => navigate(productResource.listPath)}
       onSubmit={async (values) => {
-        if (!Number.isInteger(Number(quantity)) || Number(quantity) < 1 || Number(quantity) > 500 || serialPairs.length !== Number(quantity))
-          throw new Error("Quantity must be between 1 and 500 and match the serial number rows.");
+        if (serialPairs.length < 1 || serialPairs.length > 500)
+          throw new Error("Add between 1 and 500 product units.");
         if (serialPairs.some((pair) => !pair.serialNumber.trim() || !pair.serialNumber1.trim()))
           throw new Error("Enter both serial numbers for every unit.");
         await productResource.api.create({ ...values, serialPairs });
@@ -66,17 +59,7 @@ function BulkProductCreateForm() {
             <h2 id="unit-serials-heading" className="text-sm font-semibold text-slate-900 dark:text-slate-100">Unit serial numbers</h2>
             <p className="text-xs text-slate-500 dark:text-slate-400">Both values are required and must be unique across all units.</p>
           </div>
-          <label className="text-sm font-medium text-slate-700 dark:text-slate-200">
-            <span className="mr-2">Quantity</span>
-            <input type="number" min={1} max={500} step={1} value={quantity} onChange={(event) => setUnitCount(event.target.value)} onBlur={() => {
-              const count = Number(quantity);
-              if (!Number.isInteger(count) || count < 1 || count > 500) {
-                const safeCount = Math.max(1, Math.min(500, serialPairs.length));
-                setQuantity(String(safeCount));
-                resizeSerialPairs(safeCount);
-              }
-            }} className="w-24 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-950" />
-          </label>
+          <span className="text-sm text-slate-500">{serialPairs.length} {serialPairs.length === 1 ? "unit" : "units"}</span>
         </div>
         {serialPairs.map((pair, index) => (
           <div key={index} className="grid grid-cols-1 items-end gap-3 rounded-lg bg-slate-50 p-3 sm:grid-cols-[1fr_1fr_auto] dark:bg-slate-800/50">
@@ -90,14 +73,12 @@ function BulkProductCreateForm() {
             </label>
             {serialPairs.length > 1 ? <Button type="button" variant="secondary" aria-label={`Remove unit ${index + 1}`} onClick={() => {
               const nextCount = serialPairs.length - 1;
-              setQuantity(String(nextCount));
               resizeSerialPairs(nextCount);
             }}>Remove</Button> : <span />}
           </div>
         ))}
         <Button type="button" variant="secondary" disabled={serialPairs.length >= 500} onClick={() => {
           const nextCount = serialPairs.length + 1;
-          setQuantity(String(nextCount));
           resizeSerialPairs(nextCount);
         }}>
           {serialPairs.length >= 500 ? "Maximum 500 units" : "+ Add another unit"}
@@ -149,7 +130,7 @@ function BulkProductUpdateForm() {
   return (
     <DynamicForm
       title="Bulk Update Products"
-      description={`Update purchase pricing and tax for ${selectedProducts.length} selected products. Each product's serial numbers and stock quantity will be preserved.`}
+      description={`Update purchase pricing and tax for ${selectedProducts.length} selected products. Each product's serial numbers and sold status will be preserved.`}
       fields={fields}
       initialValues={initialValues}
       columnsPerRow={3}
@@ -170,7 +151,6 @@ function BulkProductUpdateForm() {
             colorId: product.colorId,
             serialNumber: pair.serialNumber.trim(),
             serialNumber1: pair.serialNumber1.trim(),
-            quantity: product.quantity,
             purchasePrice: Number(values.purchasePrice),
             discount: Number(values.discount ?? 0),
             cgst: Number(values.cgst ?? 0),

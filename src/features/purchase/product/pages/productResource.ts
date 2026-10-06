@@ -56,7 +56,6 @@ export const productResource = {
         ...shared,
         serialNumber: serialNumber.trim(),
         serialNumber1: serialNumber1.trim(),
-        quantity: 1,
       }));
       const created = await apiClient.post<Product[]>("/products/bulk", { products });
       const firstCreated = created[0];

@@ -8,7 +8,6 @@ export const stockColumns: GridColumn<StockItem>[] = [
   { id: "productName", header: "Product", accessor: "productName", searchable: true, sortable: true },
   { id: "serialNumber", header: "Serial Number", accessor: "serialNumber", searchable: true, sortable: true },
   { id: "serialNumber1", header: "Serial Number 1", accessor: "serialNumber1", searchable: true },
-  { id: "quantityOnHand", header: "Stock Quantity", accessor: "quantityOnHand", sortable: true },
   { id: "totalAmount", header: "Unit Cost", accessor: "totalAmount", sortable: true, cell: (_, row) => currency(row.totalAmount) },
   {
     id: "stockStatus",

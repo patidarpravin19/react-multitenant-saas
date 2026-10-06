@@ -11,7 +11,7 @@ export function StockInventoryPage() {
       <header>
         <h1 className="text-2xl font-semibold tracking-tight">Stock Inventory</h1>
         <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-          Review on-hand quantities and sold products. Sales reduce stock; deleting a sale returns its item to inventory.
+          Review each product's availability. Recording a sale marks it sold; deleting the sale makes it available again.
         </p>
       </header>
       <DynamicGrid
