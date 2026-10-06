@@ -24,6 +24,7 @@ export const stockColumns: GridColumn<StockGroup>[] = [
     accessor: "totalProductCost",
     sortable: true,
     align: "right",
+    isAmount: true,
     cell: (_, row) => currency(row.totalProductCost),
   },
 ];

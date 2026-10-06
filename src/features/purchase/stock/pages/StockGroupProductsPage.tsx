@@ -14,7 +14,7 @@ const columns: GridColumn<AvailableStockProduct>[] = [
   { id: "serialNumber", header: "Serial Number", accessor: "serialNumber", searchable: true, sortable: true },
   { id: "serialNumber1", header: "Serial Number 1", accessor: "serialNumber1", searchable: true },
   { id: "colorName", header: "Color", accessor: "colorName", searchable: true, sortable: true },
-  { id: "totalAmount", header: "Product Cost", accessor: "totalAmount", sortable: true, align: "right", cell: (_, row) => currency(row.totalAmount) },
+  { id: "totalAmount", header: "Product Cost", accessor: "totalAmount", sortable: true, align: "right", isAmount: true, cell: (_, row) => currency(row.totalAmount) },
 ];
 
 export function StockGroupProductsPage() {

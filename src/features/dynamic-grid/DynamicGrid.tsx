@@ -261,6 +261,15 @@ export function DynamicGrid<TData>({
   const exportCsv = () =>
     downloadCsv("grid-export.csv", toCsv(exportRows, visibleColumns));
   const colSpan = visibleColumns.length + (selectable ? 1 : 0) + (hasActions ? 1 : 0);
+  const totalColumns = visibleColumns.filter((column) => column.isAmount && column.showTotal !== false);
+  const pageTotals = new Map(totalColumns.map((column) => [
+    column.id,
+    rows.reduce((total, row) => {
+      const value = getValue(row, column);
+      return total + (typeof value === "number" && Number.isFinite(value) ? value : 0);
+    }, 0),
+  ]));
+  const totalLabelColumn = visibleColumns.findIndex((column) => !column.isAmount);
 
   return (
     <section
@@ -548,6 +557,30 @@ export function DynamicGrid<TData>({
               );
             })}
           </tbody>
+          {totalColumns.length > 0 ? (
+            <tfoot>
+              <tr className="border-t-2 border-slate-300 bg-slate-50 font-semibold dark:border-slate-700 dark:bg-slate-950">
+                {selectable ? <td className="px-4 py-3" /> : null}
+                {visibleColumns.map((column, index) => {
+                  const total = pageTotals.get(column.id);
+                  const isAmountTotal = total !== undefined;
+                  const content = isAmountTotal
+                    ? column.totalFormatter?.(total)
+                      ?? `₹${total.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                    : index === totalLabelColumn ? "Current Page Total" : "";
+                  return (
+                    <td
+                      key={`total-${column.id}`}
+                      className={`whitespace-nowrap px-3 py-3 text-sm text-slate-900 dark:text-slate-100 ${isAmountTotal || column.align === "right" ? "text-right" : column.align === "center" ? "text-center" : "text-left"}`}
+                    >
+                      {content}
+                    </td>
+                  );
+                })}
+                {hasActions ? <td className="px-3 py-3" /> : null}
+              </tr>
+            </tfoot>
+          ) : null}
         </table>
       </div>
 

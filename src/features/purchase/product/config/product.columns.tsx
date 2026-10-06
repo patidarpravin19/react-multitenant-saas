@@ -54,6 +54,7 @@ export const productColumns: GridColumn<Product>[] = [
     header: "Purchase Price",
     accessor: "purchasePrice",
     align: "right",
+    isAmount: true,
     sortable: true,
     editable: true,
     editor: "number",
@@ -68,6 +69,7 @@ export const productColumns: GridColumn<Product>[] = [
     header: "Total Amount",
     accessor: "totalAmount",
     align: "right",
+    isAmount: true,
     sortable: true,
     cell: (_, row) =>
       `₹${row.totalAmount?.toLocaleString("en-IN", {
@@ -80,6 +82,8 @@ export const productColumns: GridColumn<Product>[] = [
     id: "discount",
     header: "Discount",
     accessor: "discount",
+    align: "right",
+    isAmount: true,
     editable: true,
     editor: "number",
     hidden: true,

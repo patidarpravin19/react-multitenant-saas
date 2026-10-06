@@ -109,6 +109,15 @@ export interface GridColumn<TData> {
 
   align?: GridAlign;
 
+  /** Include this monetary column in the grid's current-page total footer. */
+  isAmount?: boolean;
+
+  /** Defaults to true for amount columns. */
+  showTotal?: boolean;
+
+  /** Overrides the default INR currency display for the total. */
+  totalFormatter?: (total: number) => ReactNode;
+
   width?: number;
 
   minWidth?: number;
