@@ -35,6 +35,7 @@ export interface ResourcePageProps<T extends ResourceRecord> {
   fields?: FormFieldConfig[];
   loadFields?: (record?: T) => Promise<FormFieldConfig[]>;
   afterCreatePath?: (record: T) => string;
+  initialValues?: Record<string, unknown>;
   columnsPerRow?: 2 | 3 | 4;
   api: ResourceApi<T>;
   bulkAction?: BulkAction<T>;
@@ -167,7 +168,7 @@ export function ResourceListPage<T extends ResourceRecord>(
 export function ResourceFormPage<T extends ResourceRecord>(
   props: ResourcePageProps<T> & { mode: "create" | "edit" },
 ) {
-  const { mode, title, singular, listPath, fields, loadFields, afterCreatePath, columnsPerRow = 2, api } = props;
+  const { mode, title, singular, listPath, fields, loadFields, afterCreatePath, initialValues, columnsPerRow = 2, api } = props;
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [record, setRecord] = useState<T | null>(null);
@@ -240,7 +241,7 @@ export function ResourceFormPage<T extends ResourceRecord>(
       }
       fields={formFields}
       columnsPerRow={columnsPerRow}
-      initialValues={record ?? undefined}
+      initialValues={mode === "edit" ? record ?? undefined : initialValues}
       submitLabel={mode === "create" ? `Create ${singular}` : "Save Changes"}
       onCancel={() => navigate(listPath)}
       onSubmit={async (values) => {

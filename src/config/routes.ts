@@ -43,6 +43,8 @@ export const APP_ROUTES = {
 
   purchase: {
     stock: "/purchase/stock",
+    stockProducts: (brandId: string, modelId: string, variantId: string) =>
+      `/purchase/stock/${brandId}/${modelId}/${variantId}`,
     products: {
       list: "/purchase/products/list",
       add: "/purchase/products/add",
