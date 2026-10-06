@@ -46,6 +46,7 @@ export const APP_ROUTES = {
     products: {
       list: "/purchase/products/list",
       add: "/purchase/products/add",
+      bulkUpdate: "/purchase/products/bulk-update",
       edit: (id: string) => `/purchase/products/${id}/edit`,
     },
   },

@@ -9,6 +9,7 @@ export const purchaseRoutes = <>
     <Route index element={<Navigate to="list" replace />} />
     <Route path="list" element={<ProductListPage />} />
     <Route path="add" element={<ProductFormPage mode="create" />} />
+    <Route path="bulk-update" element={<ProductFormPage mode="bulk-update" />} />
     <Route path=":id/edit" element={<ProductFormPage mode="edit" />} />
   </Route>
 </>;

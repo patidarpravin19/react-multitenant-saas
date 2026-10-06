@@ -37,12 +37,14 @@ import {
   toCsv,
 } from "./lib/gridUtils";
 
+const EMPTY_DATA: never[] = [];
+
 export function DynamicGrid<TData>({
   title,
   description,
   columns,
   mode = "client",
-  data = [],
+  data = EMPTY_DATA as TData[],
   serverSource,
   refreshKey,
   getRowId,
@@ -91,6 +93,11 @@ export function DynamicGrid<TData>({
     ),
   );
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const selectedRowCache = useRef<Map<string, TData>>(new Map());
+  const getRowIdRef = useRef(getRowId);
+  const onSelectionChangeRef = useRef(onSelectionChange);
+  getRowIdRef.current = getRowId;
+  onSelectionChangeRef.current = onSelectionChange;
   const [serverRows, setServerRows] = useState<TData[]>([]);
   const [serverTotal, setServerTotal] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
@@ -233,8 +240,22 @@ export function DynamicGrid<TData>({
   }, [visibleRowIds]);
 
   useEffect(() => {
-    onSelectionChange?.(data.filter((row) => selectedIds.has(getRowId(row))));
-  }, [selectedIds, data, getRowId, onSelectionChange]);
+    const loadedRows = mode === "server" ? rows : data;
+    for (const row of loadedRows) {
+      const id = getRowIdRef.current(row);
+      if (selectedIds.has(id)) selectedRowCache.current.set(id, row);
+      else selectedRowCache.current.delete(id);
+    }
+    for (const id of selectedRowCache.current.keys()) {
+      if (!selectedIds.has(id)) selectedRowCache.current.delete(id);
+    }
+    onSelectionChangeRef.current?.(
+      [...selectedIds].flatMap((id) => {
+        const row = selectedRowCache.current.get(id);
+        return row ? [row] : [];
+      }),
+    );
+  }, [selectedIds, data, rows, mode]);
 
   const exportRows = mode === "client" ? data : rows;
   const exportCsv = () =>

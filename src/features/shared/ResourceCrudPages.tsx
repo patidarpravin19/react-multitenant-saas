@@ -18,6 +18,12 @@ interface ResourceApi<T extends ResourceRecord> {
   remove: (id: string) => Promise<void>;
 }
 
+interface BulkAction<T extends ResourceRecord> {
+  label: string;
+  maximumRecords?: number;
+  onClick: (records: T[]) => void;
+}
+
 export interface ResourcePageProps<T extends ResourceRecord> {
   title: string;
   description: string;
@@ -31,6 +37,7 @@ export interface ResourcePageProps<T extends ResourceRecord> {
   afterCreatePath?: (record: T) => string;
   columnsPerRow?: 2 | 3 | 4;
   api: ResourceApi<T>;
+  bulkAction?: BulkAction<T>;
 }
 
 function detailValue<T extends ResourceRecord>(record: T, column: GridColumn<T>) {
@@ -51,6 +58,8 @@ export function ResourceListPage<T extends ResourceRecord>(
   const [error, setError] = useState<string | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
   const [viewingRecord, setViewingRecord] = useState<T | null>(null);
+  const [selectedRecords, setSelectedRecords] = useState<T[]>([]);
+  const getRecordId = useCallback((record: T) => record.id, []);
 
   useEffect(() => {
     if (!viewingRecord) return;
@@ -90,6 +99,15 @@ export function ResourceListPage<T extends ResourceRecord>(
           </p>
         </div>
         <div className="flex gap-2">
+          {props.bulkAction ? (
+            <Button
+              variant="secondary"
+              disabled={selectedRecords.length === 0 || selectedRecords.length > (props.bulkAction.maximumRecords ?? 500)}
+              onClick={() => props.bulkAction?.onClick(selectedRecords)}
+            >
+              {props.bulkAction.label} ({selectedRecords.length})
+            </Button>
+          ) : null}
           <Button variant="secondary" onClick={() => setRefreshKey((key) => key + 1)}>
             <RefreshCw size={16} /> Refresh
           </Button>
@@ -113,10 +131,11 @@ export function ResourceListPage<T extends ResourceRecord>(
         mode="server"
         serverSource={api.serverSource}
         refreshKey={refreshKey}
-        getRowId={(record) => record.id}
+        getRowId={getRecordId}
         onView={setViewingRecord}
         onEdit={(record) => navigate(editPath(record.id))}
         onDelete={deleteRecord}
+        onSelectionChange={props.bulkAction ? setSelectedRecords : undefined}
         emptyMessage={`No ${title.toLowerCase()} have been created yet.`}
       />
       {viewingRecord ? (

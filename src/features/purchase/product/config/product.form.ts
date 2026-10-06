@@ -53,15 +53,15 @@ export function createProductFormConfig({
     { id: "quantity", name: "quantity", label: "Quantity", type: "number", required: true, min: 1, step: 1, defaultValue: 1 },
     { id: "purchasePrice", name: "purchasePrice", label: "Purchase Price", type: "number", required: true, min: 0, step: 1 },
     {
-      id: "totalAmount", name: "totalAmount", label: "Total Amount (all units)", type: "number", readOnly: true,
+      id: "totalAmount", name: "totalAmount", label: "Total Amount (per unit)", type: "number", readOnly: true,
       step: 1,
       computed: {
         calculate: (values) => {
           const purchasePrice = Number(values.purchasePrice ?? 0);
-          const quantity = Number(values.quantity ?? 1);
           const cgst = Number(values.cgst ?? 0);
           const sgst = Number(values.sgst ?? 0);
-          return Number((purchasePrice * quantity * (1 + (cgst + sgst) / 100)).toFixed(2));
+          const taxPercent = Number(values.tax || cgst + sgst);
+          return Number((purchasePrice + purchasePrice * (taxPercent / 100)).toFixed(2));
         },
       },
     },

@@ -26,6 +26,7 @@ export const productResource = {
   title: "Products", description: "Manage inventory products, variants, pricing and stock.", singular: "Product",
   listPath: APP_ROUTES.purchase.products.list,
   addPath: APP_ROUTES.purchase.products.add,
+  bulkUpdatePath: APP_ROUTES.purchase.products.bulkUpdate,
   editPath: APP_ROUTES.purchase.products.edit, columns: productColumns,
   columnsPerRow: 3 as const,
   loadFields: async () => {
@@ -37,6 +38,8 @@ export const productResource = {
   },
   api: {
     ...productsApi,
+    bulkUpdate: async (products: Record<string, unknown>[]) =>
+      apiClient.put<Product[]>("/products/bulk", { products }),
     create: async (values: Record<string, unknown>) => {
       const serialPairs = values.serialPairs as { serialNumber: string; serialNumber1: string }[];
       if (!serialPairs?.length || serialPairs.length > 500)
