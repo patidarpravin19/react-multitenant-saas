@@ -2,6 +2,7 @@ import type {
   FieldErrors,
   FieldValues,
   UseFormRegister,
+  UseFormSetValue,
 } from "react-hook-form";
 
 export type FieldType =
@@ -13,6 +14,7 @@ export type FieldType =
   | "url"
   | "textarea"
   | "select"
+  | "autocomplete"
   | "multiSelect"
   | "radio"
   | "checkbox"
@@ -100,6 +102,19 @@ export interface SelectFieldConfig extends BaseFieldConfig {
   dependsOn?: string;
   loadOptions?: (parentValue: string) => Promise<SelectOption[]>;
 }
+export interface AutocompleteOption {
+  id: string;
+  label: string;
+  description?: string;
+  data: Record<string, string | null | undefined>;
+}
+export interface AutocompleteFieldConfig extends BaseFieldConfig {
+  type: "autocomplete";
+  placeholder?: string;
+  searchOptions: (query: string) => Promise<AutocompleteOption[]>;
+  populateFields?: Record<string, string>;
+  selectionValueField?: string;
+}
 export interface MultiSelectFieldConfig extends BaseFieldConfig {
   type: "multiSelect";
   placeholder?: string;
@@ -173,6 +188,7 @@ export type FormFieldConfig =
   | UrlFieldConfig
   | TextareaFieldConfig
   | SelectFieldConfig
+  | AutocompleteFieldConfig
   | MultiSelectFieldConfig
   | RadioFieldConfig
   | CheckboxFieldConfig
@@ -193,4 +209,5 @@ export interface DynamicFieldProps {
   field: FormFieldConfig;
   register: UseFormRegister<FieldValues>;
   errors: FieldErrors<FieldValues>;
+  setValue?: UseFormSetValue<FieldValues>;
 }

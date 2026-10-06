@@ -26,6 +26,11 @@ export function createDynamicFormSchema(fields: FormFieldConfig[]) {
         shape[field.name] = field.required ? s : s.optional().or(z.literal(""));
         break;
       }
+      case "autocomplete":
+        shape[field.name] = field.required
+          ? z.string().min(1, req(field.label))
+          : z.string().optional();
+        break;
       case "email":
         shape[field.name] = field.required
           ? z

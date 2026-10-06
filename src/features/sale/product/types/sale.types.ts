@@ -31,6 +31,13 @@ export interface SaleProductOption extends ResourceRecord {
   isActive?: boolean;
 }
 
+export interface CustomerLookupRecord extends ResourceRecord {
+  name: string;
+  mobile: string;
+  address: string;
+  email?: string | null;
+}
+
 
 // Guid Id, string BrandName, string ProductType, string ProductModel, string Variant,
 // string Color, string SerialNumber, string SerialNumber1, decimal PurchasePrice, decimal Discount);

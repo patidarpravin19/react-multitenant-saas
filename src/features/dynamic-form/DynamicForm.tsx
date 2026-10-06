@@ -251,6 +251,7 @@ export function DynamicForm({
                   register={register}
                   control={control}
                   errors={errors}
+                  setValue={setValue}
                 />
               </div>
             );

@@ -1,8 +1,9 @@
-import type { FormFieldConfig, SelectOption } from "../../../../types/form";
-import type { SaleProductOption } from "../types/sale.types";
+import type { AutocompleteOption, FormFieldConfig, SelectOption } from "../../../../types/form";
+import type { CustomerLookupRecord, SaleProductOption } from "../types/sale.types";
 
 export function createSaleFormConfig(
   products: SaleProductOption[],
+  searchCustomers: (query: string) => Promise<CustomerLookupRecord[]>,
 ): FormFieldConfig[] {
   const options: SelectOption[] = products.map((product) => {
     const serial = product.serialNumber || product.serialNumber1;
@@ -26,9 +27,29 @@ export function createSaleFormConfig(
     {
       id: "customerName",
       name: "customerName",
-      label: "Customer Name",
-      type: "text",
+      label: "Customer Name or Mobile",
+      type: "autocomplete",
+      placeholder: "Search by customer name or mobile number",
+      colSpan: "full",
       required: true,
+      selectionValueField: "name",
+      searchOptions: async (query): Promise<AutocompleteOption[]> =>
+        (await searchCustomers(query)).map((customer) => ({
+          id: customer.id,
+          label: customer.name,
+          description: customer.mobile,
+          data: {
+            name: customer.name,
+            mobile: customer.mobile,
+            address: customer.address,
+            email: customer.email,
+          },
+        })),
+      populateFields: {
+        customerMobile: "mobile",
+        customerAddress: "address",
+        customerEmail: "email",
+      },
     },
     {
       id: "customerMobile",

@@ -11,6 +11,7 @@ import { RadioField } from "../fields/RadioField";
 import { ToggleField } from "../fields/ToggleField";
 import { MultiSelectField } from "../fields/MultiSelectField";
 import { FileField } from "../fields/FileField";
+import { AutocompleteField } from "../fields/AutocompleteField";
 
 export interface RegistryFieldProps extends DynamicFieldProps {
   control: Control<FieldValues>;
@@ -26,6 +27,7 @@ const registry: Record<FieldType, FieldComponent> = {
   url: NativeInputField,
   textarea: TextareaField,
   select: SelectField,
+  autocomplete: AutocompleteField,
   multiSelect: MultiSelectField,
   radio: RadioField,
   checkbox: CheckboxField,
