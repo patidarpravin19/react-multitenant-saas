@@ -7,6 +7,8 @@ export function ProductListPage() {
   return (
     <ResourceListPage
       {...productResource}
+      hideEdit={(product) => product.isSold}
+      hideDelete={(product) => product.isSold}
       bulkAction={{
         label: "Bulk Update",
         maximumRecords: 500,

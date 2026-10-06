@@ -514,15 +514,7 @@ export function DynamicGrid<TData>({
                     return (
                       <td
                         key={column.id}
-                        className="
-                              whitespace-nowrap
-                              px-3
-                              py-3
-                              text-sm
-                              text-slate-700
-
-                              dark:text-slate-200
-                            "
+                        className={`whitespace-nowrap px-3 py-3 text-sm text-slate-700 dark:text-slate-200 ${column.align === "right" ? "text-right" : column.align === "center" ? "text-center" : "text-left"}`}
                       >
                         {column.cell
                           ? column.cell(value, row, {

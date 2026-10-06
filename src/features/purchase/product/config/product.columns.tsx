@@ -9,6 +9,7 @@ export const productColumns: GridColumn<Product>[] = [
     accessor: "vendorName",
     searchable: true,
     sortable: true,
+    hidden: true,
   },
   {
     id: "productTypeName",
@@ -16,6 +17,7 @@ export const productColumns: GridColumn<Product>[] = [
     accessor: "productTypeName",
     searchable: true,
     sortable: true,
+    hidden: true,
   },
   {
     id: "productModelName",
@@ -51,6 +53,7 @@ export const productColumns: GridColumn<Product>[] = [
     id: "purchasePrice",
     header: "Purchase Price",
     accessor: "purchasePrice",
+    align: "right",
     sortable: true,
     editable: true,
     editor: "number",
@@ -64,6 +67,7 @@ export const productColumns: GridColumn<Product>[] = [
     id: "totalAmount",
     header: "Total Amount",
     accessor: "totalAmount",
+    align: "right",
     sortable: true,
     cell: (_, row) =>
       `₹${row.totalAmount?.toLocaleString("en-IN", {
@@ -78,6 +82,7 @@ export const productColumns: GridColumn<Product>[] = [
     accessor: "discount",
     editable: true,
     editor: "number",
+    hidden: true,
   },
 
   {
@@ -86,6 +91,7 @@ export const productColumns: GridColumn<Product>[] = [
     accessor: "tax",
     editable: true,
     editor: "number",
+    hidden: true,
   },
   {
     id: "cgst",
@@ -93,6 +99,7 @@ export const productColumns: GridColumn<Product>[] = [
     accessor: "cgst",
     editable: true,
     editor: "number",
+    hidden: true,
   },
   {
     id: "sgst",
@@ -100,6 +107,7 @@ export const productColumns: GridColumn<Product>[] = [
     accessor: "sgst",
     editable: true,
     editor: "number",
+    hidden: true,
   },
 
   {

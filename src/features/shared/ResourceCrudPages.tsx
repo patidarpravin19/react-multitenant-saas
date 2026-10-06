@@ -6,7 +6,7 @@ import { useNotifications } from "../../context/NotificationContext";
 import { DynamicForm } from "../dynamic-form/DynamicForm";
 import { DynamicGrid } from "../dynamic-grid/DynamicGrid";
 import type { FormFieldConfig } from "../../types/form";
-import type { GridColumn, GridServerSource } from "../../types/grid";
+import type { GridAction, GridColumn, GridServerSource } from "../../types/grid";
 import { type ResourceRecord } from "./resourceApi";
 
 interface ResourceApi<T extends ResourceRecord> {
@@ -39,6 +39,8 @@ export interface ResourcePageProps<T extends ResourceRecord> {
   columnsPerRow?: 2 | 3 | 4;
   api: ResourceApi<T>;
   bulkAction?: BulkAction<T>;
+  hideEdit?: (record: T) => boolean;
+  hideDelete?: (record: T) => boolean;
 }
 
 function detailValue<T extends ResourceRecord>(record: T, column: GridColumn<T>) {
@@ -61,7 +63,6 @@ export function ResourceListPage<T extends ResourceRecord>(
   const [viewingRecord, setViewingRecord] = useState<T | null>(null);
   const [selectedRecords, setSelectedRecords] = useState<T[]>([]);
   const getRecordId = useCallback((record: T) => record.id, []);
-
   useEffect(() => {
     if (!viewingRecord) return;
     const onKeyDown = (event: KeyboardEvent) => {
@@ -89,6 +90,25 @@ export function ResourceListPage<T extends ResourceRecord>(
       notifications.error(`${singular} could not be deleted`, message);
     }
   };
+
+  const rowActions: GridAction<T>[] = [
+    { id: "view", label: "View", icon: "view", onClick: setViewingRecord },
+    {
+      id: "edit",
+      label: "Edit",
+      icon: "edit",
+      onClick: (record) => navigate(editPath(record.id)),
+      hidden: props.hideEdit,
+    },
+    {
+      id: "delete",
+      label: "Delete",
+      icon: "delete",
+      variant: "danger",
+      onClick: deleteRecord,
+      hidden: props.hideDelete,
+    },
+  ];
 
   return (
     <div className="space-y-5">
@@ -133,9 +153,7 @@ export function ResourceListPage<T extends ResourceRecord>(
         serverSource={api.serverSource}
         refreshKey={refreshKey}
         getRowId={getRecordId}
-        onView={setViewingRecord}
-        onEdit={(record) => navigate(editPath(record.id))}
-        onDelete={deleteRecord}
+        actions={rowActions}
         onSelectionChange={props.bulkAction ? setSelectedRecords : undefined}
         emptyMessage={`No ${title.toLowerCase()} have been created yet.`}
       />

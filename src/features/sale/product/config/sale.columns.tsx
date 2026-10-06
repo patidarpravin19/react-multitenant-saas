@@ -34,9 +34,9 @@ export const saleColumns: GridColumn<SaleRecord>[] = [
   { id: "customerMobile", header: "Mobile", accessor: "customerMobile", searchable: true },
   { id: "customerEmail", header: "Email", accessor: "customerEmail" },
   { id: "saleDate", header: "Sale Date", accessor: "saleDate", sortable: true },
-  { id: "productPrice", header: "Product Price", accessor: "productPrice", cell: (_, row) => currency(row.productPrice) },
-  { id: "sellingPrice", header: "Selling Price", accessor: "sellingPrice", sortable: true, cell: (_, row) => currency(row.sellingPrice) },
-  { id: "discount", header: "Discount", accessor: "discount", cell: (_, row) => currency(row.discount) },
+  { id: "productPrice", header: "Product Price", accessor: "productPrice", align: "right", cell: (_, row) => currency(row.productPrice) },
+  { id: "sellingPrice", header: "Selling Price", accessor: "sellingPrice", sortable: true, align: "right", cell: (_, row) => currency(row.sellingPrice) },
+  { id: "discount", header: "Discount", accessor: "discount", align: "right", cell: (_, row) => currency(row.discount) },
   { id: "paymentMode", header: "Payment Mode", accessor: "paymentMode", cell: (value) => String(value ?? "Not recorded") },
   {
     id: "paymentDetails",
