@@ -24,7 +24,8 @@ export interface SaleProductOption extends ResourceRecord {
   serialNumber1?: string;
   purchasePrice?: number;
   sellingPrice?: number;
-  Discount?: number;
+  totalAmount?: number;
+  discount?: number;
   isActive?: boolean;
 }
 

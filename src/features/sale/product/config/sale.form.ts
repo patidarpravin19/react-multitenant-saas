@@ -61,13 +61,13 @@ export function createSaleFormConfig(
       required: true,
       min: 0,
       step: 1,
-      // readOnly: true,
+      readOnly: true,
       computed: {
         calculate: (values) => {
           const product = products.find(
             (item) => item.id === String(values.productId ?? ""),
           );
-          return product?.purchasePrice ?? product?.sellingPrice ?? 0;
+          return product?.totalAmount ?? product?.totalAmount ?? 0;
         },
       },
     },
@@ -84,7 +84,7 @@ export function createSaleFormConfig(
           const product = products.find(
             (item) => item.id === String(values.productId ?? ""),
           );
-          return product?.purchasePrice ?? product?.sellingPrice ?? 0;
+          return product?.totalAmount ?? product?.totalAmount ?? 0;
         },
       },
     },
