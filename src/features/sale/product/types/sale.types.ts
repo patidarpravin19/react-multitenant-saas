@@ -4,9 +4,11 @@ export interface SaleRecord extends ResourceRecord {
   productId: string;
   productName: string;
   serialNumber: string;
+  customerId: string;
   customerName: string;
   customerMobile: string;
   customerAddress: string;
+  customerEmail?: string | null;
   saleDate: string;
   productPrice: number;
   sellingPrice: number;

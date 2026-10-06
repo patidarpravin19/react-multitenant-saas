@@ -32,6 +32,7 @@ export const saleColumns: GridColumn<SaleRecord>[] = [
   },
   { id: "customerName", header: "Customer", accessor: "customerName", searchable: true, sortable: true },
   { id: "customerMobile", header: "Mobile", accessor: "customerMobile", searchable: true },
+  { id: "customerEmail", header: "Email", accessor: "customerEmail" },
   { id: "saleDate", header: "Sale Date", accessor: "saleDate", sortable: true },
   { id: "productPrice", header: "Product Price", accessor: "productPrice", cell: (_, row) => currency(row.productPrice) },
   { id: "sellingPrice", header: "Selling Price", accessor: "sellingPrice", sortable: true, cell: (_, row) => currency(row.sellingPrice) },

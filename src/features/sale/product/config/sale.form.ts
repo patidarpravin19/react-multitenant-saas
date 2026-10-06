@@ -38,6 +38,12 @@ export function createSaleFormConfig(
       required: true,
     },
     {
+      id: "customerEmail",
+      name: "customerEmail",
+      label: "Email (optional)",
+      type: "email",
+    },
+    {
       id: "customerAddress",
       name: "customerAddress",
       label: "Address",
