@@ -5,6 +5,7 @@ import { DynamicForm } from "../../../dynamic-form/DynamicForm";
 import { ResourceFormPage } from "../../../shared/ResourceCrudPages";
 import { productResource } from "./productResource";
 import type { Product } from "../types/product.types";
+import { APP_ROUTES } from "../../../../config/routes";
 
 interface SerialPair {
   serialNumber: string;
@@ -49,8 +50,8 @@ function BulkProductCreateForm() {
           throw new Error("Add between 1 and 500 product units.");
         if (serialPairs.some((pair) => !pair.serialNumber.trim() || !pair.serialNumber1.trim()))
           throw new Error("Enter both serial numbers for every unit.");
-        await productResource.api.create({ ...values, serialPairs });
-        navigate(productResource.listPath);
+        const created = await productResource.api.create({ ...values, serialPairs });
+        navigate(`${APP_ROUTES.purchase.accountingPayment}?vendorId=${encodeURIComponent(created.vendorId)}&billNumber=${encodeURIComponent(created.billNumber ?? "")}`);
       }}
     >
       <section className="space-y-3 rounded-xl border border-slate-200 p-4 dark:border-slate-700" aria-labelledby="unit-serials-heading">
@@ -149,6 +150,7 @@ function BulkProductUpdateForm() {
             productModelId: product.productModelId,
             variantId: product.variantId,
             colorId: product.colorId,
+            billNumber: product.billNumber,
             serialNumber: pair.serialNumber.trim(),
             serialNumber1: pair.serialNumber1.trim(),
             purchasePrice: Number(values.purchasePrice),

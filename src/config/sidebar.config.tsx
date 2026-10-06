@@ -84,6 +84,12 @@ export const sidebarConfiguration: NavigationItem[] = [
         path: APP_ROUTES.purchase.stock,
         icon: Boxes,
       },
+      {
+        id: "purchase-accounting",
+        label: "Bills & Payments",
+        path: APP_ROUTES.purchase.accounting,
+        icon: HandCoins,
+      },
     ],
   },
   {

@@ -33,6 +33,7 @@ export function createProductFormConfig({
 }: ProductFormOptions): FormFieldConfig[] {
   return [
     { id: "vendorId", name: "vendorId", label: "Vendor", type: "select", required: true, options: toOptions(vendors) },
+    { id: "billNumber", name: "billNumber", label: "Vendor Bill / Invoice Number", type: "text", required: true },
     { id: "brandId", name: "brandId", label: "Brand", type: "select", required: true, options: toOptions(brands) },
     {
       id: "productTypeId", name: "productTypeId", label: "Product Type", type: "select", required: true,
