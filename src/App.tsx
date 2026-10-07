@@ -9,8 +9,10 @@ import { TaxFormPage } from "./features/settings/tax/pages/TaxFormPage";
 import { TaxListPage } from "./features/settings/tax/pages/TaxListPage";
 import { FinanceVendorFormPage } from "./features/settings/finance-vendor/pages/FinanceVendorFormPage";
 import { FinanceVendorListPage } from "./features/settings/finance-vendor/pages/FinanceVendorListPage";
+import { CustomerBillSettingsPage } from "./features/settings/customer-bill/CustomerBillSettingsPage";
 import { purchaseRoutes } from "./features/purchase/routes/PurchaseRoutes";
 import { saleRoutes } from "./features/sale/routes/SaleRoutes";
+import { APP_ROUTES } from "./config/routes";
 
 function DashboardPage() {
   return (
@@ -45,6 +47,7 @@ export default function App() {
             <Route path="add" element={<FinanceVendorFormPage mode="create" />} />
             <Route path=":id/edit" element={<FinanceVendorFormPage mode="edit" />} />
           </Route>
+          <Route path={APP_ROUTES.settings.customerBill} element={<CustomerBillSettingsPage />} />
 
           <Route path="**" element={<Navigate to="/" replace />} />
         </Route>

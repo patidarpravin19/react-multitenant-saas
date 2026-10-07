@@ -135,6 +135,12 @@ export const sidebarConfiguration: NavigationItem[] = [
         path: APP_ROUTES.settings.financeVendors.list,
         icon: HandCoins,
       },
+      {
+        id: "customer-bill",
+        label: "Customer Bill",
+        path: APP_ROUTES.settings.customerBill,
+        icon: Receipt,
+      },
     ],
   },
 ];

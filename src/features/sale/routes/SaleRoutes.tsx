@@ -7,11 +7,13 @@ import { SalesBillPaymentsPage } from "../accounting/pages/SalesBillPaymentsPage
 import { CustomerListPage } from "../customers/CustomerListPage";
 import { CustomerFormPage } from "../customers/CustomerFormPage";
 import { CustomerHistoryPage } from "../customers/CustomerHistoryPage";
+import { CustomerBillPrintPage } from "../accounting/pages/CustomerBillPrintPage";
 
 export const saleRoutes = (
   <>
     <Route path="/sales/accounting" element={<SalesAccountingPage />} />
     <Route path="/sales/accounting/payments/:id" element={<SalesBillPaymentsPage />} />
+    <Route path="/sales/accounting/print/:id" element={<CustomerBillPrintPage />} />
     <Route path="/sales/customers">
       <Route index element={<Navigate to="list" replace />} />
       <Route path="list" element={<CustomerListPage />} />

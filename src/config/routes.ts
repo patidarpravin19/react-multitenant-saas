@@ -70,9 +70,11 @@ export const APP_ROUTES = {
       payment: (id: string) => `/sales/products/${id}/payment`,
     },
     accountingPayment: (id: string) => `/sales/accounting/payments/${id}`,
+    printCustomerBill: (id: string) => `/sales/accounting/print/${id}`,
   },
 
   settings: {
+    customerBill: "/settings/customer-bill",
     tax: {
       list: "/settings/taxes/list",
       add: "/settings/taxes/add",

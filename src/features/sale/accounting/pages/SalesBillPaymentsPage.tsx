@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState, type FormEvent } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { Printer } from "lucide-react";
 import { Button } from "../../../../components/ui/Button";
 import { APP_ROUTES } from "../../../../config/routes";
 import { apiClient } from "../../../../services/apiClient";
@@ -97,7 +98,10 @@ export function SalesBillPaymentsPage() {
           <h1 className="text-xl font-semibold tracking-tight">Sales Bill Payments</h1>
           <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">{bill.customerName} · {bill.productName} · {bill.billNumber} · {bill.billDate}</p>
         </div>
-        <Button variant="secondary" onClick={() => navigate(APP_ROUTES.sale.accounting)}>Back to bills</Button>
+        <div className="flex gap-2">
+          <Button variant="secondary" onClick={() => navigate(APP_ROUTES.sale.printCustomerBill(id))}><Printer size={15} /> Print bill</Button>
+          <Button variant="secondary" onClick={() => navigate(APP_ROUTES.sale.accounting)}>Back to bills</Button>
+        </div>
       </header>
 
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5">

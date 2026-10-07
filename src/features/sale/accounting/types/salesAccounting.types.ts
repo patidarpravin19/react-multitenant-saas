@@ -3,10 +3,14 @@ import type { ResourceRecord } from "../../../shared/resourceApi";
 export interface SalesBill extends ResourceRecord {
   billNumber: string;
   productName: string;
+  serialNumber: string;
   customerName: string;
   customerMobile: string;
+  customerAddress: string;
+  customerEmail?: string | null;
   billDate: string;
   sellingPrice: number;
+  discount: number;
   totalAmount: number;
   amountPaid: number;
   balance: number;
