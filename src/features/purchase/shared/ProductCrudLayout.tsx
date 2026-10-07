@@ -20,12 +20,12 @@ export function ProductCrudLayout({
   const [showForm, setShowForm] = useState(false);
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-4">
       <div
         className="
           flex
           flex-col
-          gap-3
+          gap-2
 
           sm:flex-row
           sm:items-center
@@ -35,7 +35,7 @@ export function ProductCrudLayout({
         <div>
           <h1
             className="
-              text-2xl
+              text-xl
               font-semibold
               tracking-tight
               text-slate-900
@@ -49,8 +49,8 @@ export function ProductCrudLayout({
           {description && (
             <p
               className="
-                mt-1
-                text-sm
+                mt-0.5
+                text-xs
                 text-slate-500
 
                 dark:text-slate-400
@@ -71,8 +71,8 @@ export function ProductCrudLayout({
             gap-2
             rounded-lg
             bg-[var(--tenant-primary)]
-            px-4
-            py-2.5
+            px-3
+            py-2
             text-sm
             font-semibold
             text-white
@@ -96,7 +96,7 @@ export function ProductCrudLayout({
             border
             border-slate-200
             bg-white
-            p-5
+            p-4
             shadow-sm
 
             dark:border-slate-800
@@ -105,7 +105,7 @@ export function ProductCrudLayout({
         >
           <div
             className="
-              mb-4
+              mb-3
               flex
               items-center
               justify-between

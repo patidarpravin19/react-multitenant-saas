@@ -26,7 +26,7 @@ export function Button({
     <button
       {...props}
       disabled={disabled || isLoading}
-      className={`inline-flex min-h-10 items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold shadow-sm transition-all duration-300 disabled:cursor-not-allowed disabled:opacity-60 ${variantClass} ${className}`}
+      className={`inline-flex min-h-9 items-center justify-center gap-2 rounded-lg px-3 py-1.5 text-sm font-semibold shadow-sm transition-colors disabled:cursor-not-allowed disabled:opacity-60 ${variantClass} ${className}`}
     >
       {isLoading ? (
         <LoaderCircle className="size-4 animate-spin" aria-hidden />

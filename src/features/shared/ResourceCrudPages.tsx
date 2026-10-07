@@ -111,11 +111,11 @@ export function ResourceListPage<T extends ResourceRecord>(
   ];
 
   return (
-    <div className="space-y-5">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+    <div className="space-y-3">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">{title}</h1>
-          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+          <h1 className="text-xl font-semibold tracking-tight">{title}</h1>
+          <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
             {description}
           </p>
         </div>
@@ -165,7 +165,7 @@ export function ResourceListPage<T extends ResourceRecord>(
             if (event.target === event.currentTarget) setViewingRecord(null);
           }}
         >
-          <div role="dialog" aria-modal="true" aria-labelledby="record-details-title" className="w-full max-w-2xl overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl dark:border-slate-700 dark:bg-slate-900">
+          <div role="dialog" aria-modal="true" aria-labelledby="record-details-title" className="w-full max-w-2xl overflow-hidden rounded-xl border border-slate-200 bg-white shadow-2xl dark:border-slate-700 dark:bg-slate-900">
             <div className="flex items-center justify-between border-b border-slate-200 px-6 py-4 dark:border-slate-800">
               <h3 id="record-details-title" className="text-lg font-bold text-slate-900 dark:text-slate-100">{singular} details</h3>
               <button type="button" aria-label="Close details" onClick={() => setViewingRecord(null)} className="rounded-lg p-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800"><X size={18} /></button>

@@ -65,10 +65,10 @@ export function GridToolbar<TData>({
   }, []);
 
   return (
-    <div className="flex flex-col gap-3 border-b border-slate-200 p-4 dark:border-slate-800 lg:flex-row lg:items-center lg:justify-between">
+    <div className="flex flex-col gap-2 border-b border-slate-200 p-3 dark:border-slate-800 sm:flex-row sm:items-center sm:justify-between">
       <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2">
         {searchable ? (
-          <label className="relative min-w-64 flex-1 lg:max-w-md">
+          <label className="relative min-w-48 flex-1 sm:max-w-sm">
             <span className="sr-only">Search grid</span>
             <Search
               className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400"
@@ -78,7 +78,7 @@ export function GridToolbar<TData>({
               value={search}
               onChange={(event) => onSearchChange(event.target.value)}
               placeholder="Search all visible columns..."
-              className="h-10 w-full rounded-lg border border-slate-300 bg-white pl-9 pr-9 text-sm text-slate-900 shadow-sm transition-all duration-300 placeholder:text-slate-400 focus:border-[var(--tenant-primary)] dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+              className="h-9 w-full rounded-lg border border-slate-300 bg-white pl-9 pr-9 text-sm text-slate-900 shadow-sm placeholder:text-slate-400 focus:border-[var(--tenant-primary)] dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
             />
             {isLoading ? (
               <RefreshCw
@@ -90,7 +90,7 @@ export function GridToolbar<TData>({
         ) : null}
 
         {selectedCount > 0 ? (
-          <span className="rounded-full bg-[var(--tenant-secondary)] px-3 py-1.5 text-xs font-semibold text-[var(--tenant-primary)]">
+          <span className="rounded-full bg-[var(--tenant-secondary)] px-2.5 py-1 text-xs font-semibold text-[var(--tenant-primary)]">
             {selectedCount} selected
           </span>
         ) : null}
@@ -101,7 +101,7 @@ export function GridToolbar<TData>({
           <button
             type="button"
             onClick={onToggleFilters}
-            className={`inline-flex h-10 items-center gap-2 rounded-lg border px-3 text-sm font-semibold shadow-sm transition-all duration-300 ${filtersVisible ? "border-[var(--tenant-primary)] bg-[var(--tenant-secondary)] text-[var(--tenant-primary)]" : "border-slate-300 bg-white text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"}`}
+            className={`inline-flex h-9 items-center gap-1.5 rounded-lg border px-2.5 text-xs font-semibold shadow-sm transition-colors ${filtersVisible ? "border-[var(--tenant-primary)] bg-[var(--tenant-secondary)] text-[var(--tenant-primary)]" : "border-slate-300 bg-white text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"}`}
           >
             <ListFilter className="size-4" aria-hidden /> Filters
           </button>
@@ -112,7 +112,7 @@ export function GridToolbar<TData>({
             type="button"
             onClick={onRefresh}
             disabled={isLoading}
-            className="inline-flex h-10 items-center gap-2 rounded-lg border border-slate-300 bg-white px-3 text-sm font-semibold text-slate-700 shadow-sm transition-all duration-300 hover:bg-slate-50 disabled:opacity-60 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
+            className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-2.5 text-xs font-semibold text-slate-700 shadow-sm transition-colors hover:bg-slate-50 disabled:opacity-60 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
           >
             <RefreshCw
               className={`size-4 ${isLoading ? "animate-spin" : ""}`}
@@ -126,7 +126,7 @@ export function GridToolbar<TData>({
           <button
             type="button"
             onClick={onExport}
-            className="inline-flex h-10 items-center gap-2 rounded-lg border border-slate-300 bg-white px-3 text-sm font-semibold text-slate-700 shadow-sm transition-all duration-300 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
+            className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-2.5 text-xs font-semibold text-slate-700 shadow-sm transition-colors hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
           >
             <Download className="size-4" aria-hidden /> Export CSV
           </button>
@@ -139,7 +139,7 @@ export function GridToolbar<TData>({
               onClick={() => setSettingsOpen((value) => !value)}
               aria-haspopup="menu"
               aria-expanded={settingsOpen}
-              className="inline-flex h-10 items-center gap-2 rounded-lg border border-slate-300 bg-white px-3 text-sm font-semibold text-slate-700 shadow-sm transition-all duration-300 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
+              className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-2.5 text-xs font-semibold text-slate-700 shadow-sm transition-colors hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
             >
               <Settings2 className="size-4" aria-hidden /> View{" "}
               <ChevronDown className="size-4" aria-hidden />

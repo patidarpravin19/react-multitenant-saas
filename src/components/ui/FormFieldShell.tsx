@@ -20,7 +20,7 @@ export function FormFieldShell({
   const errorId = error ? `${id}-error` : undefined;
 
   return (
-    <div className="space-y-1.5">
+    <div className="space-y-1">
       <label
         htmlFor={id}
         className="block text-sm font-medium text-slate-800 dark:text-slate-200"
