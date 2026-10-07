@@ -56,12 +56,14 @@ export const APP_ROUTES = {
   },
 
   sale: {
+    accounting: "/sales/accounting",
     products: {
       list: "/sales/products/list",
       add: "/sales/products/add",
       edit: (id: string) => `/sales/products/${id}/edit`,
       payment: (id: string) => `/sales/products/${id}/payment`,
     },
+    accountingPayment: (id: string) => `/sales/accounting/payments/${id}`,
   },
 
   settings: {

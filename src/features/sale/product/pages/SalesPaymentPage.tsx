@@ -33,15 +33,29 @@ const financeFields: FormFieldConfig[] = [
     id: "financeVendorId", name: "financeVendorId", label: "Finance Company",
     type: "select", required: true, options: [], placeholder: "Choose a finance company",
   },
-  { id: "downPayment", name: "downPayment", label: "Down Payment", type: "number", required: true, min: 0, step: 0.01 },
-  { id: "numberOfEmi", name: "numberOfEmi", label: "Number of EMI", type: "number", required: true, min: 1, step: 1 },
-  { id: "emiAmount", name: "emiAmount", label: "EMI Amount", type: "number", required: true, min: 0.01, step: 0.01 },
+  {
+    id: "downPayment", name: "downPayment", label: "Down Payment", type: "number", required: true,
+    min: 0, step: 1
+  },
+  {
+    id: "numberOfEmi", name: "numberOfEmi", label: "Number of EMI", type: "number", required: true,
+    min: 1, step: 1
+  },
+  {
+    id: "emiAmount", name: "emiAmount", label: "EMI Amount", type: "number", required: true,
+    min: 1, step: 1
+  },
   {
     id: "hasInsurance", name: "hasInsurance", label: "Insurance", type: "select", required: true,
     options: [{ label: "Yes", value: "true" }, { label: "No", value: "false" }],
   },
-  { id: "insuranceAmount", name: "insuranceAmount", label: "Insurance Amount", type: "number", min: 0, step: 0.01, defaultValue: 0, visibleWhen: { field: "hasInsurance", value: "true" } },
-  { id: "firstInstallmentDate", name: "firstInstallmentDate", label: "First Installment Date", type: "date", required: true },
+  {
+    id: "insuranceAmount", name: "insuranceAmount", label: "Insurance Amount", type: "number",
+    min: 0, step: 1, defaultValue: 0, visibleWhen: { field: "hasInsurance", value: "true" }
+  },
+  {
+    id: "firstInstallmentDate", name: "firstInstallmentDate", label: "First Installment Date", type: "date", required: true
+  },
 ];
 
 export function SalesPaymentPage() {

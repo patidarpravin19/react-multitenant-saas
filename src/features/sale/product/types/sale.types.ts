@@ -1,6 +1,7 @@
 import type { ResourceRecord } from "../../../shared/resourceApi";
 
 export interface SaleRecord extends ResourceRecord {
+  billNumber: string;
   productId: string;
   productName: string;
   serialNumber: string;

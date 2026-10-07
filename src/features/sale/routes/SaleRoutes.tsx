@@ -2,9 +2,13 @@ import { Navigate, Route } from "react-router-dom";
 import { SaleProductFormPage } from "../product/pages/SaleProductFormPage";
 import { SaleProductListPage } from "../product/pages/SaleProductListPage";
 import { SalesPaymentPage } from "../product/pages/SalesPaymentPage";
+import { SalesAccountingPage } from "../accounting/pages/SalesAccountingPage";
+import { SalesBillPaymentsPage } from "../accounting/pages/SalesBillPaymentsPage";
 
 export const saleRoutes = (
   <>
+    <Route path="/sales/accounting" element={<SalesAccountingPage />} />
+    <Route path="/sales/accounting/payments/:id" element={<SalesBillPaymentsPage />} />
     <Route path="/sales/products">
       <Route index element={<Navigate to="list" replace />} />
       <Route path="list" element={<SaleProductListPage />} />

@@ -31,6 +31,17 @@ export const saleColumns: GridColumn<SaleRecord>[] = [
       </span>
     ),
   },
+  {
+    id: "billNumber",
+    header: "Sales Bill",
+    accessor: "billNumber",
+    searchable: true,
+    cell: (_, row) => (
+      <Link className="font-medium text-[var(--tenant-primary)] hover:underline" to={APP_ROUTES.sale.accountingPayment(row.id)}>
+        {row.billNumber}
+      </Link>
+    ),
+  },
   { id: "customerName", header: "Customer", accessor: "customerName", searchable: true, sortable: true },
   { id: "customerMobile", header: "Mobile", accessor: "customerMobile", searchable: true },
   { id: "customerEmail", header: "Email", accessor: "customerEmail" },
@@ -38,10 +49,10 @@ export const saleColumns: GridColumn<SaleRecord>[] = [
   { id: "productPrice", header: "Product Price", accessor: "productPrice", align: "right", isAmount: true, cell: (_, row) => currency(row.productPrice) },
   { id: "sellingPrice", header: "Selling Price", accessor: "sellingPrice", sortable: true, align: "right", isAmount: true, cell: (_, row) => currency(row.sellingPrice) },
   { id: "discount", header: "Discount", accessor: "discount", align: "right", isAmount: true, cell: (_, row) => currency(row.discount) },
-  { id: "paymentMode", header: "Payment Mode", accessor: "paymentMode", cell: (value) => String(value ?? "Not recorded") },
+  { id: "paymentMode", header: "Payment Plan", accessor: "paymentMode", cell: (value) => String(value ?? "Not recorded") },
   {
     id: "paymentDetails",
-    header: "Payment Details",
+    header: "Plan Details",
     accessor: "paymentMode",
     cell: (_, row) => (
       <Link
