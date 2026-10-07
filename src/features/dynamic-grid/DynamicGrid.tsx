@@ -28,6 +28,7 @@ import type {
 
 import { GridPagination } from "./components/GridPagination";
 import { GridToolbar } from "./components/GridToolbar";
+import { CardTooltip } from "../../components/ui/CardTooltip";
 import { useDebouncedValue } from "./hooks/useDebouncedValue";
 import {
   densityClasses,
@@ -38,6 +39,18 @@ import {
 } from "./lib/gridUtils";
 
 const EMPTY_DATA: never[] = [];
+
+function formatTooltipValue(value: unknown): string {
+  if (value === null || value === undefined || value === "") return "—";
+  if (value instanceof Date) return value.toLocaleString();
+  if (typeof value === "string" || typeof value === "number" || typeof value === "boolean")
+    return String(value);
+  try {
+    return JSON.stringify(value, null, 2) ?? String(value);
+  } catch {
+    return String(value);
+  }
+}
 
 export function DynamicGrid<TData>({
   title,
@@ -525,13 +538,13 @@ export function DynamicGrid<TData>({
                         key={column.id}
                       className={`px-3 ${densityClasses(density)} text-slate-700 dark:text-slate-200 ${column.align === "right" ? "text-right" : column.align === "center" ? "text-center" : "text-left"}`}
                       >
-                        {column.cell
-                          ? column.cell(value, row, {
-                            row,
-                            value,
-                            rowIndex,
-                          })
-                          : String(value ?? "")}
+                        <CardTooltip
+                          detail={column.tooltip?.(value, row) ?? formatTooltipValue(value)}
+                        >
+                          {column.cell
+                            ? column.cell(value, row, { row, value, rowIndex })
+                            : String(value ?? "")}
+                        </CardTooltip>
                       </td>
                     );
                   })}

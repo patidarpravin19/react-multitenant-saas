@@ -97,6 +97,9 @@ export interface GridColumn<TData> {
     context: GridCellContext<TData>,
   ) => ReactNode;
 
+  /** Optional rich content shown in the grid's card-style cell tooltip. */
+  tooltip?: (value: unknown, row: TData) => ReactNode;
+
   sortable?: boolean;
 
   searchable?: boolean;

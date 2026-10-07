@@ -14,7 +14,7 @@ export const saleColumns: GridColumn<SaleRecord>[] = [
     searchable: true,
     sortable: true,
     cell: (value) => (
-      <span className="block max-w-64 truncate" title={String(value ?? "")}>
+      <span className="block max-w-64 truncate">
         {String(value ?? "—")}
       </span>
     ),
@@ -25,7 +25,7 @@ export const saleColumns: GridColumn<SaleRecord>[] = [
     accessor: "serialNumber",
     searchable: true,
     cell: (value) => (
-      <span className="block max-w-48 truncate" title={String(value ?? "")}>
+      <span className="block max-w-48 truncate">
         {String(value ?? "—")}
       </span>
     ),
