@@ -283,9 +283,9 @@ export function DynamicGrid<TData>({
               <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">
                 {title}
               </h3>
-              <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-500 dark:bg-slate-800 dark:text-slate-300">
+              {/* <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-500 dark:bg-slate-800 dark:text-slate-300">
                 {mode === "server" ? "Server" : "Client"}
-              </span>
+              </span> */}
             </div>
           ) : null}
           {description ? (
@@ -566,7 +566,7 @@ export function DynamicGrid<TData>({
                   const isAmountTotal = total !== undefined;
                   const content = isAmountTotal
                     ? column.totalFormatter?.(total)
-                      ?? `₹${total.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                    ?? `₹${total.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
                     : index === totalLabelColumn ? "Current Page Total" : "";
                   return (
                     <td
