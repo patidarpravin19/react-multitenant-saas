@@ -4,6 +4,9 @@ import type { AuthSession, AuthUser, LoginInput } from "./auth.types";
 const loginEndpoint = import.meta.env.VITE_AUTH_LOGIN_ENDPOINT ?? "/auth/login";
 const logoutEndpoint = import.meta.env.VITE_AUTH_LOGOUT_ENDPOINT ?? "/auth/logout";
 const refreshEndpoint = import.meta.env.VITE_AUTH_REFRESH_ENDPOINT ?? "/auth/refresh";
+const forgotPasswordEndpoint = import.meta.env.VITE_AUTH_FORGOT_PASSWORD_ENDPOINT ?? "/auth/forgot-password";
+const resetPasswordEndpoint = import.meta.env.VITE_AUTH_RESET_PASSWORD_ENDPOINT ?? "/auth/reset-password";
+const changePasswordEndpoint = import.meta.env.VITE_AUTH_CHANGE_PASSWORD_ENDPOINT ?? "/auth/change-password";
 
 type LoginResponse = {
   token?: string;
@@ -35,6 +38,12 @@ function toSession(response: LoginResponse, input: LoginInput): AuthSession {
 }
 
 export const authService = {
+  requestPasswordReset: (tenantSlug: string, email: string) =>
+    apiClient.post<{ message: string }>(forgotPasswordEndpoint, { tenantSlug, email }, { authenticate: false }),
+  resetPassword: (token: string, password: string) =>
+    apiClient.post<{ message: string }>(resetPasswordEndpoint, { token, password }, { authenticate: false }),
+  changePassword: (currentPassword: string, newPassword: string) =>
+    apiClient.post<{ message: string }>(changePasswordEndpoint, { currentPassword, newPassword }),
   async login(input: LoginInput) {
     const response = await apiClient.post<LoginResponse>(loginEndpoint, input, {
       authenticate: false,

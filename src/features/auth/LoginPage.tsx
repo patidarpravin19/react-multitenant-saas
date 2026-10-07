@@ -2,7 +2,7 @@ import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, type FieldValues } from "react-hook-form";
 import { LogIn } from "lucide-react";
-import { Navigate, useLocation, useNavigate } from "react-router-dom";
+import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "./AuthContext";
 import { ApiError } from "../../services/apiClient";
 import { getFieldComponent } from "../dynamic-form/registry/fieldRegistry";
@@ -14,6 +14,7 @@ export function LoginPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const [error, setError] = useState("");
+  const resetMessage = (location.state as { message?: string } | null)?.message;
   const {
     register,
     control,
@@ -53,12 +54,14 @@ export function LoginPage() {
           <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">Enter your tenant workspace and account credentials.</p>
         </div>
         <form className="space-y-4" onSubmit={submit} noValidate>
+          {resetMessage && <p role="status" className="rounded-lg bg-emerald-50 px-3 py-2 text-sm text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-200">{resetMessage}</p>}
           {loginFormFields.map((field) => {
             const Field = getFieldComponent(field.type);
             return <Field key={field.id} field={field} register={register} control={control} errors={errors} />;
           })}
           {error && <p role="alert" className="rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-700 dark:bg-rose-950/40 dark:text-rose-200">{error}</p>}
           <button disabled={isSubmitting} className="flex w-full items-center justify-center gap-2 rounded-lg bg-[var(--tenant-primary)] px-4 py-2.5 font-semibold text-white transition hover:bg-[var(--tenant-primary-hover)] disabled:cursor-not-allowed disabled:opacity-60">{isSubmitting ? "Signing in…" : "Sign in"}</button>
+          <div className="text-center"><Link to="/forgot-password" className="text-sm font-medium text-[var(--tenant-primary)] hover:underline">Forgot password?</Link></div>
         </form>
       </section>
     </main>
