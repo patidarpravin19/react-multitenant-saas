@@ -532,19 +532,21 @@ export function DynamicGrid<TData>({
                   })} */}
                   {visibleColumns.map((column, rowIndex) => {
                     const value = getValue(row, column);
+                    const cellContent = column.cell
+                      ? column.cell(value, row, { row, value, rowIndex })
+                      : String(value ?? "");
+                    const tooltipDetail = column.tooltip?.(value, row);
 
                     return (
                       <td
                         key={column.id}
                       className={`px-3 ${densityClasses(density)} text-slate-700 dark:text-slate-200 ${column.align === "right" ? "text-right" : column.align === "center" ? "text-center" : "text-left"}`}
                       >
-                        <CardTooltip
-                          detail={column.tooltip?.(value, row) ?? formatTooltipValue(value)}
-                        >
-                          {column.cell
-                            ? column.cell(value, row, { row, value, rowIndex })
-                            : String(value ?? "")}
-                        </CardTooltip>
+                        {column.tooltip ? (
+                          <CardTooltip detail={tooltipDetail ?? formatTooltipValue(value)}>
+                            {cellContent}
+                          </CardTooltip>
+                        ) : cellContent}
                       </td>
                     );
                   })}

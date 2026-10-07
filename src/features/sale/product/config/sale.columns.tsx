@@ -13,6 +13,7 @@ export const saleColumns: GridColumn<SaleRecord>[] = [
     accessor: "productName",
     searchable: true,
     sortable: true,
+    tooltip: (value) => String(value ?? "—"),
     cell: (value) => (
       <span className="block max-w-64 truncate">
         {String(value ?? "—")}
