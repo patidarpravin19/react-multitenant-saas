@@ -57,6 +57,12 @@ export const APP_ROUTES = {
 
   sale: {
     accounting: "/sales/accounting",
+    customers: {
+      list: "/sales/customers/list",
+      add: "/sales/customers/add",
+      edit: (id: string) => `/sales/customers/${id}/edit`,
+      history: (id: string) => `/sales/customers/${id}/history`,
+    },
     products: {
       list: "/sales/products/list",
       add: "/sales/products/add",

@@ -25,6 +25,7 @@ export const saleColumns: GridColumn<SaleRecord>[] = [
     header: "Serial Number",
     accessor: "serialNumber",
     searchable: true,
+    hidden: true,
     cell: (value) => (
       <span className="block max-w-48 truncate">
         {String(value ?? "—")}
@@ -44,11 +45,21 @@ export const saleColumns: GridColumn<SaleRecord>[] = [
   },
   { id: "customerName", header: "Customer", accessor: "customerName", searchable: true, sortable: true },
   { id: "customerMobile", header: "Mobile", accessor: "customerMobile", searchable: true },
-  { id: "customerEmail", header: "Email", accessor: "customerEmail" },
+  { id: "customerEmail", header: "Email", accessor: "customerEmail", hidden: true },
   { id: "saleDate", header: "Sale Date", accessor: "saleDate", sortable: true },
-  { id: "productPrice", header: "Product Price", accessor: "productPrice", align: "right", isAmount: true, cell: (_, row) => currency(row.productPrice) },
-  { id: "sellingPrice", header: "Selling Price", accessor: "sellingPrice", sortable: true, align: "right", isAmount: true, cell: (_, row) => currency(row.sellingPrice) },
-  { id: "discount", header: "Discount", accessor: "discount", align: "right", isAmount: true, cell: (_, row) => currency(row.discount) },
+  {
+    id: "productPrice", header: "Product Price", accessor: "productPrice", align: "right",
+    isAmount: true, cell: (_, row) => currency(row.productPrice)
+  },
+  {
+    id: "sellingPrice", header: "Selling Price", accessor: "sellingPrice", sortable: true, align: "right",
+    isAmount: true, cell: (_, row) => currency(row.sellingPrice)
+  },
+  {
+    id: "discount", header: "Discount", accessor: "discount", align: "right",
+    isAmount: true, hidden: true,
+    cell: (_, row) => currency(row.discount)
+  },
   { id: "paymentMode", header: "Payment Plan", accessor: "paymentMode", cell: (value) => String(value ?? "Not recorded") },
   {
     id: "paymentDetails",
