@@ -1,4 +1,7 @@
 import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import { History as HistoryIcon } from "lucide-react";
+import { Button } from "../../../../components/ui/Button";
 import type { GridColumn } from "../../../../types/grid";
 import { DynamicGrid } from "../../../dynamic-grid/DynamicGrid";
 import { createResourceApi } from "../../../shared/resourceApi";
@@ -27,11 +30,13 @@ const columns: GridColumn<PurchaseBill>[] = [
 ];
 
 export function PurchaseAccountingPage() {
+  const navigate = useNavigate();
   return (
     <section className="space-y-5">
-      <header>
-        <h1 className="text-2xl font-semibold tracking-tight">Purchase Accounting</h1>
-        <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">Track vendor bills, payments made, and outstanding payables.</p>
+      <header className="flex flex-wrap items-center justify-between gap-2">
+        <div><h1 className="text-2xl font-semibold tracking-tight">Purchase Accounting</h1>
+        <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">Track vendor bills, payments made, and outstanding payables.</p></div>
+        <Button variant="secondary" onClick={() => navigate(`${APP_ROUTES.settings.auditLogs}?tableName=purchase_payments`)}><HistoryIcon size={16} /> Payment Audit</Button>
       </header>
       <DynamicGrid
         title="Vendor Bills"

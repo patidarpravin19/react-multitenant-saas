@@ -75,6 +75,7 @@ export const APP_ROUTES = {
 
   settings: {
     customerBill: "/settings/customer-bill",
+    auditLogs: "/settings/audit-logs",
     tax: {
       list: "/settings/taxes/list",
       add: "/settings/taxes/add",

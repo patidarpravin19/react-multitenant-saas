@@ -7,6 +7,7 @@ export const brandResource = {
   title: "Brands",
   description: "Manage product brands.",
   singular: "Brand",
+  auditTableName: "brands",
   listPath: "/products/brands/list",
   addPath: "/products/brands/add",
   editPath: (id: string) => `/products/brands/${id}/edit`,

@@ -8,6 +8,7 @@ export const financeVendorResource = {
   title: "Finance Vendors",
   description: "Manage finance vendors and their contact details.",
   singular: "Finance Vendor",
+  auditTableName: "finance_vendors",
   listPath: APP_ROUTES.settings.financeVendors.list,
   addPath: APP_ROUTES.settings.financeVendors.add,
   editPath: APP_ROUTES.settings.financeVendors.edit,

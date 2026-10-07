@@ -9,6 +9,7 @@ const salesApi = createResourceApi<SaleRecord>("/sales/products");
 
 export const saleResource = {
   title: "Product Sales",
+  auditTableName: "sales_products",
   description: "Record sold products and customer details.",
   singular: "Sale",
   listPath: APP_ROUTES.sale.products.list,

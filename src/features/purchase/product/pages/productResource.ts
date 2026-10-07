@@ -24,6 +24,7 @@ async function getCurrentTaxRates() {
 
 export const productResource = {
   title: "Products", description: "Manage inventory products, variants, pricing and stock.", singular: "Product",
+  auditTableName: "products",
   listPath: APP_ROUTES.purchase.products.list,
   addPath: APP_ROUTES.purchase.products.add,
   bulkUpdatePath: APP_ROUTES.purchase.products.bulkUpdate,

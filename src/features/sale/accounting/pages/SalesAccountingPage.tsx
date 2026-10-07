@@ -1,4 +1,7 @@
 import { Link } from "react-router-dom";
+import { History as HistoryIcon } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { Button } from "../../../../components/ui/Button";
 import type { GridColumn } from "../../../../types/grid";
 import { APP_ROUTES } from "../../../../config/routes";
 import { DynamicGrid } from "../../../dynamic-grid/DynamicGrid";
@@ -28,11 +31,13 @@ const columns: GridColumn<SalesBill>[] = [
 ];
 
 export function SalesAccountingPage() {
+  const navigate = useNavigate();
   return (
     <section className="space-y-3">
-      <header>
-        <h1 className="text-xl font-semibold tracking-tight">Sales Bills & Payments</h1>
-        <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">Track customer invoices, received payments, and outstanding balances.</p>
+      <header className="flex flex-wrap items-center justify-between gap-2">
+        <div><h1 className="text-xl font-semibold tracking-tight">Sales Bills & Payments</h1>
+        <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">Track customer invoices, received payments, and outstanding balances.</p></div>
+        <Button variant="secondary" onClick={() => navigate(`${APP_ROUTES.settings.auditLogs}?tableName=sales_receipts`)}><HistoryIcon size={16} /> Payment Audit</Button>
       </header>
       <DynamicGrid
         title="Sales Bills"

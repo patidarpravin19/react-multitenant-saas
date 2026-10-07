@@ -1,4 +1,4 @@
-import { Plus, RefreshCw, X } from "lucide-react";
+import { History as HistoryIcon, Plus, RefreshCw, X } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Button } from "../../components/ui/Button";
@@ -8,6 +8,7 @@ import { DynamicGrid } from "../dynamic-grid/DynamicGrid";
 import type { FormFieldConfig } from "../../types/form";
 import type { GridAction, GridColumn, GridServerSource } from "../../types/grid";
 import { type ResourceRecord } from "./resourceApi";
+import { APP_ROUTES } from "../../config/routes";
 
 interface ResourceApi<T extends ResourceRecord> {
   list: (force?: boolean) => Promise<T[]>;
@@ -38,6 +39,7 @@ export interface ResourcePageProps<T extends ResourceRecord> {
   initialValues?: Record<string, unknown>;
   columnsPerRow?: 2 | 3 | 4;
   api: ResourceApi<T>;
+  auditTableName?: string;
   bulkAction?: BulkAction<T>;
   hideEdit?: (record: T) => boolean;
   hideDelete?: (record: T) => boolean;
@@ -93,6 +95,12 @@ export function ResourceListPage<T extends ResourceRecord>(
 
   const rowActions: GridAction<T>[] = [
     { id: "view", label: "View", icon: "view", onClick: setViewingRecord },
+    ...(props.auditTableName ? [{
+      id: "audit-history",
+      label: "Audit History",
+      icon: "history" as const,
+      onClick: (record: T) => navigate(`${APP_ROUTES.settings.auditLogs}?tableName=${encodeURIComponent(props.auditTableName!)}&recordId=${encodeURIComponent(record.id)}`),
+    }] : []),
     {
       id: "edit",
       label: "Edit",
@@ -129,6 +137,7 @@ export function ResourceListPage<T extends ResourceRecord>(
               {props.bulkAction.label} ({selectedRecords.length})
             </Button>
           ) : null}
+          {props.auditTableName ? <Button variant="secondary" onClick={() => navigate(`${APP_ROUTES.settings.auditLogs}?tableName=${encodeURIComponent(props.auditTableName!)}`)}><HistoryIcon size={16} /> Audit History</Button> : null}
           <Button variant="secondary" onClick={() => setRefreshKey((key) => key + 1)}>
             <RefreshCw size={16} /> Refresh
           </Button>

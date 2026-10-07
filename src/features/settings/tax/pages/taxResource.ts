@@ -8,6 +8,7 @@ export const taxResource = {
   title: "Tax",
   description: "Manage CGST and SGST rates.",
   singular: "Tax Rate",
+  auditTableName: "taxes",
   listPath: APP_ROUTES.settings.tax.list,
   addPath: APP_ROUTES.settings.tax.add,
   editPath: APP_ROUTES.settings.tax.edit,

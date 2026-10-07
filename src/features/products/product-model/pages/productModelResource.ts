@@ -9,6 +9,7 @@ const brandsApi = createResourceApi<LookupRecord>("/brands/all");
 
 export const productModelResource = {
   title: "Product Models", description: "Manage product models.", singular: "Product Model",
+  auditTableName: "product_models",
   listPath: "/products/models/list",
   addPath: "/products/models/add",
   editPath: (id: string) => `/products/models/${id}/edit`,

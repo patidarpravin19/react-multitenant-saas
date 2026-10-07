@@ -13,6 +13,7 @@ import {
   ShoppingCart,
   Receipt,
   Users,
+  ClipboardList,
 } from "lucide-react";
 
 import type { NavigationItem } from "../types/navigation";
@@ -140,6 +141,12 @@ export const sidebarConfiguration: NavigationItem[] = [
         label: "Customer Bill",
         path: APP_ROUTES.settings.customerBill,
         icon: Receipt,
+      },
+      {
+        id: "audit-logs",
+        label: "Audit Logs",
+        path: APP_ROUTES.settings.auditLogs,
+        icon: ClipboardList,
       },
     ],
   },

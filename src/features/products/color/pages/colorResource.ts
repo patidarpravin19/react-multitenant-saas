@@ -7,6 +7,7 @@ export const colorResource = {
   title: "Colors",
   description: "Manage product colors.",
   singular: "Color",
+  auditTableName: "colors",
   listPath: "/products/colors/list",
   addPath: "/products/colors/add",
   editPath: (id: string) => `/products/colors/${id}/edit`,

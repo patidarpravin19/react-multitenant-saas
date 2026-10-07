@@ -23,6 +23,7 @@ export const customerColumns: GridColumn<CustomerRecord>[] = [
 
 export const customerResource = {
   title: "Customers",
+  auditTableName: "customers",
   description: "Manage customers, including people who have only made an enquiry.",
   singular: "Customer",
   listPath: APP_ROUTES.sale.customers.list,

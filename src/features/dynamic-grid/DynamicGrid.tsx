@@ -10,6 +10,7 @@ import {
   Pencil,
   Trash2,
   Eye,
+  History,
   SearchX,
   TriangleAlert,
 } from "lucide-react";
@@ -554,7 +555,7 @@ export function DynamicGrid<TData>({
                     <td className={`px-3 text-right ${densityClasses(density)}`} onClick={(event) => event.stopPropagation()}>
                       <div className="inline-flex items-center gap-1">
                         {rowActions.filter((action) => !action.hidden?.(row)).map((action) => {
-                          const Icon = action.icon === "delete" ? Trash2 : action.icon === "view" ? Eye : Pencil;
+                          const Icon = action.icon === "delete" ? Trash2 : action.icon === "view" ? Eye : action.icon === "history" ? History : Pencil;
                           return <button
                             key={action.id}
                             type="button"

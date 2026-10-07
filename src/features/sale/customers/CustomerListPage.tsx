@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Plus, RefreshCw } from "lucide-react";
+import { History as HistoryIcon, Plus, RefreshCw } from "lucide-react";
 import { Button } from "../../../components/ui/Button";
 import { useNotifications } from "../../../context/NotificationContext";
 import { APP_ROUTES } from "../../../config/routes";
@@ -16,6 +16,7 @@ export function CustomerListPage() {
 
   const actions: GridAction<CustomerRecord>[] = [
     { id: "history", label: "History", icon: "view", onClick: (customer) => navigate(APP_ROUTES.sale.customers.history(customer.id)) },
+    { id: "audit-history", label: "Audit History", icon: "history", onClick: (customer) => navigate(`${APP_ROUTES.settings.auditLogs}?tableName=customers&recordId=${encodeURIComponent(customer.id)}`) },
     { id: "edit", label: "Edit", icon: "edit", onClick: (customer) => navigate(APP_ROUTES.sale.customers.edit(customer.id)) },
     {
       id: "delete", label: "Delete", icon: "delete", variant: "danger",
@@ -43,6 +44,7 @@ export function CustomerListPage() {
       <header className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div><h1 className="text-xl font-semibold tracking-tight">Customers</h1><p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">Save enquiries and keep each customer’s complete sales and payment history.</p></div>
         <div className="flex gap-2">
+          <Button variant="secondary" onClick={() => navigate(`${APP_ROUTES.settings.auditLogs}?tableName=customers`)}><HistoryIcon size={16} /> Audit History</Button>
           <Button variant="secondary" onClick={() => setRefreshKey((key) => key + 1)}><RefreshCw size={16} /> Refresh</Button>
           <Button onClick={() => navigate(APP_ROUTES.sale.customers.add)}><Plus size={16} /> Add Customer</Button>
         </div>

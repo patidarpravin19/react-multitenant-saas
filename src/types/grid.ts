@@ -150,7 +150,7 @@ export interface GridAction<TData> {
 
   label: string;
 
-  icon?: "view" | "edit" | "delete" | "save" | "cancel";
+  icon?: "view" | "edit" | "delete" | "save" | "cancel" | "history";
 
   onClick: (row: TData) => void | Promise<void>;
 

@@ -10,6 +10,7 @@ import { TaxListPage } from "./features/settings/tax/pages/TaxListPage";
 import { FinanceVendorFormPage } from "./features/settings/finance-vendor/pages/FinanceVendorFormPage";
 import { FinanceVendorListPage } from "./features/settings/finance-vendor/pages/FinanceVendorListPage";
 import { CustomerBillSettingsPage } from "./features/settings/customer-bill/CustomerBillSettingsPage";
+import { AuditLogsPage } from "./features/settings/audit-logs/AuditLogsPage";
 import { purchaseRoutes } from "./features/purchase/routes/PurchaseRoutes";
 import { saleRoutes } from "./features/sale/routes/SaleRoutes";
 import { APP_ROUTES } from "./config/routes";
@@ -48,6 +49,7 @@ export default function App() {
             <Route path=":id/edit" element={<FinanceVendorFormPage mode="edit" />} />
           </Route>
           <Route path={APP_ROUTES.settings.customerBill} element={<CustomerBillSettingsPage />} />
+          <Route path={APP_ROUTES.settings.auditLogs} element={<AuditLogsPage />} />
 
           <Route path="**" element={<Navigate to="/" replace />} />
         </Route>

@@ -7,6 +7,7 @@ export const vendorResource = {
   title: "Vendors",
   description: "Manage product vendors and suppliers.",
   singular: "Vendor",
+  auditTableName: "vendors",
   listPath: "/products/vendors/list",
   addPath: "/products/vendors/add",
   editPath: (id: string) => `/products/vendors/${id}/edit`,
