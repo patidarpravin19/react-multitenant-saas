@@ -14,6 +14,13 @@ import {
   Receipt,
   Users,
   ClipboardList,
+  BookOpenCheck,
+  Clock3,
+  CalendarDays,
+  Landmark,
+  ArrowLeftRight,
+  FileSpreadsheet,
+  ShieldCheck,
 } from "lucide-react";
 
 import type { NavigationItem } from "../types/navigation";
@@ -92,6 +99,20 @@ export const sidebarConfiguration: NavigationItem[] = [
         path: APP_ROUTES.purchase.accounting,
         icon: HandCoins,
       },
+    ],
+  },
+  {
+    id: "accounting",
+    label: "Accounting",
+    icon: BookOpenCheck,
+    children: [
+      { id: "general-ledger", label: "General Ledger", path: APP_ROUTES.generalLedger, icon: BookOpenCheck },
+      { id: "accounting-aging", label: "Receivable & Payable Aging", path: APP_ROUTES.accountingAging, icon: Clock3 },
+      { id: "tax-reports", label: "GST Reports", path: APP_ROUTES.taxReports, icon: FileSpreadsheet },
+      { id: "accounting-periods", label: "Accounting Periods", path: APP_ROUTES.accountingPeriods, icon: CalendarDays },
+      { id: "bank-reconciliation", label: "Bank Reconciliation", path: APP_ROUTES.bankReconciliation, icon: Landmark },
+      { id: "stock-movements", label: "Stock Movements", path: APP_ROUTES.stockMovements, icon: ArrowLeftRight },
+      { id: "accounting-controls", label: "Controls & Budgets", path: APP_ROUTES.accountingControls, icon: ShieldCheck },
     ],
   },
   {

@@ -1,5 +1,12 @@
 export const APP_ROUTES = {
   dashboard: "/",
+  generalLedger: "/accounting/general-ledger",
+  accountingAging: "/accounting/aging",
+  taxReports: "/accounting/tax-reports",
+  accountingPeriods: "/accounting/periods",
+  accountingControls: "/accounting/controls",
+  bankReconciliation: "/accounting/bank-reconciliation",
+  stockMovements: "/purchase/stock-movements",
 
   products: {
     root: "/products",

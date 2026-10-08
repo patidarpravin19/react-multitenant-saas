@@ -44,6 +44,9 @@ export function CustomerBillDocument({ template, bill }: { template: CustomerBil
         <dl>
           <div><dt>Selling price</dt><dd>{currency(bill.sellingPrice)}</dd></div>
           {template.showDiscount && bill.discount > 0 ? <div><dt>Discount</dt><dd>− {currency(bill.discount)}</dd></div> : null}
+          <div><dt>Taxable amount</dt><dd>{currency(bill.taxableAmount)}</dd></div>
+          {bill.cgstAmount > 0 ? <div><dt>CGST ({bill.cgstRate}%)</dt><dd>{currency(bill.cgstAmount)}</dd></div> : null}
+          {bill.sgstAmount > 0 ? <div><dt>SGST ({bill.sgstRate}%)</dt><dd>{currency(bill.sgstAmount)}</dd></div> : null}
           <div className="customer-bill-grand-total"><dt>Bill total</dt><dd>{currency(bill.totalAmount)}</dd></div>
           <div><dt>Received</dt><dd>{currency(bill.amountPaid)}</dd></div>
           {template.showBalanceDue ? <div><dt>Balance due</dt><dd>{currency(bill.balance)}</dd></div> : null}

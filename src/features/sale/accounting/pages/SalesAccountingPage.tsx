@@ -17,6 +17,7 @@ const columns: GridColumn<SalesBill>[] = [
   { id: "customerName", header: "Customer", accessor: "customerName", searchable: true, sortable: true },
   { id: "customerMobile", header: "Mobile", accessor: "customerMobile", searchable: true },
   { id: "billDate", header: "Bill Date", accessor: "billDate", sortable: true },
+  { id: "dueDate", header: "Due Date", accessor: "dueDate", sortable: true },
   { id: "totalAmount", header: "Bill Total", accessor: "totalAmount", align: "right", isAmount: true, cell: (_, bill) => currency(bill.totalAmount) },
   { id: "amountPaid", header: "Received", accessor: "amountPaid", align: "right", isAmount: true, cell: (_, bill) => currency(bill.amountPaid) },
   { id: "balance", header: "Balance Due", accessor: "balance", align: "right", isAmount: true, cell: (_, bill) => currency(bill.balance) },

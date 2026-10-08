@@ -34,6 +34,8 @@ export function createProductFormConfig({
   return [
     { id: "vendorId", name: "vendorId", label: "Vendor", type: "select", required: true, options: toOptions(vendors) },
     { id: "billNumber", name: "billNumber", label: "Vendor Bill / Invoice Number", type: "text", required: true },
+    { id: "purchaseDate", name: "purchaseDate", label: "Vendor Invoice Date", type: "date", required: true, defaultValue: new Date().toISOString().slice(0, 10) },
+    { id: "paymentTermsDays", name: "paymentTermsDays", label: "Payment Terms (days)", type: "number", min: 0, max: 3650, step: 1, defaultValue: 0 },
     { id: "brandId", name: "brandId", label: "Brand", type: "select", required: true, options: toOptions(brands) },
     {
       id: "productTypeId", name: "productTypeId", label: "Product Type", type: "select", required: true,
@@ -58,10 +60,12 @@ export function createProductFormConfig({
       computed: {
         calculate: (values) => {
           const purchasePrice = Number(values.purchasePrice ?? 0);
+          const discount = Number(values.discount ?? 0);
           const cgst = Number(values.cgst ?? 0);
           const sgst = Number(values.sgst ?? 0);
           const taxPercent = Number(values.tax || cgst + sgst);
-          return Number((purchasePrice + purchasePrice * (taxPercent / 100)).toFixed(2));
+          const taxableAmount = Math.max(0, purchasePrice - discount);
+          return Number((taxableAmount + taxableAmount * (taxPercent / 100)).toFixed(2));
         },
       },
     },

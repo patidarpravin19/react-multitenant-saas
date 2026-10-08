@@ -5,6 +5,8 @@ export interface PurchaseBill extends ResourceRecord {
   vendorName: string;
   billNumber: string;
   billDate: string;
+  paymentTermsDays: number;
+  dueDate: string;
   totalAmount: number;
   amountPaid: number;
   balance: number;

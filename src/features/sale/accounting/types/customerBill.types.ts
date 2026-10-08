@@ -27,6 +27,11 @@ export interface PrintableSalesBill {
   serialNumber: string;
   sellingPrice: number;
   discount: number;
+  taxableAmount: number;
+  cgstRate: number;
+  cgstAmount: number;
+  sgstRate: number;
+  sgstAmount: number;
   totalAmount: number;
   amountPaid: number;
   balance: number;

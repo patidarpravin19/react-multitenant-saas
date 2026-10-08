@@ -5,6 +5,9 @@ export interface Product extends BaseMaster {
   vendorId: string;
   vendorName?: string;
   billNumber?: string | null;
+  purchaseDate: string;
+  paymentTermsDays: number;
+  dueDate: string;
   brandId: string;
   brandName?: string;
   productTypeId: string;

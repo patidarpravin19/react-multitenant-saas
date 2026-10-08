@@ -11,6 +11,13 @@ import { FinanceVendorFormPage } from "./features/settings/finance-vendor/pages/
 import { FinanceVendorListPage } from "./features/settings/finance-vendor/pages/FinanceVendorListPage";
 import { CustomerBillSettingsPage } from "./features/settings/customer-bill/CustomerBillSettingsPage";
 import { AuditLogsPage } from "./features/settings/audit-logs/AuditLogsPage";
+import { GeneralLedgerPage } from "./features/accounting/GeneralLedgerPage";
+import { AgingReportPage } from "./features/accounting/AgingReportPage";
+import { AccountingPeriodsPage } from "./features/accounting/AccountingPeriodsPage";
+import { BankReconciliationPage } from "./features/accounting/BankReconciliationPage";
+import { StockMovementsPage } from "./features/accounting/StockMovementsPage";
+import { TaxReportsPage } from "./features/accounting/TaxReportsPage";
+import { AccountingControlsPage } from "./features/accounting/AccountingControlsPage";
 import { purchaseRoutes } from "./features/purchase/routes/PurchaseRoutes";
 import { saleRoutes } from "./features/sale/routes/SaleRoutes";
 import { APP_ROUTES } from "./config/routes";
@@ -33,6 +40,13 @@ export default function App() {
         <Route element={<AppShell />}>
           <Route path="/" element={<DashboardPage />} />
           <Route path="/account/change-password" element={<ChangePasswordPage />} />
+          <Route path={APP_ROUTES.generalLedger} element={<GeneralLedgerPage />} />
+          <Route path={APP_ROUTES.accountingAging} element={<AgingReportPage />} />
+          <Route path={APP_ROUTES.taxReports} element={<TaxReportsPage />} />
+          <Route path={APP_ROUTES.accountingPeriods} element={<AccountingPeriodsPage />} />
+          <Route path={APP_ROUTES.bankReconciliation} element={<BankReconciliationPage />} />
+          <Route path={APP_ROUTES.stockMovements} element={<StockMovementsPage />} />
+          <Route path={APP_ROUTES.accountingControls} element={<AccountingControlsPage />} />
           {productRoutes}
           {purchaseRoutes}
           {saleRoutes}

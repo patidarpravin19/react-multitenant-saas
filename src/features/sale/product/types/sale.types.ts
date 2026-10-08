@@ -11,6 +11,8 @@ export interface SaleRecord extends ResourceRecord {
   customerAddress: string;
   customerEmail?: string | null;
   saleDate: string;
+  paymentTermsDays: number;
+  dueDate: string;
   productPrice: number;
   sellingPrice: number;
   discount: number;

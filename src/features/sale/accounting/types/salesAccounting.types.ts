@@ -9,8 +9,15 @@ export interface SalesBill extends ResourceRecord {
   customerAddress: string;
   customerEmail?: string | null;
   billDate: string;
+  paymentTermsDays: number;
+  dueDate: string;
   sellingPrice: number;
   discount: number;
+  taxableAmount: number;
+  cgstRate: number;
+  cgstAmount: number;
+  sgstRate: number;
+  sgstAmount: number;
   totalAmount: number;
   amountPaid: number;
   balance: number;

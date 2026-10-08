@@ -1,9 +1,12 @@
 import type { AutocompleteOption, FormFieldConfig, SelectOption } from "../../../../types/form";
 import type { CustomerLookupRecord, SaleProductOption } from "../types/sale.types";
 
+export interface SaleTaxOption { id: string; cgst: number; sgst: number; totalTax: number }
+
 export function createSaleFormConfig(
   products: SaleProductOption[],
   searchCustomers: (query: string) => Promise<CustomerLookupRecord[]>,
+  taxes: SaleTaxOption[],
 ): FormFieldConfig[] {
   const options: SelectOption[] = products.map((product) => {
     const serial = product.serialNumber || product.serialNumber1;
@@ -80,6 +83,7 @@ export function createSaleFormConfig(
       required: true,
       defaultValue: new Date().toISOString().slice(0, 10),
     },
+    { id: "paymentTermsDays", name: "paymentTermsDays", label: "Payment Terms (days)", type: "number", min: 0, max: 3650, step: 1, defaultValue: 0 },
     {
       id: "productPrice",
       name: "productPrice",
@@ -114,6 +118,18 @@ export function createSaleFormConfig(
           return product?.totalAmount ?? product?.totalAmount ?? 0;
         },
       },
+    },
+    {
+      id: "taxId",
+      name: "taxId",
+      label: "GST rate",
+      type: "select",
+      required: true,
+      defaultValue: "00000000-0000-0000-0000-000000000000",
+      options: [
+        { value: "00000000-0000-0000-0000-000000000000", label: "No GST" },
+        ...taxes.map((tax) => ({ value: tax.id, label: `CGST ${tax.cgst}% + SGST ${tax.sgst}%` })),
+      ],
     },
     {
       id: "discount",
