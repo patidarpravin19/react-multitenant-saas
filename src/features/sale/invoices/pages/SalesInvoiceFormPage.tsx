@@ -70,7 +70,7 @@ export function SalesInvoiceFormPage() {
           apiClient.get<SaleTaxOption[]>("/taxes/all"),
           apiClient.get<CustomerBillTemplate>("/settings/customer-bill").catch(() => null),
         ]);
-        setAvailableProducts(prods);
+        setAvailableProducts(prods.filter(p => p.isActive !== false));
         setTaxes(taxList);
         if (billSettings) {
           setSellerSettings(billSettings);
@@ -82,9 +82,9 @@ export function SalesInvoiceFormPage() {
         }
 
         // Add initial serialized row if products available
-        if (prods.length > 0) {
+        if (prods[0]) {
           const first = prods[0];
-          const matchedTax = taxList.find((t) => t.id === first.taxId) ?? taxList[0];
+          const matchedTax = taxList.find((t) => t.cgst === first.cgst && t.sgst === first.sgst) ?? taxList[0];
           setLines([
             {
               tempId: `row_${Date.now()}`,
@@ -94,7 +94,7 @@ export function SalesInvoiceFormPage() {
               serialNumber: first.serialNumber,
               serialNumber1: first.serialNumber1,
               quantity: 1,
-              unitPrice: first.totalAmount || first.purchasePrice,
+              unitPrice: first.purchasePrice ?? 0,
               discount: 0,
               taxId: matchedTax?.id,
               cgstRate: matchedTax?.cgst ?? 0,
@@ -154,7 +154,7 @@ export function SalesInvoiceFormPage() {
       return manualSupplyTypeOverride;
     }
 
-    const sellerCode = sellerSettings?.stateCode?.trim();
+    const sellerCode = sellerSettings?.stateCode?.trim() || sellerSettings?.taxRegistrationNumber?.slice(0, 2);
     const customerCode = placeOfSupplyStateCode?.trim();
 
     if (sellerCode && customerCode) {
@@ -193,6 +193,9 @@ export function SalesInvoiceFormPage() {
     setCustomerSearch("");
     setCustomerMatches([]);
 
+    setCustomerGstin("");
+    setManualSupplyTypeOverride(null);
+    handleStateChange(sellerSettings?.stateCode ?? "");
     // Check if customer has GSTIN or state info
     const anyCustomer = c as unknown as { gstin?: string; stateCode?: string; stateName?: string };
     if (anyCustomer.gstin) {
@@ -271,8 +274,9 @@ export function SalesInvoiceFormPage() {
 
   const addSerializedLine = () => {
     const usedProductIds = new Set(lines.filter((l) => l.productId).map((l) => l.productId));
-    const nextProd = availableProducts.find((p) => !usedProductIds.has(p.id)) ?? availableProducts[0];
-    const defaultTax = nextProd ? taxes.find((t) => t.id === nextProd.taxId) ?? taxes[0] : taxes[0];
+    const nextProd = availableProducts.find((p) => !usedProductIds.has(p.id));
+    if (!nextProd) { notifications.warning("All available devices are already selected."); return; }
+    const defaultTax = nextProd ? taxes.find((t) => t.cgst === nextProd.cgst && t.sgst === nextProd.sgst) ?? taxes[0] : taxes[0];
 
     setLines((prev) => [
       ...prev,
@@ -286,7 +290,7 @@ export function SalesInvoiceFormPage() {
         serialNumber: nextProd?.serialNumber,
         serialNumber1: nextProd?.serialNumber1,
         quantity: 1,
-        unitPrice: nextProd?.totalAmount || nextProd?.purchasePrice || 0,
+        unitPrice: nextProd?.purchasePrice ?? 0,
         discount: 0,
         taxId: defaultTax?.id,
         cgstRate: defaultTax?.cgst ?? 0,
@@ -332,14 +336,14 @@ export function SalesInvoiceFormPage() {
         if (patch.productId && patch.productId !== line.productId) {
           const prod = availableProducts.find((p) => p.id === patch.productId);
           if (prod) {
-            const matchedTax = taxes.find((t) => t.id === prod.taxId) ?? taxes[0];
+            const matchedTax = taxes.find((t) => t.cgst === prod.cgst && t.sgst === prod.sgst) ?? taxes[0];
             return {
               ...line,
               ...patch,
               itemDescription: `${prod.brand} - ${prod.productModel} - ${prod.variant} - ${prod.color}`,
               serialNumber: prod.serialNumber,
               serialNumber1: prod.serialNumber1,
-              unitPrice: prod.totalAmount || prod.purchasePrice || 0,
+              unitPrice: prod.purchasePrice ?? 0,
               taxId: matchedTax?.id,
               cgstRate: matchedTax?.cgst ?? 0,
               sgstRate: matchedTax?.sgst ?? 0,
@@ -378,6 +382,9 @@ export function SalesInvoiceFormPage() {
       return;
     }
 
+    if (submitting) return;
+    const ids = lines.filter(l => l.itemType === 0).map(l => l.productId);
+    if (ids.some(id => !id) || new Set(ids).size !== ids.length) { notifications.error("Invalid items", "Choose a different device for every serialized line."); return; }
     for (const l of lines) {
       if (!l.itemDescription.trim()) {
         notifications.error("Missing Description", "Every item must have a valid description.");
@@ -407,6 +414,8 @@ export function SalesInvoiceFormPage() {
           itemType: l.itemType,
           productId: l.productId || null,
           itemDescription: l.itemDescription.trim(),
+          hsnSac: l.hsnSac?.trim() || null,
+          unitOfMeasure: l.unitOfMeasure || "NOS",
           serialNumber: l.serialNumber?.trim() || null,
           serialNumber1: l.serialNumber1?.trim() || null,
           quantity: Number(l.quantity),
@@ -684,14 +693,7 @@ export function SalesInvoiceFormPage() {
                   <CheckCircle2 size={13} /> Intra-State Supply (CGST 50% + SGST 50%)
                 </span>
               )}
-              <button
-                type="button"
-                onClick={() => setManualSupplyTypeOverride(isInterState ? 0 : 1)}
-                className="text-[11px] text-blue-600 hover:underline dark:text-blue-400"
-                title="Override supply classification"
-              >
-                (Switch to {isInterState ? "Intra-State" : "Inter-State"})
-              </button>
+
             </div>
           </div>
         </div>
@@ -772,7 +774,7 @@ export function SalesInvoiceFormPage() {
               <tr className="border-b border-slate-200 bg-slate-50 text-slate-600 dark:border-slate-700 dark:bg-slate-800/50 dark:text-slate-300">
                 <th className="py-2.5 pl-3">Type</th>
                 <th className="py-2.5">Item & Details</th>
-                <th className="py-2.5 text-center">Qty</th>
+                <th className="py-2.5">HSN/SAC · Unit</th><th className="py-2.5 text-center">Qty</th>
                 <th className="py-2.5 text-right">Price (₹)</th>
                 <th className="py-2.5 text-right">Discount (₹)</th>
                 <th className="py-2.5 text-center">
@@ -829,11 +831,12 @@ export function SalesInvoiceFormPage() {
                     )}
                   </td>
 
+                  <td className="py-2 px-2"><input aria-label="HSN / SAC" placeholder="HSN / SAC" maxLength={8} value={line.hsnSac ?? ""} onChange={e => updateLineField(line.tempId, { hsnSac: e.target.value })} className="w-20 rounded border bg-transparent p-1" /><input aria-label="Unit of measure" placeholder="NOS" maxLength={10} value={line.unitOfMeasure ?? "NOS"} onChange={e => updateLineField(line.tempId, { unitOfMeasure: e.target.value })} className="mt-1 w-20 rounded border bg-transparent p-1" /></td>
                   {/* Quantity */}
                   <td className="w-16 py-2.5 px-2 text-center">
                     <input
                       type="number"
-                      step={line.itemType === 0 ? "1" : "any"}
+                      step={line.itemType === 0 ? "1" : "0.0001"}
                       min="1"
                       disabled={line.itemType === 0}
                       value={line.quantity}
@@ -846,7 +849,7 @@ export function SalesInvoiceFormPage() {
                   <td className="w-28 py-2.5 px-2 text-right">
                     <input
                       type="number"
-                      step="1"
+                      step="0.01"
                       min="0"
                       value={line.unitPrice}
                       onChange={(e) => updateLineField(line.tempId, { unitPrice: Number(e.target.value) })}
@@ -858,7 +861,7 @@ export function SalesInvoiceFormPage() {
                   <td className="w-24 py-2.5 px-2 text-right">
                     <input
                       type="number"
-                      step="1"
+                      step="0.01"
                       min="0"
                       value={line.discount}
                       onChange={(e) => updateLineField(line.tempId, { discount: Number(e.target.value) })}
@@ -924,7 +927,7 @@ export function SalesInvoiceFormPage() {
                   <label className="text-xs font-medium text-slate-600 dark:text-slate-400">Payment Amount (₹)</label>
                   <input
                     type="number"
-                    step="1"
+                    step="0.01"
                     min="0.01"
                     max={totals.total}
                     value={paymentAmount}

@@ -24,12 +24,14 @@ export function SalesInvoicePrintPage() {
     if (!id) return;
     try {
       setError(null);
-      const [invoiceData, settings] = await Promise.all([
+      const [invoiceData, snapshot] = await Promise.all([
         apiClient.get<SalesInvoiceDetails>(`/sales/invoices/${encodeURIComponent(id)}`),
-        apiClient.get<CustomerBillTemplate>("/settings/customer-bill"),
+        apiClient.get<{ partyName: string; partyMobile: string; partyAddress: string; partyEmail?: string; detailsJson: string }>(`/accounting/snapshots/Sale/${encodeURIComponent(id)}`),
       ]);
-      setDetails(invoiceData);
-      setTemplate(settings);
+      const frozen = JSON.parse(snapshot.detailsJson) as { seller?: CustomerBillTemplate | null };
+      setDetails({ ...invoiceData, invoice: { ...invoiceData.invoice, customerName: snapshot.partyName,
+        customerMobile: snapshot.partyMobile, customerAddress: snapshot.partyAddress, customerEmail: snapshot.partyEmail } });
+      setTemplate({ ...defaultCustomerBillTemplate, ...frozen.seller });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unable to load invoice details.");
     } finally {
@@ -126,7 +128,7 @@ export function SalesInvoicePrintPage() {
                 <th style={{ width: "32px" }}>#</th>
                 <th>Item Description</th>
                 {template.showSerialNumber ? <th>Serial / IMEI</th> : null}
-                <th className="number" style={{ width: "45px" }}>Qty</th>
+                <th>HSN/SAC</th><th className="number" style={{ width: "45px" }}>Qty / Unit</th>
                 <th className="number">Rate</th>
                 {template.showDiscount ? <th className="number">Disc</th> : null}
                 <th className="number">{invoice.supplyType === 1 ? "IGST" : "GST"}</th>
@@ -152,7 +154,7 @@ export function SalesInvoicePrintPage() {
                       )}
                     </td>
                   ) : null}
-                  <td className="number">{l.quantity}</td>
+                  <td>{l.hsnSac || "—"}</td><td className="number">{l.quantity} {l.unitOfMeasure || "NOS"}</td>
                   <td className="number">{currency(l.unitPrice)}</td>
                   {template.showDiscount ? (
                     <td className="number">{l.discount > 0 ? currency(l.discount) : "—"}</td>

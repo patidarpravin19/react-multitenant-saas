@@ -238,7 +238,7 @@ export function SalesInvoiceListPage() {
                 <label className="text-xs font-medium text-slate-700 dark:text-slate-300">Amount (₹)</label>
                 <input
                   type="number"
-                  step="1"
+                  step="0.01"
                   min="0.01"
                   max={paymentModal.balance}
                   value={payAmount}

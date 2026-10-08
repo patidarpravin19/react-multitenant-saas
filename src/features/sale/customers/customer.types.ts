@@ -19,6 +19,7 @@ export interface CustomerPaymentHistory {
 }
 
 export interface CustomerSaleHistory {
+  isMultiLineInvoice?: boolean;
   id: string;
   billNumber: string;
   saleDate: string;

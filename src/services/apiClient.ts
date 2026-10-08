@@ -182,6 +182,16 @@ async function request<T>(
 ): Promise<T> {
   const headers = new Headers(config.headers);
   if (!headers.has("Accept")) headers.set("Accept", "application/json");
+  let retryStorageKey: string | undefined;
+  const moneyRequest = config.method === "POST" && (path.startsWith("/sales/invoices") || path.includes("/payments") || path.includes("/receipts") || path.includes("/refunds") || path.includes("/settlements"));
+  if (moneyRequest && !headers.has("Idempotency-Key")) {
+    const fingerprint = new TextEncoder().encode(`${localStorage.getItem("tenant_id")}:${localStorage.getItem("auth_user_id")}:${path}:${String(config.body ?? "")}`);
+    const digest = await crypto.subtle.digest("SHA-256", fingerprint);
+    retryStorageKey = "money-retry:" + Array.from(new Uint8Array(digest), b => b.toString(16).padStart(2, "0")).join("");
+    const token = sessionStorage.getItem(retryStorageKey) ?? crypto.randomUUID();
+    sessionStorage.setItem(retryStorageKey, token);
+    headers.set("Idempotency-Key", token);
+  }
   let finalConfig: ApiRequestConfig = { ...config, headers };
 
   for (const interceptor of requestInterceptors)
@@ -198,7 +208,7 @@ async function request<T>(
       unauthorizedHandler
     ) {
       if (await unauthorizedHandler()) {
-        const retryConfig = { ...config, headers: new Headers(config.headers) };
+        const retryConfig = { ...config, headers: new Headers(headers) };
         for (const interceptor of requestInterceptors)
           finalConfig = await interceptor(toUrl(path), retryConfig);
         response = await fetch(toUrl(path), finalConfig);
@@ -210,7 +220,9 @@ async function request<T>(
     if (!response.ok) {
       throw new ApiError(getErrorMessage(body, response.status), response.status, body);
     }
-    return unwrapApiResponse<T>(body, response.status);
+    const result = unwrapApiResponse<T>(body, response.status);
+    if (retryStorageKey) sessionStorage.removeItem(retryStorageKey);
+    return result;
   } finally {
     activeRequests -= 1;
     notifyLoading();

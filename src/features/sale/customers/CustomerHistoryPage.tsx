@@ -64,7 +64,7 @@ export function CustomerHistoryPage() {
         <article key={sale.id} className="overflow-hidden rounded-xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
           <div className="flex flex-wrap items-start justify-between gap-3 border-b border-slate-200 px-4 py-3 dark:border-slate-800">
             <div><p className="font-semibold">{sale.productName || "Product sale"}</p><p className="mt-0.5 text-xs text-slate-500">{sale.billNumber}{sale.serialNumber ? ` · S/N ${sale.serialNumber}` : ""}{sale.paymentPlan ? ` · ${sale.paymentPlan}` : ""}</p></div>
-            <Button variant="secondary" onClick={() => navigate(APP_ROUTES.sale.accountingPayment(sale.id))}>Open bill</Button>
+            <Button variant="secondary" onClick={() => navigate(sale.isMultiLineInvoice ? APP_ROUTES.sale.invoices.print(sale.id) : APP_ROUTES.sale.accountingPayment(sale.id))}>Open bill</Button>
           </div>
           <div className="grid grid-cols-2 gap-3 px-4 py-3 text-sm sm:grid-cols-3 xl:grid-cols-6">
             <div><p className="text-xs text-slate-500">Purchase date</p><p className="font-medium">{sale.saleDate}</p></div>

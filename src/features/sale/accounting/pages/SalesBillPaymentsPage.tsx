@@ -123,7 +123,7 @@ export function SalesBillPaymentsPage() {
           </div>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             <label className="text-xs font-medium text-slate-700 dark:text-slate-200">Amount
-              <input required type="number" min="0.01" max={bill.balance} step="1" value={amount} onChange={(event) => setAmount(event.target.value)} className={inputClass} />
+              <input required type="number" min="0.01" max={bill.balance} step="0.01" value={amount} onChange={(event) => setAmount(event.target.value)} className={inputClass} />
             </label>
             <label className="text-xs font-medium text-slate-700 dark:text-slate-200">Payment method
               <select value={paymentMode} onChange={(event) => setPaymentMode(event.target.value as PaymentMode)} className={inputClass}>

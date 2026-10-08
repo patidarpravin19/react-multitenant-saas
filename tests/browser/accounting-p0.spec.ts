@@ -25,6 +25,7 @@ async function fixture(page: Page, owner = true) {
     else if(path==="/accounting/staff")data=staff;
     else if(path==="/accounting-permissions")data=staff.map(s=>({userId:s.id,permissions:[]}));
     else if(path==="/sales/accounting/bills")data={items:[item],page:1,pageSize:100,totalCount:1,totalPages:1};
+    else if(path==="/sales/invoices")data={items:[],page:1,pageSize:100,totalCount:0,totalPages:0};
     else if(path==="/sales/accounting/bills/s1")data={bill:item,payments:[]};
     else if(path==="/products/all")data=[{id:"p1",brand:"Brand",productModel:"Phone",variant:"128GB",color:"Blue",serialNumber:"SERIAL-1",totalAmount:1180,cgst:9,sgst:9}];
     else if(path==="/taxes/all")data=[{id:"t1",cgst:9,sgst:9,totalTax:18}];
@@ -53,12 +54,13 @@ test("sale selection fills GST-inclusive cost, keeps edited selling price, and s
 
 test("return and refund forms retain the source and send ledger-safe requests",async({page})=>{
   const posted=await fixture(page);await page.goto("/accounting/corrections");
-  await expect(page.getByLabel("Invoice unit").locator("option")).toHaveCount(2);
-  await page.getByLabel("Invoice unit").selectOption("s1");await page.getByLabel("Reason",{exact:true}).fill("Customer return");
+  await expect(page.getByLabel("Invoice / purchase unit").locator("option")).toHaveCount(2);
+  await page.getByLabel("Invoice / purchase unit").selectOption("s1");await page.getByLabel("Reason",{exact:true}).fill("Customer return");
   await page.getByRole("button",{name:"Post credit note"}).click();await expect(page.getByRole("cell",{name:/^CN-1/})).toBeVisible();
-  await page.getByRole("button",{name:"Record refund"}).click();await page.getByLabel("Amount",{exact:true}).fill("100");await page.getByRole("button",{name:"Save refund"}).click();
+  await page.getByRole("button",{name:"Record refund"}).click();await page.getByLabel("Amount",{exact:true}).fill("100.25");await page.getByRole("button",{name:"Save refund"}).click();
   await expect.poll(()=>posted.some(p=>p.path==="/accounting/corrections/n1/refunds")).toBe(true);
   expect(posted.find(p=>p.path==="/accounting/corrections")!.body).toMatchObject({kind:"Sale",sourceId:"s1",reason:"Customer return",disposition:"Restock"});
+  expect(posted.find(p=>p.path==="/accounting/corrections/n1/refunds")!.body.amount).toBe(100.25);
   await page.getByRole("button",{name:"View note"}).click();
   const note=page.getByRole("dialog",{name:"Credit or debit note"});
   await expect(note).toContainText("Original buyer");await expect(note).toContainText("CGST reversal (9%)");await expect(note).toContainText("REFUND-1");
@@ -86,4 +88,57 @@ test("ungranted staff cannot open sale add and owner navigation is hidden",async
 
 test("printed seller details come from the frozen invoice snapshot",async({page})=>{
   await fixture(page);await page.goto("/sales/accounting/print/s1");await expect(page.getByText("Frozen shop",{exact:true})).toBeVisible();await expect(page.getByText("Changed shop",{exact:true})).toHaveCount(0);await expect(page.getByText("Original buyer",{exact:true})).toBeVisible();
+});
+
+test("multi-line invoice printing freezes buyer and seller and includes HSN and unit", async ({page}) => {
+  await fixture(page);
+  await page.route("**/api/sales/invoices/i1", route => route.fulfill({contentType:"application/json",body:JSON.stringify({
+    invoice:{id:"i1",billNumber:"INV-1",customerName:"Changed buyer",customerMobile:"9000000000",customerAddress:"Changed address",invoiceDate:"2026-02-01",dueDate:"2026-02-01",subTotal:100,discount:0,taxableAmount:100,cgstAmount:9,sgstAmount:9,igstAmount:0,totalAmount:118,amountPaid:0,balance:118,supplyType:0},
+    lines:[{id:"l1",lineNumber:1,itemDescription:"Phone",hsnSac:"8517",unitOfMeasure:"NOS",quantity:1,unitPrice:100,discount:0,cgstRate:9,sgstRate:9,igstRate:0,cgstAmount:9,sgstAmount:9,totalAmount:118}],payments:[]})}));
+  await page.route("**/api/accounting/snapshots/Sale/i1", route => route.fulfill({contentType:"application/json",body:JSON.stringify({partyName:"Frozen buyer",partyMobile:"9000000001",partyAddress:"Frozen address",detailsJson:JSON.stringify({seller:{companyName:"Frozen shop",paperSize:"A4",billTitle:"TAX INVOICE",showSerialNumber:true}})})}));
+  await page.goto("/sales/invoices/i1/print");
+  await expect(page.locator("#customer-bill-print")).toContainText("Frozen buyer");
+  await expect(page.locator("#customer-bill-print")).toContainText("Frozen shop");
+  await expect(page.locator("#customer-bill-print")).toContainText("8517");
+  await expect(page.locator("#customer-bill-print")).toContainText("NOS");
+  await expect(page.locator("#customer-bill-print")).not.toContainText("Changed buyer");
+});
+
+test("lost money response retains the same retry key", async ({page}) => {
+  await fixture(page); await page.goto("/sales/invoices");
+  const keys:string[]=[];
+  await page.route("**/api/sales/invoices", async route => {
+    keys.push(route.request().headers()["idempotency-key"] ?? "");
+    if(keys.length===1) await route.abort("failed");
+    else await route.fulfill({contentType:"application/json",body:JSON.stringify({invoice:{id:"retry-id"}})});
+  });
+  const outcome=await page.evaluate(async()=>{
+    // Exercise the shared client used by invoice and payment forms through Vite's module server.
+    const path="/src/services/apiClient.ts";
+    const {apiClient}=await import(/* @vite-ignore */ path);
+    const body={customerName:"Retry buyer",amount:10.25};
+    try {await apiClient.post("/sales/invoices",body);} catch {}
+    return await apiClient.post("/sales/invoices",body);
+  });
+  expect(keys).toHaveLength(2); expect(keys[0]).toMatch(/^[0-9a-f-]{36}$/); expect(keys[1]).toBe(keys[0]);
+  expect(outcome).toMatchObject({invoice:{id:"retry-id"}});
+});
+
+test("authentication refresh preserves the money retry key", async ({page}) => {
+  await fixture(page); await page.goto("/sales/invoices");
+  const keys:string[]=[];
+  await page.route("**/api/sales/invoices", async route => {
+    keys.push(route.request().headers()["idempotency-key"] ?? "");
+    await route.fulfill({status:keys.length===1 ? 401 : 200, contentType:"application/json",
+      body:JSON.stringify(keys.length===1 ? {message:"Expired session"} : {invoice:{id:"refreshed-id"}})});
+  });
+  const outcome=await page.evaluate(async()=>{
+    const path="/src/services/apiClient.ts";
+    const {apiClient,setUnauthorizedHandler}=await import(/* @vite-ignore */ path);
+    const cleanup=setUnauthorizedHandler(async()=>true);
+    try { return await apiClient.post("/sales/invoices",{amount:15.25}); }
+    finally { cleanup(); }
+  });
+  expect(keys).toHaveLength(2); expect(keys[0]).toMatch(/^[0-9a-f-]{36}$/); expect(keys[1]).toBe(keys[0]);
+  expect(outcome).toMatchObject({invoice:{id:"refreshed-id"}});
 });

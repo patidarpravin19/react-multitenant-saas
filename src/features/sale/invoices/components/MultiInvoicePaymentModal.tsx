@@ -3,6 +3,7 @@ import { X, CheckCircle2, DollarSign, ArrowRight, Zap, RefreshCw, AlertCircle, F
 import { Button } from "../../../../components/ui/Button";
 import { apiClient } from "../../../../services/apiClient";
 import { useNotifications } from "../../../../context/NotificationContext";
+import { CustomerAdvancePanel } from "./CustomerAdvancePanel";
 import type {
   CustomerUnpaidInvoicesSummary,
   UnpaidCustomerInvoice,
@@ -51,7 +52,7 @@ export function MultiInvoicePaymentModal({ initialCustomerId, onClose, onSuccess
       try {
         const list = await apiClient.get<Array<{ id: string; name: string; mobile: string }>>("/customers?limit=100");
         setCustomers(list);
-        if (!selectedCustomerId && list.length > 0) {
+        if (!selectedCustomerId && list[0]) {
           setSelectedCustomerId(list[0].id);
         }
       } catch {
@@ -61,10 +62,14 @@ export function MultiInvoicePaymentModal({ initialCustomerId, onClose, onSuccess
       }
     }
     void loadCustomers();
-  }, [selectedCustomerId]);
+  }, []);
 
   // Load customer unpaid invoices when customerId changes
   useEffect(() => {
+    let active = true;
+    setSummary(null);
+    setCustomAllocations({});
+    setPaymentAmount(0);
     if (!selectedCustomerId) {
       setSummary(null);
       return;
@@ -75,19 +80,20 @@ export function MultiInvoicePaymentModal({ initialCustomerId, onClose, onSuccess
         const res = await apiClient.get<CustomerUnpaidInvoicesSummary>(
           `/sales/invoices/unpaid-by-customer/${selectedCustomerId}`
         );
+        if (!active) return;
         setSummary(res);
         // Pre-fill payment amount with total outstanding if unset
-        if (paymentAmount <= 0) {
-          setPaymentAmount(res.totalOutstanding);
-        }
+        setPaymentAmount(res.totalOutstanding);
       } catch (err) {
+        if (!active) return;
         setSummary(null);
         notifications.error("Error", "Could not load customer invoices.");
       } finally {
-        setLoadingInvoices(false);
+        if (active) setLoadingInvoices(false);
       }
     }
     void loadInvoices();
+    return () => { active = false; };
   }, [selectedCustomerId, notifications]);
 
   // FIFO live allocation preview computation
@@ -134,6 +140,7 @@ export function MultiInvoicePaymentModal({ initialCustomerId, onClose, onSuccess
       return;
     }
 
+    if (totalAllocated > paymentAmount) { notifications.error("Invalid Allocation", "Allocated amounts exceed the payment received."); return; }
     setSubmitting(true);
     try {
       const payload = {
@@ -176,6 +183,7 @@ export function MultiInvoicePaymentModal({ initialCustomerId, onClose, onSuccess
           <X size={18} />
         </button>
 
+        {summary && !result && <CustomerAdvancePanel customerId={selectedCustomerId} invoices={summary.invoices} onChanged={onSuccess} />}
         {/* Success Result View */}
         {result ? (
           <div className="space-y-4 py-4 text-center">
@@ -295,7 +303,7 @@ export function MultiInvoicePaymentModal({ initialCustomerId, onClose, onSuccess
                 </label>
                 <input
                   type="number"
-                  step="1"
+                  step="0.01"
                   min="0.01"
                   required
                   value={paymentAmount}
@@ -426,7 +434,7 @@ export function MultiInvoicePaymentModal({ initialCustomerId, onClose, onSuccess
                               ) : (
                                 <input
                                   type="number"
-                                  step="1"
+                                  step="0.01"
                                   min="0"
                                   max={inv.balance}
                                   value={customAllocations[inv.invoiceId] || 0}
