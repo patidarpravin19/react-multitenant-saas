@@ -18,6 +18,11 @@ import { BankReconciliationPage } from "./features/accounting/BankReconciliation
 import { StockMovementsPage } from "./features/accounting/StockMovementsPage";
 import { TaxReportsPage } from "./features/accounting/TaxReportsPage";
 import { AccountingControlsPage } from "./features/accounting/AccountingControlsPage";
+import { InvoiceCorrectionsPage } from "./features/accounting/InvoiceCorrectionsPage";
+import { OpeningBalancesPage } from "./features/accounting/OpeningBalancesPage";
+import { OpeningStockFormPage } from "./features/accounting/OpeningStockFormPage";
+import { StaffAccessPage } from "./features/accounting/StaffAccessPage";
+import { AcceptInvitationPage } from "./features/auth/AcceptInvitationPage";
 import { purchaseRoutes } from "./features/purchase/routes/PurchaseRoutes";
 import { saleRoutes } from "./features/sale/routes/SaleRoutes";
 import { APP_ROUTES } from "./config/routes";
@@ -34,6 +39,7 @@ export default function App() {
   return (
     <Routes>
       <Route path="/login" element={<LoginPage />} />
+      <Route path="/accept-invitation" element={<AcceptInvitationPage />} />
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />
       <Route path="/reset-password" element={<ResetPasswordPage />} />
       <Route element={<ProtectedRoute />}>
@@ -47,6 +53,10 @@ export default function App() {
           <Route path={APP_ROUTES.bankReconciliation} element={<BankReconciliationPage />} />
           <Route path={APP_ROUTES.stockMovements} element={<StockMovementsPage />} />
           <Route path={APP_ROUTES.accountingControls} element={<AccountingControlsPage />} />
+          <Route path="/accounting/corrections" element={<InvoiceCorrectionsPage />} />
+          <Route path="/accounting/opening-balances" element={<OpeningBalancesPage />} />
+          <Route path="/accounting/opening-stock/add" element={<OpeningStockFormPage />} />
+          <Route path="/accounting/staff" element={<StaffAccessPage />} />
           {productRoutes}
           {purchaseRoutes}
           {saleRoutes}

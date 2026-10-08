@@ -21,11 +21,15 @@ export function CustomerBillPrintPage() {
     if (!id) return;
     try {
       setError(null);
-      const [details, settings] = await Promise.all([
+      const [details, settings, snapshot] = await Promise.all([
         apiClient.get<SalesBillDetails>(`/sales/accounting/bills/${encodeURIComponent(id)}`),
         apiClient.get<CustomerBillTemplate>("/settings/customer-bill"),
+        apiClient.get<{ detailsJson: string }>(`/accounting/snapshots/Sale/${encodeURIComponent(id)}`),
       ]);
-      setTemplate(settings);
+      const frozen = JSON.parse(snapshot.detailsJson);
+      const seller = frozen.seller ?? frozen.Seller;
+      const normalizedSeller = seller ? Object.fromEntries(Object.entries(seller).map(([key,value]) => [key.replace(/_([a-z])/g,(_,letter:string)=>letter.toUpperCase()).replace(/^./,letter=>letter.toLowerCase()),value])) : {};
+      setTemplate({ ...settings, ...normalizedSeller });
       setBill({
         billNumber: details.bill.billNumber,
         billDate: details.bill.billDate,

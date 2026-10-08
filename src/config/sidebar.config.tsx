@@ -113,6 +113,9 @@ export const sidebarConfiguration: NavigationItem[] = [
       { id: "bank-reconciliation", label: "Bank Reconciliation", path: APP_ROUTES.bankReconciliation, icon: Landmark },
       { id: "stock-movements", label: "Stock Movements", path: APP_ROUTES.stockMovements, icon: ArrowLeftRight },
       { id: "accounting-controls", label: "Controls & Budgets", path: APP_ROUTES.accountingControls, icon: ShieldCheck },
+      { id: "invoice-corrections", label: "Returns & Corrections", path: "/accounting/corrections", icon: ArrowLeftRight },
+      { id: "opening-balances", label: "Opening Balances & Reconciliation", path: "/accounting/opening-balances", icon: BookOpenCheck },
+      { id: "staff-access", label: "Staff Access", path: "/accounting/staff", icon: Users },
     ],
   },
   {

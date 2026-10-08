@@ -9,6 +9,7 @@ import type { FormFieldConfig } from "../../types/form";
 import type { GridAction, GridColumn, GridServerSource } from "../../types/grid";
 import { type ResourceRecord } from "./resourceApi";
 import { APP_ROUTES } from "../../config/routes";
+import { useAccountingAccess, writePermission } from "../accounting/AccountingAccess";
 
 interface ResourceApi<T extends ResourceRecord> {
   list: (force?: boolean) => Promise<T[]>;
@@ -59,6 +60,9 @@ export function ResourceListPage<T extends ResourceRecord>(
   const { title, description, singular, addPath, editPath, columns, api } =
     props;
   const navigate = useNavigate();
+  const { can } = useAccountingAccess();
+  const permission = writePermission(addPath);
+  const canWrite = !permission || can(permission);
   const notifications = useNotifications();
   const [error, setError] = useState<string | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
@@ -106,7 +110,7 @@ export function ResourceListPage<T extends ResourceRecord>(
       label: "Edit",
       icon: "edit",
       onClick: (record) => navigate(editPath(record.id)),
-      hidden: props.hideEdit,
+      hidden: (record) => !canWrite || Boolean(props.hideEdit?.(record)),
     },
     {
       id: "delete",
@@ -114,7 +118,7 @@ export function ResourceListPage<T extends ResourceRecord>(
       icon: "delete",
       variant: "danger",
       onClick: deleteRecord,
-      hidden: props.hideDelete,
+      hidden: (record) => !canWrite || Boolean(props.hideDelete?.(record)),
     },
   ];
 
@@ -128,7 +132,7 @@ export function ResourceListPage<T extends ResourceRecord>(
           </p>
         </div>
         <div className="flex gap-2">
-          {props.bulkAction ? (
+          {props.bulkAction && canWrite ? (
             <Button
               variant="secondary"
               disabled={selectedRecords.length === 0 || selectedRecords.length > (props.bulkAction.maximumRecords ?? 500)}
@@ -141,9 +145,9 @@ export function ResourceListPage<T extends ResourceRecord>(
           <Button variant="secondary" onClick={() => setRefreshKey((key) => key + 1)}>
             <RefreshCw size={16} /> Refresh
           </Button>
-          <Button onClick={() => navigate(addPath)}>
+          {canWrite && <Button onClick={() => navigate(addPath)}>
             <Plus size={17} /> Add {singular}
-          </Button>
+          </Button>}
         </div>
       </div>
       {error ? (

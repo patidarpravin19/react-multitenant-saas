@@ -9,7 +9,8 @@
     "preview": "vite preview",
     "lint": "eslint .",
     "build:staging": "vite build --mode staging",
-    "build:prod": "vite build --mode production"
+    "build:prod": "vite build --mode production",
+    "test:accounting-ui": "playwright test"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.1",
@@ -23,6 +24,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.34.0",
+    "@playwright/test": "^1.64.0",
     "@tailwindcss/vite": "^4.1.13",
     "@types/react": "^19.1.12",
     "@types/react-dom": "^19.1.9",

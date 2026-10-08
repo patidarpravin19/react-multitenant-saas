@@ -3,6 +3,8 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { sidebarConfiguration } from "../../config/sidebar.config";
 
 import { SidebarMenuItem } from "../navigation/SidebarMenuItem";
+import { useAccountingAccess } from "../../features/accounting/AccountingAccess";
+import type { NavigationItem } from "../../types/navigation";
 
 interface SidebarProps {
   collapsed: boolean;
@@ -11,6 +13,10 @@ interface SidebarProps {
 }
 
 export function Sidebar({ collapsed, onToggle }: SidebarProps) {
+  const { isOwner } = useAccountingAccess();
+  const filter = (items: NavigationItem[]): NavigationItem[] => items
+    .filter(item => item.id !== "staff-access" || isOwner)
+    .map(item => ({ ...item, children: item.children ? filter(item.children) : undefined }));
   return (
     <aside
       className={[
@@ -33,7 +39,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
         "
       >
         <nav aria-label="Main navigation" className="space-y-1">
-          {sidebarConfiguration.map((item) => (
+          {filter(sidebarConfiguration).map((item) => (
             <SidebarMenuItem key={item.id} item={item} collapsed={collapsed} />
           ))}
         </nav>

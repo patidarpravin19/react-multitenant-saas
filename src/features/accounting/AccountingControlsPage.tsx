@@ -59,7 +59,9 @@ export function AccountingControlsPage() {
 
   const run = async (work: () => Promise<unknown>, success: string) => {
     setBusy(true);
-    try { await work(); notifications.success(success, "Changes have been saved."); await load(); }
+    try { await work(); notifications.success(success, "Changes have been saved."); await load();
+      await apiClient.get<PermissionUser[]>("/accounting-permissions").then(setPermissionUsers).catch(() => setPermissionUsers([]));
+    }
     catch (cause) { notifications.error("Action not completed", cause instanceof Error ? cause.message : "Please check the details."); }
     finally { setBusy(false); }
   };
@@ -115,7 +117,7 @@ export function AccountingControlsPage() {
 
     {permissionUsers.length > 0 && <section className={card}>
       <h2 className="text-lg font-semibold">Accounting permissions</h2>
-      <p className="mb-4 mt-1 text-sm text-slate-500">The tenant owner manages accounting permissions. The first user registered in the tenant is the owner; permissions take effect immediately.</p>
+      <p className="mb-4 mt-1 text-sm text-slate-500">The designated tenant owner manages permissions. Permissions take effect immediately. Use Staff Access to invite users and transfer ownership.</p>
       <div className="overflow-x-auto"><table className="w-full text-left text-sm"><thead><tr className="border-b text-slate-500"><th className="py-2">User</th>{permissionNames.map(code => <th key={code} className="px-2">{code.replace("accounting.", "")}</th>)}</tr></thead><tbody>{permissionUsers.map(user => <tr key={user.userId} className="border-b border-slate-100 dark:border-slate-800"><td className="py-2">{user.userName}<div className="text-xs text-slate-500">{user.email}</div></td>{permissionNames.map(code => <td key={code} className="px-2 text-center"><input aria-label={`${code} for ${user.userName}`} type="checkbox" checked={user.permissions.includes(code)} onChange={event => void run(() => apiClient.put(`/accounting-permissions/${user.userId}/${code}`, { granted: event.target.checked }), "Permission updated")} /></td>)}</tr>)}</tbody></table></div>
     </section>}
 
