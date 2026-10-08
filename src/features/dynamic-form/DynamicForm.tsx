@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { ArrowLeft } from "lucide-react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, useWatch, type FieldValues } from "react-hook-form";
-import type { FormFieldConfig, SelectOption } from "../../types/form";
+import type { FormFieldConfig, SelectFieldConfig, SelectOption } from "../../types/form";
 import { Button } from "../../components/ui/Button";
 import { getFieldComponent } from "./registry/fieldRegistry";
 import { createDynamicFormSchema } from "./validation/schemaFactory";
@@ -18,6 +18,10 @@ interface DynamicFormProps {
   /** Number of form columns at desktop widths. Defaults to two. */
   columnsPerRow?: 2 | 3 | 4;
   children?: ReactNode;
+}
+
+function getDependencies(field: SelectFieldConfig): string[] {
+  return Array.isArray(field.dependsOn) ? field.dependsOn : field.dependsOn ? [field.dependsOn] : [];
 }
 
 function createDefaultValues(fields: FormFieldConfig[]): FieldValues {
@@ -93,7 +97,7 @@ export function DynamicForm({
     .filter((field) => field.type === "select" && field.dependsOn)
     .map((field) =>
       field.type === "select"
-        ? `${field.name}:${String(values[field.dependsOn!] ?? "")}`
+        ? `${field.name}:${getDependencies(field).map((name) => String(values[name] ?? "")).join(":")}`
         : "",
     )
     .join("|");
@@ -111,7 +115,7 @@ export function DynamicForm({
   useEffect(() => {
     for (const field of fields) {
       if (field.type !== "select" || !field.dependsOn) continue;
-      if (previousValues.current[field.dependsOn] !== values[field.dependsOn]) {
+      if (getDependencies(field).some((name) => previousValues.current[name] !== values[name])) {
         setValue(field.name, "", { shouldValidate: true, shouldDirty: true });
       }
     }
@@ -123,14 +127,16 @@ export function DynamicForm({
     for (const field of fields) {
       if (field.type !== "select" || !field.dependsOn || !field.loadOptions)
         continue;
-      const parentValue = String(getValues(field.dependsOn) ?? "");
-      if (!parentValue) {
+      const dependencies = getDependencies(field);
+      const formValues = getValues();
+      const parentValue = String(formValues[dependencies[0] ?? ""] ?? "");
+      if (dependencies.some((name) => !formValues[name])) {
         setDependentOptions((current) => ({ ...current, [field.name]: [] }));
         setLoadingDependentOptions((current) => ({ ...current, [field.name]: false }));
         continue;
       }
       setLoadingDependentOptions((current) => ({ ...current, [field.name]: true }));
-      void field.loadOptions(parentValue)
+      void field.loadOptions(parentValue, formValues)
         .then((options) => {
           if (!cancelled)
             setDependentOptions((current) => ({ ...current, [field.name]: options }));
@@ -202,26 +208,28 @@ export function DynamicForm({
             || String(values[field.visibleWhen.field] ?? "") === String(field.visibleWhen.value),
           ).map((field) => {
             const Component = getFieldComponent(field.type);
+            const dependencies = field.type === "select" ? getDependencies(field) : [];
+            const missingDependency = dependencies.find((name) => !values[name]);
             const renderedField =
               field.type === "select" && field.dependsOn
                 ? {
                     ...field,
                     disabled:
                       field.disabled ||
-                      !values[field.dependsOn] ||
+                      Boolean(missingDependency) ||
                       loadingDependentOptions[field.name],
-                    placeholder: !values[field.dependsOn]
-                      ? `Select ${fields.find((candidate) => candidate.name === field.dependsOn)?.label.toLowerCase() ?? "a parent option"} first`
+                    placeholder: missingDependency
+                      ? `Select ${fields.find((candidate) => candidate.name === missingDependency)?.label.toLowerCase() ?? "a parent option"} first`
                       : loadingDependentOptions[field.name]
                         ? "Loading options..."
                         : field.placeholder,
                     options: field.loadOptions
                       ? dependentOptions[field.name] ?? []
-                      : values[field.dependsOn]
+                      : !missingDependency
                         ? field.options.filter(
                             (option) =>
                               option.parentValue ===
-                              String(values[field.dependsOn!]),
+                              String(values[dependencies[0] ?? ""]),
                           )
                         : [],
                   }

@@ -99,8 +99,8 @@ export interface SelectFieldConfig extends BaseFieldConfig {
   type: "select";
   placeholder?: string;
   options: SelectOption[];
-  dependsOn?: string;
-  loadOptions?: (parentValue: string) => Promise<SelectOption[]>;
+  dependsOn?: string | string[];
+  loadOptions?: (parentValue: string, values: DynamicFormValues) => Promise<SelectOption[]>;
 }
 export interface AutocompleteOption {
   id: string;

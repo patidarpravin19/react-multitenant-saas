@@ -45,9 +45,12 @@ export function createProductFormConfig({
     },
     {
       id: "productModelId", name: "productModelId", label: "Model", type: "select", required: true,
-      dependsOn: "productTypeId", placeholder: "Select a product type first",
+      dependsOn: ["brandId", "productTypeId"], placeholder: "Select a model",
       options: models.map((item) => ({ label: item.name, value: item.id, parentValue: item.productTypeId })),
-      loadOptions: async (productTypeId) => toOptions(models.filter((item) => !item.productTypeId || item.productTypeId === productTypeId)),
+      loadOptions: async (_parentValue, values) => toOptions(models.filter(
+        (item) => Boolean(values.brandId && values.productTypeId)
+          && item.brandId === values.brandId && item.productTypeId === values.productTypeId,
+      )),
     },
     { id: "variantId", name: "variantId", label: "Variant", type: "select", required: true, options: toOptions(variants) },
     { id: "colorId", name: "colorId", label: "Color", type: "select", required: true, options: toOptions(colors) },
