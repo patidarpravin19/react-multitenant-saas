@@ -16,7 +16,7 @@ const card = "rounded-xl border border-slate-200 bg-white p-5 shadow-sm dark:bor
 const money = (value: number) => new Intl.NumberFormat(undefined, { style: "currency", currency: "INR" }).format(value);
 const actionNames = ["Journal", "Period close", "Stock write-off", "Financial correction"];
 const statusNames = ["Pending", "Approved", "Rejected", "Applied"];
-const permissionNames = ["accounting.approve", "accounting.dimensions.manage", "accounting.documents.manage", "accounting.assets.manage", "accounting.budgets.manage"];
+const permissionNames = ["catalog.manage", "purchases.manage", "sales.manage", "inventory.manage", "accounting.manage", "accounting.approve", "accounting.dimensions.manage", "accounting.documents.manage", "accounting.assets.manage", "accounting.budgets.manage"];
 
 export function AccountingControlsPage() {
   const notifications = useNotifications();
