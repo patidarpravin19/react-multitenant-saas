@@ -20,6 +20,7 @@ import {
   Landmark,
   ArrowLeftRight,
   FileSpreadsheet,
+  FileText,
   ShieldCheck,
 } from "lucide-react";
 
@@ -106,6 +107,7 @@ export const sidebarConfiguration: NavigationItem[] = [
     label: "Accounting",
     icon: BookOpenCheck,
     children: [
+      { id: "party-statement", label: "Party Ledger (SOA)", path: APP_ROUTES.partyStatement, icon: FileText },
       { id: "general-ledger", label: "General Ledger", path: APP_ROUTES.generalLedger, icon: BookOpenCheck },
       { id: "accounting-aging", label: "Receivable & Payable Aging", path: APP_ROUTES.accountingAging, icon: Clock3 },
       { id: "tax-reports", label: "GST Reports", path: APP_ROUTES.taxReports, icon: FileSpreadsheet },
@@ -123,6 +125,12 @@ export const sidebarConfiguration: NavigationItem[] = [
     label: "Sale",
     icon: Receipt,
     children: [
+      {
+        id: "sales-invoices",
+        label: "Sales Invoices",
+        path: APP_ROUTES.sale.invoices.list,
+        icon: FileText,
+      },
       {
         id: "sale-products",
         label: "Products",

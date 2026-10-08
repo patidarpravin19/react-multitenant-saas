@@ -6,6 +6,8 @@ export interface CustomerBillTemplate {
   companyMobile: string;
   companyEmail: string | null;
   taxRegistrationNumber: string | null;
+  stateCode?: string | null;
+  stateName?: string | null;
   billTitle: string;
   footerNote: string;
   paperSize: CustomerBillPaperSize;
@@ -51,6 +53,8 @@ export const defaultCustomerBillTemplate: CustomerBillTemplate = {
   companyMobile: "",
   companyEmail: null,
   taxRegistrationNumber: null,
+  stateCode: null,
+  stateName: null,
   billTitle: "SALES INVOICE",
   footerNote: "Thank you for your business.",
   paperSize: "A4",

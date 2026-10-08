@@ -3,6 +3,7 @@ export const APP_ROUTES = {
   generalLedger: "/accounting/general-ledger",
   accountingAging: "/accounting/aging",
   taxReports: "/accounting/tax-reports",
+  partyStatement: "/accounting/party-statement",
   accountingPeriods: "/accounting/periods",
   accountingControls: "/accounting/controls",
   bankReconciliation: "/accounting/bank-reconciliation",
@@ -15,6 +16,7 @@ export const APP_ROUTES = {
       list: "/products/vendors/list",
       add: "/products/vendors/add",
       edit: (id: string) => `/products/vendors/${id}/edit`,
+      statement: (id: string) => `/accounting/party-statement?partyType=Vendor&partyId=${id}`,
     },
 
     brands: {
@@ -63,12 +65,19 @@ export const APP_ROUTES = {
   },
 
   sale: {
+    invoices: {
+      list: "/sales/invoices",
+      new: "/sales/invoices/new",
+      add: "/sales/invoices/new",
+      print: (id: string) => `/sales/invoices/${id}/print`,
+    },
     accounting: "/sales/accounting",
     customers: {
       list: "/sales/customers/list",
       add: "/sales/customers/add",
       edit: (id: string) => `/sales/customers/${id}/edit`,
       history: (id: string) => `/sales/customers/${id}/history`,
+      statement: (id: string) => `/accounting/party-statement?partyType=Customer&partyId=${id}`,
     },
     products: {
       list: "/sales/products/list",

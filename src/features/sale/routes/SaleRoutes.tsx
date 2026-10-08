@@ -8,9 +8,15 @@ import { CustomerListPage } from "../customers/CustomerListPage";
 import { CustomerFormPage } from "../customers/CustomerFormPage";
 import { CustomerHistoryPage } from "../customers/CustomerHistoryPage";
 import { CustomerBillPrintPage } from "../accounting/pages/CustomerBillPrintPage";
+import { SalesInvoiceListPage } from "../invoices/pages/SalesInvoiceListPage";
+import { SalesInvoiceFormPage } from "../invoices/pages/SalesInvoiceFormPage";
+import { SalesInvoicePrintPage } from "../invoices/pages/SalesInvoicePrintPage";
 
 export const saleRoutes = (
   <>
+    <Route path="/sales/invoices" element={<SalesInvoiceListPage />} />
+    <Route path="/sales/invoices/new" element={<SalesInvoiceFormPage />} />
+    <Route path="/sales/invoices/:id/print" element={<SalesInvoicePrintPage />} />
     <Route path="/sales/accounting" element={<SalesAccountingPage />} />
     <Route path="/sales/accounting/payments/:id" element={<SalesBillPaymentsPage />} />
     <Route path="/sales/accounting/print/:id" element={<CustomerBillPrintPage />} />

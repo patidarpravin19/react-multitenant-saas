@@ -17,6 +17,7 @@ import { AccountingPeriodsPage } from "./features/accounting/AccountingPeriodsPa
 import { BankReconciliationPage } from "./features/accounting/BankReconciliationPage";
 import { StockMovementsPage } from "./features/accounting/StockMovementsPage";
 import { TaxReportsPage } from "./features/accounting/TaxReportsPage";
+import { PartyStatementPage } from "./features/accounting/pages/PartyStatementPage";
 import { AccountingControlsPage } from "./features/accounting/AccountingControlsPage";
 import { InvoiceCorrectionsPage } from "./features/accounting/InvoiceCorrectionsPage";
 import { OpeningBalancesPage } from "./features/accounting/OpeningBalancesPage";
@@ -26,14 +27,7 @@ import { AcceptInvitationPage } from "./features/auth/AcceptInvitationPage";
 import { purchaseRoutes } from "./features/purchase/routes/PurchaseRoutes";
 import { saleRoutes } from "./features/sale/routes/SaleRoutes";
 import { APP_ROUTES } from "./config/routes";
-
-function DashboardPage() {
-  return (
-    <div>
-      <h1 className="text-2xl font-semibold">Dashboard</h1>
-    </div>
-  );
-}
+import { DashboardPage } from "./features/dashboard/pages/DashboardPage";
 
 export default function App() {
   return (
@@ -49,6 +43,7 @@ export default function App() {
           <Route path={APP_ROUTES.generalLedger} element={<GeneralLedgerPage />} />
           <Route path={APP_ROUTES.accountingAging} element={<AgingReportPage />} />
           <Route path={APP_ROUTES.taxReports} element={<TaxReportsPage />} />
+          <Route path={APP_ROUTES.partyStatement} element={<PartyStatementPage />} />
           <Route path={APP_ROUTES.accountingPeriods} element={<AccountingPeriodsPage />} />
           <Route path={APP_ROUTES.bankReconciliation} element={<BankReconciliationPage />} />
           <Route path={APP_ROUTES.stockMovements} element={<StockMovementsPage />} />

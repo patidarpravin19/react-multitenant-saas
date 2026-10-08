@@ -15,6 +15,7 @@ export function CustomerListPage() {
   const [refreshKey, setRefreshKey] = useState(0);
 
   const actions: GridAction<CustomerRecord>[] = [
+    { id: "statement", label: "Statement (SOA)", icon: "view", onClick: (customer) => navigate(APP_ROUTES.sale.customers.statement(customer.id)) },
     { id: "history", label: "History", icon: "view", onClick: (customer) => navigate(APP_ROUTES.sale.customers.history(customer.id)) },
     { id: "audit-history", label: "Audit History", icon: "history", onClick: (customer) => navigate(`${APP_ROUTES.settings.auditLogs}?tableName=customers&recordId=${encodeURIComponent(customer.id)}`) },
     { id: "edit", label: "Edit", icon: "edit", onClick: (customer) => navigate(APP_ROUTES.sale.customers.edit(customer.id)) },

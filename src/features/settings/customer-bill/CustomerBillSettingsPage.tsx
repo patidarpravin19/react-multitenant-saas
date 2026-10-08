@@ -4,6 +4,7 @@ import { Button } from "../../../components/ui/Button";
 import { apiClient } from "../../../services/apiClient";
 import { CustomerBillDocument } from "../../sale/accounting/components/CustomerBillDocument";
 import { defaultCustomerBillTemplate, type CustomerBillTemplate, type PrintableSalesBill } from "../../sale/accounting/types/customerBill.types";
+import { INDIAN_GST_STATES } from "../../sale/invoices/types/salesInvoice.types";
 
 const fieldClass = "mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[var(--tenant-primary)] focus:ring-2 focus:ring-[var(--tenant-primary)]/20 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100";
 
@@ -101,9 +102,44 @@ export function CustomerBillSettingsPage() {
             <label className="text-xs font-medium sm:col-span-2">Business address<textarea className={fieldClass} rows={2} maxLength={500} value={template.companyAddress} onChange={onText("companyAddress")} required /></label>
             <label className="text-xs font-medium">Business phone<input className={fieldClass} maxLength={20} value={template.companyMobile} onChange={onText("companyMobile")} required /></label>
             <label className="text-xs font-medium">Email<input type="email" className={fieldClass} maxLength={256} value={template.companyEmail ?? ""} onChange={onText("companyEmail")} /></label>
-            <label className="text-xs font-medium">GSTIN / Tax ID<input className={fieldClass} maxLength={50} value={template.taxRegistrationNumber ?? ""} onChange={onText("taxRegistrationNumber")} /></label>
+            <label className="text-xs font-medium">GSTIN / Tax ID
+              <input
+                className={fieldClass}
+                maxLength={50}
+                placeholder="e.g. 27AABCU9603R1ZM"
+                value={template.taxRegistrationNumber ?? ""}
+                onChange={(e) => {
+                  const val = e.target.value.toUpperCase();
+                  update("taxRegistrationNumber", val);
+                  if (val.length >= 2 && !template.stateCode) {
+                    const matchedState = INDIAN_GST_STATES.find(s => s.code === val.slice(0, 2));
+                    if (matchedState) {
+                      update("stateCode", matchedState.code);
+                      update("stateName", matchedState.name);
+                    }
+                  }
+                }}
+              />
+            </label>
+            <label className="text-xs font-medium">Home State (GST)
+              <select
+                className={fieldClass}
+                value={template.stateCode ?? ""}
+                onChange={(e) => {
+                  const code = e.target.value;
+                  const found = INDIAN_GST_STATES.find(s => s.code === code);
+                  update("stateCode", code || null);
+                  update("stateName", found?.name ?? null);
+                }}
+              >
+                <option value="">Select State / UT</option>
+                {INDIAN_GST_STATES.map(s => (
+                  <option key={s.code} value={s.code}>{s.code} - {s.name}</option>
+                ))}
+              </select>
+            </label>
             <label className="text-xs font-medium">Bill heading<input className={fieldClass} maxLength={80} value={template.billTitle} onChange={onText("billTitle")} required /></label>
-            <label className="text-xs font-medium sm:col-span-2">Paper size<select className={fieldClass} value={template.paperSize} onChange={(event) => update("paperSize", event.target.value as CustomerBillTemplate["paperSize"])}><option value="A4">A4</option><option value="A5">A5</option><option value="Thermal80">80 mm thermal receipt</option></select></label>
+            <label className="text-xs font-medium">Paper size<select className={fieldClass} value={template.paperSize} onChange={(event) => update("paperSize", event.target.value as CustomerBillTemplate["paperSize"])}><option value="A4">A4</option><option value="A5">A5</option><option value="Thermal80">80 mm thermal receipt</option></select></label>
             <label className="text-xs font-medium sm:col-span-2">Footer note<textarea className={fieldClass} rows={2} maxLength={500} value={template.footerNote} onChange={onText("footerNote")} /></label>
           </div>
           <fieldset className="space-y-2 border-t border-slate-200 pt-3 dark:border-slate-800"><legend className="px-1 text-xs font-semibold">Show on printed bill</legend>
