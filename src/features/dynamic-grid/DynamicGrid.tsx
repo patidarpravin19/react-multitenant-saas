@@ -125,10 +125,13 @@ export function DynamicGrid<TData>({
       pageIndex,
       pageSize,
       search: debouncedSearch,
-      sort: sorting,
+      sort: mode === "server" ? sorting.map((sort) => {
+        const column = columns.find((item) => item.id === sort.field);
+        return { ...sort, field: String(column?.accessorKey ?? column?.accessor ?? sort.field) };
+      }) : sorting,
       filters,
     }),
-    [pageIndex, pageSize, debouncedSearch, sorting, filters],
+    [pageIndex, pageSize, debouncedSearch, sorting, filters, columns, mode],
   );
 
   useEffect(() => {
@@ -203,6 +206,11 @@ export function DynamicGrid<TData>({
         nextForColumn = { field: columnId, direction: "desc" };
       else nextForColumn = null;
 
+      if (multi && existing) {
+        return nextForColumn
+          ? current.map((sort) => sort.field === columnId ? nextForColumn : sort)
+          : current.filter((sort) => sort.field !== columnId);
+      }
       const remaining = multi
         ? current.filter((sort) => sort.field !== columnId)
         : [];

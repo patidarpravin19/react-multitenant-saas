@@ -11,7 +11,8 @@ export function getColumnValue<TData>(
   column: GridColumn<TData>,
 ): unknown {
   if (column.valueGetter) return column.valueGetter(row);
-  if (column.accessor) return row[column.accessor];
+  const accessor = column.accessorKey ?? column.accessor;
+  if (accessor) return row[accessor];
   return undefined;
 }
 
@@ -78,6 +79,7 @@ export function applyClientFilters<TData>(
 }
 
 function compare(a: unknown, b: unknown): number {
+  if (a === b) return 0;
   if (a === null || a === undefined) return 1;
   if (b === null || b === undefined) return -1;
   if (typeof a === "number" && typeof b === "number") return a - b;

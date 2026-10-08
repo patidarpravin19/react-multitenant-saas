@@ -21,8 +21,8 @@ function toPageQuery(query: GridQuery) {
 
   const sort = query.sort[0];
   if (sort) {
-    params.set("sortBy", sort.field);
-    params.set("sortDirection", sort.direction);
+    params.set("sortBy", query.sort.map((item) => item.field).join(","));
+    params.set("sortDirection", query.sort.map((item) => item.direction).join(","));
   }
 
   query.filters.forEach((filter, index) => {

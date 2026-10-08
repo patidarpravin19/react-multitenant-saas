@@ -45,7 +45,7 @@ const columns: GridColumn<AuditLogRow>[] = [
 function queryParams(query: GridQuery, filters: { tableName: string; action: string; recordId: string; fromDate: string; toDate: string }) {
   const params = new URLSearchParams({ page: String(query.pageIndex + 1), pageSize: String(query.pageSize), search: query.search });
   const sort = query.sort[0];
-  if (sort) { params.set("sortBy", sort.field); params.set("sortDirection", sort.direction); }
+  if (sort) { params.set("sortBy", query.sort.map((item) => item.field).join(",")); params.set("sortDirection", query.sort.map((item) => item.direction).join(",")); }
   if (filters.tableName) params.set("tableName", filters.tableName);
   if (filters.action) params.set("action", filters.action);
   if (filters.recordId.trim()) params.set("recordId", filters.recordId.trim());
