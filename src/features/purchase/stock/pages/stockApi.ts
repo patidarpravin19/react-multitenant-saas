@@ -12,8 +12,8 @@ function createPagedSource<T>(endpoint: (query: URLSearchParams) => string): Gri
       });
       const sort = query.sort[0];
       if (sort) {
-        params.set("sortBy", sort.field);
-        params.set("sortDirection", sort.direction);
+        params.set("sortBy", query.sort.map((item) => item.field).join(","));
+        params.set("sortDirection", query.sort.map((item) => item.direction).join(","));
       }
       const result = await apiClient.get<PagedData<T>>(endpoint(params), { signal });
       return {

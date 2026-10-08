@@ -38,13 +38,15 @@ export function createProductFormConfig({
     { id: "paymentTermsDays", name: "paymentTermsDays", label: "Payment Terms (days)", type: "number", min: 0, max: 3650, step: 1, defaultValue: 0 },
     { id: "brandId", name: "brandId", label: "Brand", type: "select", required: true, options: toOptions(brands) },
     {
-      id: "productTypeId", name: "productTypeId", label: "Product Type", type: "select", required: true,
+      id: "productTypeId", name: "productTypeId", label: "Product Type",
+      type: "select", required: true,
       dependsOn: "brandId", placeholder: "Select a brand first",
       options: productTypes.map((item) => ({ label: item.name, value: item.id, parentValue: item.brandId })),
       loadOptions: async (brandId) => toOptions(productTypes.filter((item) => !item.brandId || item.brandId === brandId)),
     },
     {
-      id: "productModelId", name: "productModelId", label: "Model", type: "select", required: true,
+      id: "productModelId", name: "productModelId", label: "Model",
+      type: "select", required: true,
       dependsOn: ["brandId", "productTypeId"], placeholder: "Select a model",
       options: models.map((item) => ({ label: item.name, value: item.id, parentValue: item.productTypeId })),
       loadOptions: async (_parentValue, values) => toOptions(models.filter(
@@ -52,13 +54,29 @@ export function createProductFormConfig({
           && item.brandId === values.brandId && item.productTypeId === values.productTypeId,
       )),
     },
-    { id: "variantId", name: "variantId", label: "Variant", type: "select", required: true, options: toOptions(variants) },
-    { id: "colorId", name: "colorId", label: "Color", type: "select", required: true, options: toOptions(colors) },
-    { id: "serialNumber", name: "serialNumber", label: "Serial Number", type: "text", required: true },
-    { id: "serialNumber1", name: "serialNumber1", label: "Serial Number 1", type: "text", required: true },
-    { id: "purchasePrice", name: "purchasePrice", label: "Purchase Price", type: "number", required: true, min: 0, step: 1 },
     {
-      id: "totalAmount", name: "totalAmount", label: "Total Amount (per unit)", type: "number", readOnly: true,
+      id: "variantId", name: "variantId", label: "Variant", type: "select",
+      required: true, options: toOptions(variants)
+    },
+    {
+      id: "colorId", name: "colorId", label: "Color", type: "select",
+      required: true, options: toOptions(colors)
+    },
+    {
+      id: "serialNumber", name: "serialNumber", label: "Serial Number",
+      type: "text", required: true
+    },
+    {
+      id: "serialNumber1", name: "serialNumber1", label: "Serial Number 1",
+      type: "text", required: true
+    },
+    {
+      id: "purchasePrice", name: "purchasePrice", label: "Purchase Price",
+      type: "number", required: true, min: 0, step: 1
+    },
+    {
+      id: "totalAmount", name: "totalAmount", label: "Total Amount (per unit)",
+      type: "number", readOnly: true,
       step: 1,
       computed: {
         calculate: (values) => {
@@ -72,9 +90,18 @@ export function createProductFormConfig({
         },
       },
     },
-    { id: "discount", name: "discount", label: "Discount", type: "number", min: 0, step: 1 },
-    { id: "cgst", name: "cgst", label: "CGST (%)", type: "number", min: 0, step: 1, defaultValue: cgst },
-    { id: "sgst", name: "sgst", label: "SGST (%)", type: "number", min: 0, step: 1, defaultValue: sgst },
+    {
+      id: "discount", name: "discount", label: "Discount", type: "number", min: 0,
+      step: 1, defaultValue: 0
+    },
+    {
+      id: "cgst", name: "cgst", label: "CGST (%)", type: "number",
+      min: 0, step: 1, defaultValue: cgst
+    },
+    {
+      id: "sgst", name: "sgst", label: "SGST (%)", type: "number",
+      min: 0, step: 1, defaultValue: sgst
+    },
     {
       id: "tax", name: "tax", label: "Tax (%)", type: "number", min: 0, step: 1,
       computed: {
