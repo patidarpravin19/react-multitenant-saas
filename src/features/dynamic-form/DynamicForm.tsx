@@ -93,6 +93,7 @@ export function DynamicForm({
   });
   const values = useWatch({ control });
   const previousValues = useRef(values);
+  const computedDependencies = useRef<Record<string, unknown[]>>({});
   const dependencyKey = fields
     .filter((field) => field.type === "select" && field.dependsOn)
     .map((field) =>
@@ -105,6 +106,13 @@ export function DynamicForm({
   useEffect(() => {
     for (const field of fields) {
       if (!field.computed) continue;
+      if (field.computed.dependsOn) {
+        const dependencies = field.computed.dependsOn.map((name) => values[name]);
+        const previous = computedDependencies.current[field.name];
+        computedDependencies.current[field.name] = dependencies;
+        if (previous && dependencies.every((value, index) => value === previous[index])) continue;
+        if (!previous && values[field.name] !== "" && values[field.name] != null) continue;
+      }
       const calculated = field.computed.calculate(values);
       if (values[field.name] !== calculated) {
         setValue(field.name, calculated, { shouldValidate: true });

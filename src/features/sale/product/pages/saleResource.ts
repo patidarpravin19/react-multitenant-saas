@@ -6,6 +6,17 @@ import { createSaleFormConfig, type SaleTaxOption } from "../config/sale.form";
 import type { CustomerLookupRecord, SaleProductOption, SaleRecord } from "../types/sale.types";
 
 const salesApi = createResourceApi<SaleRecord>("/sales/products");
+let saleTaxes: SaleTaxOption[] = [];
+
+function toInvoiceValues(values: Record<string, unknown>) {
+  const tax = saleTaxes.find((item) => item.id === values.taxId);
+  const factor = 1 + ((tax?.cgst ?? 0) + (tax?.sgst ?? 0)) / 100;
+  const discount = Math.round(Number(values.discount || 0) / factor * 100) / 100;
+  // The invoice API subtracts discount before adding GST. Convert the final
+  // inclusive selling price to its taxable value, then restore the discount.
+  const sellingPrice = Math.round(Number(values.sellingPrice || 0) / factor * 100) / 100 + discount;
+  return { ...values, sellingPrice, discount };
+}
 
 export const saleResource = {
   title: "Product Sales",
@@ -24,10 +35,22 @@ export const saleResource = {
       apiClient.get<SaleProductOption[]>(`/products/all${currentSale}`),
       apiClient.get<SaleTaxOption[]>("/taxes/all"),
     ]);
+    saleTaxes = taxes;
     return createSaleFormConfig(products, async (query) => {
       const params = new URLSearchParams({ search: query, limit: "10" });
       return apiClient.get<CustomerLookupRecord[]>(`/customers?${params}`);
     }, taxes);
   },
-  api: salesApi,
+  api: {
+    ...salesApi,
+    getById: async (id: string) => {
+      const record = await salesApi.getById(id);
+      return {
+        ...record, sellingPrice: record.totalAmount ?? record.sellingPrice,
+        taxId: record.taxId ?? "00000000-0000-0000-0000-000000000000"
+      };
+    },
+    create: (values: Record<string, unknown>) => salesApi.create(toInvoiceValues(values)),
+    update: (id: string, values: Record<string, unknown>) => salesApi.update(id, toInvoiceValues(values)),
+  },
 };

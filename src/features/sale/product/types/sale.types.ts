@@ -16,6 +16,10 @@ export interface SaleRecord extends ResourceRecord {
   productPrice: number;
   sellingPrice: number;
   discount: number;
+  taxId?: string | null;
+  cgstRate?: number;
+  sgstRate?: number;
+  totalAmount?: number;
   paymentMode?: "Cash" | "Finance" | null;
 }
 
@@ -30,6 +34,8 @@ export interface SaleProductOption extends ResourceRecord {
   purchasePrice?: number;
   sellingPrice?: number;
   totalAmount?: number;
+  cgst?: number;
+  sgst?: number;
   discount?: number;
   isActive?: boolean;
 }

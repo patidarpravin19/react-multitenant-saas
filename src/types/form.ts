@@ -49,7 +49,8 @@ export interface BaseFieldConfig {
   readOnly?: boolean;
   visibleWhen?: { field: string; value: string | boolean };
   computed?: {
-    calculate: (values: Record<string, unknown>) => number;
+    dependsOn?: string[];
+    calculate: (values: Record<string, unknown>) => number | string;
   };
 }
 
