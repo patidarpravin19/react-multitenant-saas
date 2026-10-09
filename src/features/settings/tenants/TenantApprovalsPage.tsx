@@ -49,7 +49,8 @@ export function TenantApprovalsPage() {
     setLoading(true);
     setError(null);
     try {
-      const pending = await apiClient.get<PendingTenant[]>("/tenants/pending");
+      const pending = await apiClient.get<PendingTenant[]>("/admin/tenants/pending")
+        .catch(() => apiClient.get<PendingTenant[]>("/tenants/pending"));
       if (!Array.isArray(pending)) throw new Error("The service returned an invalid pending registrations list.");
       setTenants(pending);
     } catch (err) {
@@ -77,8 +78,10 @@ export function TenantApprovalsPage() {
     setSuccessMessage(null);
     try {
       const res = await apiClient.post<{ ownerUsername: string; message: string }>(
+        `/admin/tenants/${tenant.id}/approve`, {}
+      ).catch(() => apiClient.post<{ ownerUsername: string; message: string }>(
         `/tenants/${tenant.id}/approve`, {}
-      );
+      ));
 
       setSuccessMessage(
         `Store "${tenant.name}" approved successfully! Schema "${tenant.schemaName}" provisioned, seed ledgers initialized, and owner account "${res.ownerUsername || "admin"}" activated.`
@@ -99,9 +102,11 @@ export function TenantApprovalsPage() {
     setError(null);
     setSuccessMessage(null);
     try {
-      await apiClient.post(`/tenants/${rejectModalTenant.id}/reject`, {
+      await apiClient.post(`/admin/tenants/${rejectModalTenant.id}/reject`, {
         reason: rejectReason.trim() || undefined,
-      });
+      }).catch(() => apiClient.post(`/tenants/${rejectModalTenant.id}/reject`, {
+        reason: rejectReason.trim() || undefined,
+      }));
 
       setSuccessMessage(`Registration for "${rejectModalTenant.name}" has been rejected.`);
       setRejectModalTenant(null);

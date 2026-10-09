@@ -9,7 +9,7 @@ import {
 } from "react";
 import { setUnauthorizedHandler } from "../../services/apiClient";
 import { authService } from "./auth.service";
-import type { AuthSession, LoginInput } from "./auth.types";
+import type { AdminLoginInput, AuthSession, LoginInput } from "./auth.types";
 
 const sessionKey = "auth_session";
 const tokenKey = "auth_token";
@@ -31,7 +31,9 @@ function readStoredSession(): AuthSession | null {
 interface AuthContextValue {
   session: AuthSession | null;
   isAuthenticated: boolean;
+  isProductOwner: boolean;
   login: (input: LoginInput) => Promise<void>;
+  adminLogin: (input: AdminLoginInput) => Promise<void>;
   logout: () => Promise<void>;
 }
 
@@ -52,6 +54,16 @@ export function AuthProvider({ children }: PropsWithChildren) {
     localStorage.setItem(tokenKey, nextSession.token);
     localStorage.setItem(sessionKey, JSON.stringify(nextSession));
     localStorage.setItem(tenantIdKey, nextSession.tenantId ?? "");
+    setSession(nextSession);
+  }, []);
+
+  const adminLogin = useCallback(async (input: AdminLoginInput) => {
+    const nextSession = await authService.adminLogin(input);
+    localStorage.setItem(tokenKey, nextSession.token);
+    localStorage.setItem(sessionKey, JSON.stringify(nextSession));
+    if (nextSession.tenantId) {
+      localStorage.setItem(tenantIdKey, nextSession.tenantId);
+    }
     setSession(nextSession);
   }, []);
 
@@ -95,9 +107,18 @@ export function AuthProvider({ children }: PropsWithChildren) {
     [clearSession],
   );
 
+  const isProductOwner = Boolean(session?.isProductOwner || session?.user?.isProductOwner);
+
   const value = useMemo<AuthContextValue>(
-    () => ({ session, isAuthenticated: session !== null, login, logout }),
-    [login, logout, session],
+    () => ({
+      session,
+      isAuthenticated: session !== null,
+      isProductOwner,
+      login,
+      adminLogin,
+      logout,
+    }),
+    [adminLogin, isProductOwner, login, logout, session],
   );
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

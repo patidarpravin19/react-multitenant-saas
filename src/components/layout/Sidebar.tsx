@@ -1,9 +1,10 @@
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, ShieldCheck } from "lucide-react";
 
-import { sidebarConfiguration } from "../../config/sidebar.config";
+import { sidebarConfiguration, productOwnerSidebarConfiguration } from "../../config/sidebar.config";
 
 import { SidebarMenuItem } from "../navigation/SidebarMenuItem";
 import { useAccountingAccess } from "../../features/accounting/AccountingAccess";
+import { useAuth } from "../../features/auth/AuthContext";
 import type { NavigationItem } from "../../types/navigation";
 
 interface SidebarProps {
@@ -14,9 +15,16 @@ interface SidebarProps {
 
 export function Sidebar({ collapsed, onToggle }: SidebarProps) {
   const { isOwner } = useAccountingAccess();
+  const { isProductOwner } = useAuth();
+
   const filter = (items: NavigationItem[]): NavigationItem[] => items
     .filter(item => item.id !== "staff-access" || isOwner)
     .map(item => ({ ...item, children: item.children ? filter(item.children) : undefined }));
+
+  const activeNavItems = isProductOwner
+    ? productOwnerSidebarConfiguration
+    : filter(sidebarConfiguration);
+
   return (
     <aside
       className={[
@@ -38,8 +46,20 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
           py-4
         "
       >
+        {isProductOwner && !collapsed && (
+          <div className="mb-4 rounded-xl border border-indigo-200 bg-indigo-50/70 p-3 text-xs dark:border-indigo-900/60 dark:bg-indigo-950/40">
+            <div className="flex items-center gap-1.5 font-bold text-indigo-900 dark:text-indigo-200">
+              <ShieldCheck className="size-4 text-indigo-600 dark:text-indigo-400" />
+              <span>Product Owner Console</span>
+            </div>
+            <p className="mt-1 text-[11px] text-indigo-700 dark:text-indigo-300">
+              Platform & multi-tenant control plane
+            </p>
+          </div>
+        )}
+
         <nav aria-label="Main navigation" className="space-y-1">
-          {filter(sidebarConfiguration).map((item) => (
+          {activeNavItems.map((item) => (
             <SidebarMenuItem key={item.id} item={item} collapsed={collapsed} />
           ))}
         </nav>

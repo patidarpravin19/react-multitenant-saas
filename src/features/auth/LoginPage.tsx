@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, type FieldValues } from "react-hook-form";
-import { LogIn } from "lucide-react";
+import { LogIn, ShieldCheck } from "lucide-react";
 import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "./AuthContext";
 import { ApiError } from "../../services/apiClient";
@@ -65,11 +65,22 @@ export function LoginPage() {
             <Link to="/forgot-password" className="font-medium text-[var(--tenant-primary)] hover:underline">Forgot password?</Link>
             <Link to="/register-tenant" className="font-semibold text-blue-600 hover:underline dark:text-blue-400">Register New Store</Link>
           </div>
-          <div className="pt-3 border-t border-slate-100 text-center text-xs text-slate-500 dark:border-slate-800">
-            <span>New business owner? </span>
-            <Link to="/register-tenant" className="font-semibold text-[var(--tenant-primary)] hover:underline">
-              Create store workspace
-            </Link>
+          <div className="pt-3 border-t border-slate-100 text-center text-xs text-slate-500 dark:border-slate-800 space-y-2">
+            <div>
+              <span>New business owner? </span>
+              <Link to="/register-tenant" className="font-semibold text-[var(--tenant-primary)] hover:underline">
+                Create store workspace
+              </Link>
+            </div>
+            <div>
+              <Link
+                to="/admin/login"
+                className="inline-flex items-center gap-1.5 font-semibold text-slate-600 hover:text-indigo-600 dark:text-slate-400 dark:hover:text-indigo-300 transition"
+              >
+                <ShieldCheck className="size-3.5" />
+                <span>Product Owner / Platform Sign In</span>
+              </Link>
+            </div>
           </div>
         </form>
       </section>

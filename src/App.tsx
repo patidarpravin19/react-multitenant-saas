@@ -30,11 +30,23 @@ import { purchaseRoutes } from "./features/purchase/routes/PurchaseRoutes";
 import { saleRoutes } from "./features/sale/routes/SaleRoutes";
 import { APP_ROUTES } from "./config/routes";
 import { DashboardPage } from "./features/dashboard/pages/DashboardPage";
+import { AdminLoginPage } from "./features/auth/AdminLoginPage";
+import { useAuth } from "./features/auth/AuthContext";
+import { ProductOwnerDashboardPage } from "./features/admin/ProductOwnerDashboardPage";
+import { TenantDirectoryPage } from "./features/admin/TenantDirectoryPage";
+import { DatabaseMigrationsPage } from "./features/admin/DatabaseMigrationsPage";
+import { SystemSettingsPage } from "./features/admin/SystemSettingsPage";
+
+function RootDashboard() {
+  const { isProductOwner } = useAuth();
+  return isProductOwner ? <ProductOwnerDashboardPage /> : <DashboardPage />;
+}
 
 export default function App() {
   return (
     <Routes>
       <Route path="/login" element={<LoginPage />} />
+      <Route path="/admin/login" element={<AdminLoginPage />} />
       <Route path="/register-tenant" element={<RegisterTenantPage />} />
       <Route path="/register" element={<RegisterTenantPage />} />
       <Route path="/accept-invitation" element={<AcceptInvitationPage />} />
@@ -42,7 +54,7 @@ export default function App() {
       <Route path="/reset-password" element={<ResetPasswordPage />} />
       <Route element={<ProtectedRoute />}>
         <Route element={<AppShell />}>
-          <Route path="/" element={<DashboardPage />} />
+          <Route path="/" element={<RootDashboard />} />
           <Route path="/account/change-password" element={<ChangePasswordPage />} />
           <Route path={APP_ROUTES.generalLedger} element={<GeneralLedgerPage />} />
           <Route path={APP_ROUTES.accountingAging} element={<AgingReportPage />} />
@@ -74,7 +86,14 @@ export default function App() {
           <Route path={APP_ROUTES.settings.customerBill} element={<CustomerBillSettingsPage />} />
           <Route path={APP_ROUTES.settings.auditLogs} element={<AuditLogsPage />} />
           <Route path={APP_ROUTES.settings.tenantApprovals} element={<TenantApprovalsPage />} />
-          <Route path="/admin/tenants" element={<TenantApprovalsPage />} />
+
+          {/* Product Owner Console Routes */}
+          <Route path="/admin" element={<Navigate to={APP_ROUTES.admin.dashboard} replace />} />
+          <Route path={APP_ROUTES.admin.dashboard} element={<ProductOwnerDashboardPage />} />
+          <Route path={APP_ROUTES.admin.tenants} element={<TenantDirectoryPage />} />
+          <Route path={APP_ROUTES.admin.pendingApprovals} element={<TenantApprovalsPage />} />
+          <Route path={APP_ROUTES.admin.databaseMigrations} element={<DatabaseMigrationsPage />} />
+          <Route path={APP_ROUTES.admin.systemSettings} element={<SystemSettingsPage />} />
 
           <Route path="**" element={<Navigate to="/" replace />} />
         </Route>

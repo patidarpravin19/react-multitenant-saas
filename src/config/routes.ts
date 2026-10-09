@@ -104,4 +104,13 @@ export const APP_ROUTES = {
     },
     tenantApprovals: "/settings/tenant-approvals",
   },
+
+  admin: {
+    dashboard: "/admin/dashboard",
+    tenants: "/admin/tenants",
+    pendingApprovals: "/admin/tenants/pending",
+    databaseMigrations: "/admin/database-migrations",
+    systemSettings: "/admin/system-settings",
+    login: "/admin/login",
+  },
 } as const;

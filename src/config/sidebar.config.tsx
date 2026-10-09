@@ -22,10 +22,47 @@ import {
   FileSpreadsheet,
   FileText,
   ShieldCheck,
+  Building2,
+  Database,
+  Server,
+  Clock,
 } from "lucide-react";
 
 import type { NavigationItem } from "../types/navigation";
 import { APP_ROUTES } from "./routes";
+
+export const productOwnerSidebarConfiguration: NavigationItem[] = [
+  {
+    id: "admin-dashboard",
+    label: "Platform Overview",
+    path: APP_ROUTES.admin.dashboard,
+    icon: LayoutDashboard,
+  },
+  {
+    id: "admin-approvals",
+    label: "Store Approvals",
+    path: APP_ROUTES.admin.pendingApprovals,
+    icon: ShieldCheck,
+  },
+  {
+    id: "admin-tenants",
+    label: "Tenant Directory",
+    path: APP_ROUTES.admin.tenants,
+    icon: Building2,
+  },
+  {
+    id: "admin-migrations",
+    label: "Database Migrations",
+    path: APP_ROUTES.admin.databaseMigrations,
+    icon: Database,
+  },
+  {
+    id: "admin-settings",
+    label: "System Settings",
+    path: APP_ROUTES.admin.systemSettings,
+    icon: Server,
+  },
+];
 
 export const sidebarConfiguration: NavigationItem[] = [
   {

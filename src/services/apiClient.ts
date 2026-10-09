@@ -56,9 +56,18 @@ function notifyLoading() {
 }
 
 function toUrl(path: string) {
-  return /^https?:\/\//.test(path)
-    ? path
-    : `${baseUrl}${path.startsWith("/") ? path : `/${path}`}`;
+  if (/^https?:\/\//.test(path)) return path;
+
+  let normalized = path.startsWith("/") ? path : `/${path}`;
+
+  // Prevent double /api/api prefix if baseUrl ends with /api
+  if (baseUrl.endsWith("/api") && normalized.startsWith("/api/")) {
+    normalized = normalized.substring(4);
+  } else if (!baseUrl.endsWith("/api") && !normalized.startsWith("/api/")) {
+    normalized = `/api${normalized}`;
+  }
+
+  return `${baseUrl}${normalized}`;
 }
 
 async function parseBody(response: Response): Promise<unknown> {
@@ -164,10 +173,11 @@ addRequestInterceptor((_, config) => {
   if (config.authenticate === false) return config;
   const token = localStorage.getItem("auth_token");
   if (!token) return config;
-  const tenantId = localStorage.getItem("tenant_id");
-  if (!tenantId) return config;
   const headers = new Headers(config.headers);
-  headers.set("X-Tenant-ID", tenantId);
+  const tenantId = localStorage.getItem("tenant_id");
+  if (tenantId && tenantId !== "00000000-0000-0000-0000-000000000000" && tenantId !== "system") {
+    headers.set("X-Tenant-ID", tenantId);
+  }
   headers.set("Authorization", `Bearer ${token}`);
   return { ...config, headers };
 });
