@@ -43,7 +43,6 @@ export function DatabaseMigrationsPage() {
     setError(null);
     try {
       const data = await apiClient.get<MigrationStatusResult>("/admin/migrations/status")
-        .catch(() => apiClient.get<MigrationStatusResult>("/tenants/migrations/status"))
         .catch(() => ({
           masterSchema: "tenant",
           tenantSchemas: [],

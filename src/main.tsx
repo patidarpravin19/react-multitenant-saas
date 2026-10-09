@@ -1,4 +1,3 @@
-import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import App from "./App";
 import { TenantProvider } from "./context/TenantContext";
@@ -17,19 +16,17 @@ if (!root) {
 }
 
 createRoot(root).render(
-  <StrictMode>
-    <ThemeProvider>
-      <NotificationProvider position="top-right" maxToasts={5}>
-        <TenantProvider tenant={defaultTenant}>
-          <ApiLoadingProvider>
-            <BrowserRouter>
-              <AuthProvider>
-                <App />
-              </AuthProvider>
-            </BrowserRouter>
-          </ApiLoadingProvider>
-        </TenantProvider>
-      </NotificationProvider>
-    </ThemeProvider>
-  </StrictMode>,
+  <ThemeProvider>
+    <NotificationProvider position="top-right" maxToasts={5}>
+      <TenantProvider tenant={defaultTenant}>
+        <ApiLoadingProvider>
+          <BrowserRouter>
+            <AuthProvider>
+              <App />
+            </AuthProvider>
+          </BrowserRouter>
+        </ApiLoadingProvider>
+      </TenantProvider>
+    </NotificationProvider>
+  </ThemeProvider>,
 );

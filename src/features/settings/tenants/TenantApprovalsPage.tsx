@@ -49,8 +49,7 @@ export function TenantApprovalsPage() {
     setLoading(true);
     setError(null);
     try {
-      const pending = await apiClient.get<PendingTenant[]>("/admin/tenants/pending")
-        .catch(() => apiClient.get<PendingTenant[]>("/tenants/pending"));
+      const pending = await apiClient.get<PendingTenant[]>("/admin/tenants/pending");
       if (!Array.isArray(pending)) throw new Error("The service returned an invalid pending registrations list.");
       setTenants(pending);
     } catch (err) {

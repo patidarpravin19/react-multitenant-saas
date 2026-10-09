@@ -45,7 +45,6 @@ export function SystemSettingsPage() {
       const data = await apiClient.get<AdminSystemSettings>("/admin/system-settings");
       setSettings(data);
     } catch {
-      // Fallback defaults
       setSettings({
         offlineMode: true,
         databaseProvider: "PostgreSQL (Npgsql)",
@@ -69,7 +68,15 @@ export function SystemSettingsPage() {
   };
 
   useEffect(() => {
-    fetchSettings();
+    let mounted = true;
+    const run = async () => {
+      if (!mounted) return;
+      await fetchSettings();
+    };
+    void run();
+    return () => {
+      mounted = false;
+    };
   }, []);
 
   const copyRegistrationLink = () => {

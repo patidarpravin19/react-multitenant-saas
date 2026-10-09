@@ -63,9 +63,7 @@ export function TenantDirectoryPage() {
     setLoading(true);
     setError(null);
     try {
-      const data = await apiClient.get<AdminTenant[]>("/admin/tenants")
-        .catch(() => apiClient.get<AdminTenant[]>("/tenants/all"))
-        .catch(() => apiClient.get<AdminTenant[]>("/tenants"));
+      const data = await apiClient.get<AdminTenant[]>("/admin/tenants");
       setTenants(Array.isArray(data) ? data : []);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load tenant directory.");

@@ -55,19 +55,15 @@ export function ProductOwnerDashboardPage() {
     setError(null);
     try {
       const [metricsRes, pendingRes] = await Promise.all([
-        apiClient.get<TenantMetrics>("/admin/metrics")
-          .catch(() => apiClient.get<TenantMetrics>("/tenants/metrics"))
-          .catch(() => ({
-            totalTenants: 1,
-            pendingApprovals: 0,
-            activeTenants: 1,
-            suspendedTenants: 0,
-            rejectedTenants: 0,
-            offlineMode: true,
-          })),
-        apiClient.get<PendingTenant[]>("/admin/tenants/pending")
-          .catch(() => apiClient.get<PendingTenant[]>("/tenants/pending"))
-          .catch(() => []),
+        apiClient.get<TenantMetrics>("/admin/metrics").catch(() => ({
+          totalTenants: 1,
+          pendingApprovals: 0,
+          activeTenants: 1,
+          suspendedTenants: 0,
+          rejectedTenants: 0,
+          offlineMode: true,
+        })),
+        apiClient.get<PendingTenant[]>("/admin/tenants/pending").catch(() => []),
       ]);
 
       setMetrics(metricsRes);
