@@ -142,3 +142,27 @@ test("authentication refresh preserves the money retry key", async ({page}) => {
   expect(keys).toHaveLength(2); expect(keys[0]).toMatch(/^[0-9a-f-]{36}$/); expect(keys[1]).toBe(keys[0]);
   expect(outcome).toMatchObject({invoice:{id:"refreshed-id"}});
 });
+
+test("accessory inventory form creates SKU and receives supplier stock", async ({page}) => {
+ const posted=await fixture(page);
+ const sku={id:"sku1",code:"CHARGER",name:"Charger",hsnSac:"8504",unitOfMeasure:"NOS",quantity:0,inventoryValue:0};
+ await page.route("**/api/inventory/skus",route=>route.request().method()==="GET" ? route.fulfill({contentType:"application/json",body:JSON.stringify([sku])}) : route.fallback());
+ for(const path of ["inventory/movements","products","vendors","taxes"]){
+  await page.route(`**/api/${path}?**`,route=>route.fulfill({contentType:"application/json",body:JSON.stringify({items:path==="vendors"?[{id:"v1",name:"Supplier"}]:path==="taxes"?[{id:"t1",cgst:9,sgst:9}]:[],page:1,totalPages:1,totalCount:0})}));
+ }
+ await page.goto("/purchase/stock-movements");
+ await page.getByLabel("SKU code",{exact:true}).fill("CHARGER");await page.getByLabel("SKU name",{exact:true}).fill("Charger");await page.getByLabel("SKU HSN",{exact:true}).fill("8504");
+ await page.getByRole("button",{name:"Create SKU",exact:true}).click();
+ await expect.poll(()=>posted.filter(p=>p.path==="/inventory/skus").length).toBe(1);
+ const receive=page.locator("form").filter({has:page.getByRole("button",{name:"Receive stock",exact:true})});
+ await receive.getByLabel("Stock SKU",{exact:true}).selectOption("sku1");await receive.getByLabel("SKU supplier",{exact:true}).selectOption("v1");await receive.getByLabel("Supplier bill",{exact:true}).fill("SKU-P1");
+ await receive.getByLabel("Stock quantity",{exact:true}).fill("10");await receive.getByLabel("SKU unit cost",{exact:true}).fill("12.25");await receive.getByLabel("Purchase GST rate",{exact:true}).selectOption("t1");
+ await receive.getByRole("button",{name:"Receive stock",exact:true}).click();
+ await expect.poll(()=>posted.filter(p=>p.path==="/inventory/skus/receipts").length).toBe(1);
+ expect(posted.find(p=>p.path==="/inventory/skus/receipts")?.body).toMatchObject({skuId:"sku1",vendorId:"v1",billNumber:"SKU-P1",quantity:10,unitCost:12.25,taxId:"t1",interState:false});
+});
+
+test("missing supplier state is displayed explicitly on invoice", async ({page}) => {
+ await fixture(page);await page.goto("/sales/invoices/new");
+ await expect(page.getByText(/Not configured.*set Home State in Customer Bill settings/)).toBeVisible();
+});

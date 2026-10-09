@@ -14,7 +14,11 @@ import {
   Clock,
   ShieldCheck,
   CheckCircle2,
-  AlertCircle
+  AlertCircle,
+  Lightbulb,
+  Sparkles,
+  ChevronDown,
+  ChevronUp
 } from "lucide-react";
 import { Button } from "../../../components/ui/Button";
 import { apiClient } from "../../../services/apiClient";
@@ -59,6 +63,7 @@ export function PartyStatementPage() {
   // Statement data
   const [statement, setStatement] = useState<PartyStatementOfAccount | null>(null);
   const [loadingStatement, setLoadingStatement] = useState(false);
+  const [showLedgerGuide, setShowLedgerGuide] = useState(false);
   const [sellerSettings, setSellerSettings] = useState<CustomerBillTemplate>(defaultCustomerBillTemplate);
 
   // Load tenant branding settings
@@ -244,6 +249,70 @@ export function PartyStatementPage() {
         </div>
       </header>
 
+      {/* Non-Accountant Plain-English Ledger Guide Banner */}
+      <div className="no-print rounded-xl border border-indigo-200 bg-gradient-to-r from-indigo-50/90 via-sky-50/60 to-purple-50/70 p-3.5 text-xs text-indigo-950 dark:border-indigo-900/50 dark:bg-indigo-950/30 dark:text-indigo-200">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div className="flex items-center gap-2.5">
+            <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-indigo-600 text-white shadow-xs dark:bg-indigo-500">
+              <Lightbulb size={16} />
+            </span>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="font-bold text-indigo-950 dark:text-indigo-100">
+                  Plain-English Ledger Guide
+                </span>
+                <span className="rounded-full bg-indigo-100 px-2 py-0.5 text-[10px] font-semibold text-indigo-700 dark:bg-indigo-900/70 dark:text-indigo-300">
+                  <Sparkles size={10} className="inline mr-0.5" /> Easy for Non-Accountants
+                </span>
+              </div>
+              <p className="text-[11px] text-indigo-800/80 dark:text-indigo-300/80">
+                Understand Debit (+), Credit (-), and Closing Balance without formal accounting training.
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => setShowLedgerGuide((prev) => !prev)}
+            className="inline-flex items-center gap-1 rounded-lg border border-indigo-300/70 bg-white px-2.5 py-1 text-xs font-semibold text-indigo-800 shadow-2xs hover:bg-indigo-50 dark:border-indigo-700 dark:bg-slate-800 dark:text-indigo-200 dark:hover:bg-slate-700"
+          >
+            {showLedgerGuide ? "Hide Guide" : "💡 How to Read Ledgers"}
+            {showLedgerGuide ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+          </button>
+        </div>
+
+        {showLedgerGuide && (
+          <div className="mt-3 grid grid-cols-1 gap-2.5 border-t border-indigo-200/70 pt-3 sm:grid-cols-2 lg:grid-cols-3 dark:border-indigo-900/50">
+            <div className="rounded-lg bg-white/80 p-2.5 shadow-2xs dark:bg-slate-900/60">
+              <span className="font-semibold text-blue-900 dark:text-blue-300">Customer (Debtor) Statements</span>
+              <p className="mt-1 text-[11px] leading-relaxed text-slate-600 dark:text-slate-300">
+                • <strong>Debit (+)</strong>: Goods or phones you sold to them on bill.<br />
+                • <strong>Credit (-)</strong>: Payments they gave you (Cash/UPI).<br />
+                • <strong>Closing Dr</strong>: Customer still owes you this money.<br />
+                • <strong>Closing Cr</strong>: Customer gave you advance store credit.
+              </p>
+            </div>
+            <div className="rounded-lg bg-white/80 p-2.5 shadow-2xs dark:bg-slate-900/60">
+              <span className="font-semibold text-purple-900 dark:text-purple-300">Vendor (Creditor) Statements</span>
+              <p className="mt-1 text-[11px] leading-relaxed text-slate-600 dark:text-slate-300">
+                • <strong>Credit (+)</strong>: Stock you purchased from supplier.<br />
+                • <strong>Debit (-)</strong>: Payments you sent to supplier.<br />
+                • <strong>Closing Cr</strong>: You still owe this money to supplier.<br />
+                • <strong>Closing Dr</strong>: You gave advance payment to supplier.
+              </p>
+            </div>
+            <div className="rounded-lg bg-white/80 p-2.5 shadow-2xs dark:bg-slate-900/60">
+              <span className="font-semibold text-emerald-900 dark:text-emerald-300">Aging & Overdue Insights</span>
+              <p className="mt-1 text-[11px] leading-relaxed text-slate-600 dark:text-slate-300">
+                • <strong>0–30 Days (Green)</strong>: Recent, normal business cycle.<br />
+                • <strong>31–60 Days (Blue)</strong>: Due soon, send friendly reminder.<br />
+                • <strong>61–90 Days (Amber)</strong>: Overdue, follow up phone call.<br />
+                • <strong>90+ Days (Rose)</strong>: Critical overdue, prioritize recovery.
+              </p>
+            </div>
+          </div>
+        )}
+      </div>
+
       {/* Filter and Party Selector Bar (Hidden on print) */}
       <div className="no-print rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-12">
@@ -390,6 +459,32 @@ export function PartyStatementPage() {
 
       {!loadingStatement && statement && (
         <>
+          {/* Action Suggestion Card */}
+          {statement.partyType === "Customer" && statement.closingBalance > 0 && statement.closingBalanceSide === "Dr" && (
+            <div className="no-print flex flex-wrap items-center justify-between gap-2 rounded-xl border border-amber-200 bg-amber-50/90 p-3 text-xs text-amber-950 dark:border-amber-900/60 dark:bg-amber-950/40 dark:text-amber-200">
+              <div className="flex items-center gap-2">
+                <Sparkles size={16} className="text-amber-600 dark:text-amber-400 shrink-0" />
+                <div>
+                  <strong>💡 Suggested Next Action:</strong> This customer has an outstanding balance of{" "}
+                  <span className="font-extrabold text-amber-900 dark:text-amber-100">{currency(statement.closingBalance)}</span>.
+                </div>
+              </div>
+              <Link to={`${APP_ROUTES.sale.invoices.list}?action=multipay&customerId=${encodeURIComponent(statement.partyId)}`}>
+                <Button size="sm" className="gap-1.5 text-xs">
+                  Collect Payment via Multi-Pay <ArrowRight size={13} />
+                </Button>
+              </Link>
+            </div>
+          )}
+          {statement.partyType === "Customer" && statement.closingBalance === 0 && (
+            <div className="no-print flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50/90 p-3 text-xs text-emerald-950 dark:border-emerald-900/60 dark:bg-emerald-950/40 dark:text-emerald-200">
+              <CheckCircle2 size={16} className="text-emerald-600 dark:text-emerald-400 shrink-0" />
+              <div>
+                <strong>✨ All Settled:</strong> This customer has a <strong>Zero Balance</strong>. All past bills are fully paid!
+              </div>
+            </div>
+          )}
+
           {/* Key Stat Cards (Screen View) */}
           <div className="no-print grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {/* Opening Balance Card */}

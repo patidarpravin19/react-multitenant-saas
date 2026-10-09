@@ -17,7 +17,8 @@ import {
   ShieldAlert,
   Zap,
   Sparkles,
-  ArrowUpRight
+  ArrowUpRight,
+  Lightbulb
 } from "lucide-react";
 import { Button } from "../../../components/ui/Button";
 import { apiClient } from "../../../services/apiClient";
@@ -35,6 +36,7 @@ export function DashboardPage() {
   const [data, setData] = useState<DashboardSummary | null>(null);
   const [loading, setLoading] = useState(true);
   const [lastRefreshed, setLastRefreshed] = useState<Date>(new Date());
+  const [showStoreGuide, setShowStoreGuide] = useState(false);
 
   const fetchSummary = useCallback(async () => {
     setLoading(true);
@@ -112,6 +114,14 @@ export function DashboardPage() {
             <RefreshCw className={`size-3.5 ${loading ? "animate-spin" : ""}`} />
             Refresh <span className="hidden text-[10px] text-slate-400 sm:inline">[Alt+R]</span>
           </Button>
+          <Button
+            variant="secondary"
+            onClick={() => setShowStoreGuide((prev) => !prev)}
+            className="flex items-center gap-1.5 border-indigo-200 bg-indigo-50 text-xs font-semibold text-indigo-700 hover:bg-indigo-100 dark:border-indigo-800 dark:bg-indigo-950/60 dark:text-indigo-300"
+          >
+            <Lightbulb className="size-3.5 text-indigo-600 dark:text-indigo-400" />
+            {showStoreGuide ? "Hide Guide" : "💡 Shopkeeper's Guide"}
+          </Button>
           <Link to={APP_ROUTES.sale.invoices.add}>
             <Button className="flex items-center gap-1.5 text-xs">
               <PlusCircle className="size-4" />
@@ -120,6 +130,69 @@ export function DashboardPage() {
           </Link>
         </div>
       </div>
+
+      {/* 4-Step Shopkeeper Guide Banner */}
+      {showStoreGuide && (
+        <div className="rounded-xl border border-indigo-200 bg-gradient-to-r from-indigo-50/95 via-sky-50/80 to-purple-50/90 p-4 text-xs text-indigo-950 shadow-sm dark:border-indigo-900/60 dark:bg-indigo-950/40 dark:text-indigo-200">
+          <div className="flex items-center justify-between border-b border-indigo-200/60 pb-2.5 dark:border-indigo-900/40">
+            <div className="flex items-center gap-2">
+              <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-indigo-600 text-white shadow-xs dark:bg-indigo-500">
+                <Lightbulb size={16} />
+              </span>
+              <div>
+                <h3 className="text-sm font-bold text-indigo-950 dark:text-indigo-100">
+                  Shopkeeper's 4-Step Daily Store Workflow
+                </h3>
+                <p className="text-[11px] text-indigo-800/80 dark:text-indigo-300/80">
+                  Run your entire mobile store smoothly without any formal accounting background.
+                </p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => setShowStoreGuide(false)}
+              className="text-xs font-semibold text-indigo-700 hover:underline dark:text-indigo-300"
+            >
+              Close
+            </button>
+          </div>
+
+          <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="rounded-lg bg-white/90 p-3 shadow-2xs dark:bg-slate-900/80">
+              <span className="flex items-center gap-1.5 font-bold text-indigo-900 dark:text-indigo-200">
+                <Boxes size={15} className="text-blue-500" /> 1. Buy & Receive Stock
+              </span>
+              <p className="mt-1.5 text-[11px] leading-relaxed text-slate-600 dark:text-slate-300">
+                Enter phone purchases under <strong>Purchase &gt; Products</strong> with IMEI serial numbers. Stock increases immediately with accurate cost tracking.
+              </p>
+            </div>
+            <div className="rounded-lg bg-white/90 p-3 shadow-2xs dark:bg-slate-900/80">
+              <span className="flex items-center gap-1.5 font-bold text-indigo-900 dark:text-indigo-200">
+                <PlusCircle size={15} className="text-emerald-500" /> 2. Fast Customer Billing
+              </span>
+              <p className="mt-1.5 text-[11px] leading-relaxed text-slate-600 dark:text-slate-300">
+                Hit <strong>[Alt+I]</strong>. Type customer mobile, pick phone IMEI from stock. Indian GST splits automatically based on customer state. Hit <strong>[Ctrl+Enter]</strong> to print!
+              </p>
+            </div>
+            <div className="rounded-lg bg-white/90 p-3 shadow-2xs dark:bg-slate-900/80">
+              <span className="flex items-center gap-1.5 font-bold text-indigo-900 dark:text-indigo-200">
+                <WalletCards size={15} className="text-purple-500" /> 3. Smart Multi-Pay
+              </span>
+              <p className="mt-1.5 text-[11px] leading-relaxed text-slate-600 dark:text-slate-300">
+                Hit <strong>[Alt+M]</strong>. When a customer pays a lumpsum against old bills, the system clears their oldest bills first (FIFO) and saves extra as advance store credit.
+              </p>
+            </div>
+            <div className="rounded-lg bg-white/90 p-3 shadow-2xs dark:bg-slate-900/80">
+              <span className="flex items-center gap-1.5 font-bold text-indigo-900 dark:text-indigo-200">
+                <FileText size={15} className="text-amber-500" /> 4. Party Ledger (SOA)
+              </span>
+              <p className="mt-1.5 text-[11px] leading-relaxed text-slate-600 dark:text-slate-300">
+                Hit <strong>[Alt+P]</strong>. View chronological customer and vendor statements with running balances and color-coded overdue aging (0-30, 31-60, 61-90 days).
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Quick Launch Hotbar */}
       <div className="rounded-xl border border-slate-200/90 bg-slate-50/70 p-3 shadow-sm dark:border-slate-800 dark:bg-slate-900/50">
@@ -298,6 +371,37 @@ export function DashboardPage() {
           </div>
         </div>
       </div>
+
+      {/* Smart Proactive Action Suggestions */}
+      {metrics && (metrics.totalReceivables > 0 || metrics.netGstLiability > 0) && (
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-indigo-100 bg-indigo-50/60 p-3.5 text-xs text-indigo-950 dark:border-indigo-900/40 dark:bg-indigo-950/30 dark:text-indigo-200">
+          <div className="flex items-center gap-2">
+            <Sparkles size={16} className="text-indigo-600 dark:text-indigo-400 shrink-0" />
+            <div>
+              <span className="font-bold text-indigo-950 dark:text-indigo-100">💡 Smart Store Insights:</span>
+              <span className="ml-1 text-indigo-900/90 dark:text-indigo-300">
+                {metrics.totalReceivables > 0
+                  ? `You have ${formatCurrency(metrics.totalReceivables)} pending across ${metrics.unpaidInvoicesCount} customer bill(s). Consider running Multi-Pay to clear dues.`
+                  : `Your sales ledger is healthy and all customer bills are settled!`}
+              </span>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            {metrics.totalReceivables > 0 && (
+              <Link to={`${APP_ROUTES.sale.invoices.list}?action=multipay`}>
+                <Button size="sm" className="gap-1 text-xs">
+                  <WalletCards size={13} /> Settle Customer Dues
+                </Button>
+              </Link>
+            )}
+            <Link to={APP_ROUTES.taxReports}>
+              <Button size="sm" variant="secondary" className="gap-1 text-xs">
+                <Receipt size={13} /> Review GST
+              </Button>
+            </Link>
+          </div>
+        </div>
+      )}
 
       {/* Main Grid: Left Recent Invoices + Right Intelligence & Watchlist */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">

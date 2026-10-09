@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, type FormEvent } from "react";
-import { X, CheckCircle2, DollarSign, ArrowRight, Zap, RefreshCw, AlertCircle, FileText } from "lucide-react";
+import { X, CheckCircle2, DollarSign, ArrowRight, Zap, RefreshCw, AlertCircle, FileText, Sparkles, Lightbulb } from "lucide-react";
 import { Button } from "../../../../components/ui/Button";
 import { apiClient } from "../../../../services/apiClient";
 import { useNotifications } from "../../../../context/NotificationContext";
@@ -123,6 +123,21 @@ export function MultiInvoicePaymentModal({ initialCustomerId, onClose, onSuccess
   }, [effectiveAllocations]);
 
   const unallocatedAdvance = Math.max(0, Number(paymentAmount || 0) - totalAllocated);
+
+  const settlementStats = useMemo(() => {
+    if (!summary) return { fullyPaid: 0, partiallyPaid: 0 };
+    let fullyPaid = 0;
+    let partiallyPaid = 0;
+    for (const inv of summary.invoices) {
+      const alloc = effectiveAllocations[inv.invoiceId] || 0;
+      if (alloc >= inv.balance && inv.balance > 0) {
+        fullyPaid++;
+      } else if (alloc > 0) {
+        partiallyPaid++;
+      }
+    }
+    return { fullyPaid, partiallyPaid };
+  }, [summary, effectiveAllocations]);
 
   const handleCustomAllocChange = (invoiceId: string, val: number, max: number) => {
     const clamped = Math.min(max, Math.max(0, val));
@@ -260,6 +275,26 @@ export function MultiInvoicePaymentModal({ initialCustomerId, onClose, onSuccess
               </div>
             </header>
 
+            {/* Smart Settle Assistant Banner */}
+            <div className="rounded-xl border border-indigo-200 bg-gradient-to-r from-indigo-50/90 via-sky-50/70 to-blue-50/80 p-3 text-xs text-indigo-950 dark:border-indigo-900/50 dark:bg-indigo-950/30 dark:text-indigo-200">
+              <div className="flex items-start gap-2.5">
+                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-indigo-600 text-white shadow-2xs dark:bg-indigo-500">
+                  <Lightbulb size={14} />
+                </span>
+                <div>
+                  <div className="flex items-center gap-1.5 font-bold text-indigo-950 dark:text-indigo-100">
+                    <span>💡 Smart Settle Assistant</span>
+                    <span className="rounded-full bg-indigo-100 px-2 py-0.5 text-[10px] font-semibold text-indigo-700 dark:bg-indigo-900/70 dark:text-indigo-300">
+                      Zero Accounting Knowledge Needed
+                    </span>
+                  </div>
+                  <p className="mt-1 text-[11px] leading-relaxed text-indigo-900/80 dark:text-indigo-300/80">
+                    Keep <strong>Auto-Allocate FIFO</strong> selected. The customer’s payment automatically clears their oldest outstanding bills first. Any extra money paid is safely preserved as an <strong>Advance Store Credit</strong> on their account for future visits!
+                  </p>
+                </div>
+              </div>
+            </div>
+
             {/* Customer selector */}
             <div>
               <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Customer *</label>
@@ -291,6 +326,53 @@ export function MultiInvoicePaymentModal({ initialCustomerId, onClose, onSuccess
                     {summary.invoices.length} unpaid bill(s)
                   </span>
                   <p className="text-[11px] text-slate-400">Oldest to newest invoice sequence</p>
+                </div>
+              </div>
+            )}
+
+            {/* Smart Amount Quick-Suggest Chips */}
+            {summary && summary.totalOutstanding > 0 && (
+              <div className="rounded-lg border border-slate-200 bg-slate-50 p-2.5 dark:border-slate-800 dark:bg-slate-900/50">
+                <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-700 dark:text-slate-300">
+                  <Sparkles size={13} className="text-amber-500" />
+                  <span>💡 Smart Suggestion (1-Click Fill):</span>
+                </div>
+                <div className="mt-2 flex flex-wrap items-center gap-1.5">
+                  <button
+                    type="button"
+                    onClick={() => setPaymentAmount(summary.totalOutstanding)}
+                    className="rounded-md border border-emerald-300 bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-800 hover:bg-emerald-100 dark:border-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300"
+                  >
+                    Clear All Dues ({currency(summary.totalOutstanding)})
+                  </button>
+                  {summary.totalOutstanding > 100 && (
+                    <button
+                      type="button"
+                      onClick={() => setPaymentAmount(Math.round(summary.totalOutstanding / 2))}
+                      className="rounded-md border border-blue-300 bg-blue-50 px-2.5 py-1 text-xs font-semibold text-blue-800 hover:bg-blue-100 dark:border-blue-800 dark:bg-blue-950/60 dark:text-blue-300"
+                    >
+                      Pay Half ({currency(Math.round(summary.totalOutstanding / 2))})
+                    </button>
+                  )}
+                  {Math.ceil(summary.totalOutstanding / 1000) * 1000 > summary.totalOutstanding && (
+                    <button
+                      type="button"
+                      onClick={() => setPaymentAmount(Math.ceil(summary.totalOutstanding / 1000) * 1000)}
+                      className="rounded-md border border-purple-300 bg-purple-50 px-2.5 py-1 text-xs font-semibold text-purple-800 hover:bg-purple-100 dark:border-purple-800 dark:bg-purple-950/60 dark:text-purple-300"
+                    >
+                      Round Figure ({currency(Math.ceil(summary.totalOutstanding / 1000) * 1000)})
+                    </button>
+                  )}
+                  {[1000, 2000, 5000].filter(amt => amt < summary.totalOutstanding && amt !== Math.round(summary.totalOutstanding / 2)).map(amt => (
+                    <button
+                      key={amt}
+                      type="button"
+                      onClick={() => setPaymentAmount(amt)}
+                      className="rounded-md border border-slate-300 bg-white px-2.5 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
+                    >
+                      {currency(amt)}
+                    </button>
+                  ))}
                 </div>
               </div>
             )}
@@ -364,6 +446,24 @@ export function MultiInvoicePaymentModal({ initialCustomerId, onClose, onSuccess
                 />
               </div>
             </div>
+
+            {/* Live Settlement Suggestion Preview */}
+            {summary && summary.invoices.length > 0 && paymentAmount > 0 && (
+              <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-emerald-200 bg-emerald-50/80 p-2.5 text-xs text-emerald-950 dark:border-emerald-900/50 dark:bg-emerald-950/40 dark:text-emerald-200">
+                <div className="flex items-center gap-1.5 font-medium">
+                  <CheckCircle2 size={15} className="text-emerald-600 dark:text-emerald-400" />
+                  <span>
+                    Will clear <strong>{settlementStats.fullyPaid}</strong> bill(s) completely
+                    {settlementStats.partiallyPaid > 0 ? " and partially pay 1 bill" : ""}.
+                  </span>
+                </div>
+                {unallocatedAdvance > 0 && (
+                  <span className="rounded bg-purple-100 px-2 py-0.5 font-bold text-purple-800 dark:bg-purple-950 dark:text-purple-300">
+                    + {currency(unallocatedAdvance)} saved safely as Customer Advance
+                  </span>
+                )}
+              </div>
+            )}
 
             {/* Allocation Strategy Selection */}
             <div className="flex items-center gap-4 rounded-lg bg-slate-50 p-2.5 text-xs dark:bg-slate-800/50">

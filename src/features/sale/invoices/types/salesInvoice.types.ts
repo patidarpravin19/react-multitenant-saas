@@ -36,6 +36,7 @@ export interface SalesInvoiceLine {
   lineNumber: number;
   itemType: InvoiceItemType;
   productId?: string | null;
+  skuId?: string | null;
   itemDescription: string;
   hsnSac?: string | null;
   unitOfMeasure?: string;
@@ -73,6 +74,7 @@ export interface SalesInvoiceDetails {
 export interface CreateInvoiceLineDraft {
   itemType: InvoiceItemType;
   productId?: string | null;
+  skuId?: string | null;
   itemDescription: string;
   hsnSac?: string | null;
   unitOfMeasure?: string;

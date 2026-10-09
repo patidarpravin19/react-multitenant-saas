@@ -34,7 +34,7 @@ export function CustomerHistoryPage() {
   const metrics = [
     ["Purchases", String(sales.length)],
     ["Total billed", currency(history.totalSales)],
-    ["Total received", currency(history.totalReceived)],
+    ["Net received", currency(history.totalReceived)],
     ["Outstanding", currency(history.outstandingBalance)],
   ];
 

@@ -183,7 +183,7 @@ async function request<T>(
   const headers = new Headers(config.headers);
   if (!headers.has("Accept")) headers.set("Accept", "application/json");
   let retryStorageKey: string | undefined;
-  const moneyRequest = config.method === "POST" && (path.startsWith("/sales/invoices") || path.includes("/payments") || path.includes("/receipts") || path.includes("/refunds") || path.includes("/settlements"));
+  const moneyRequest = config.method === "POST" && (path.startsWith("/sales/invoices") || path.startsWith("/inventory/skus") || path.includes("/payments") || path.includes("/receipts") || path.includes("/refunds") || path.includes("/settlements"));
   if (moneyRequest && !headers.has("Idempotency-Key")) {
     const fingerprint = new TextEncoder().encode(`${localStorage.getItem("tenant_id")}:${localStorage.getItem("auth_user_id")}:${path}:${String(config.body ?? "")}`);
     const digest = await crypto.subtle.digest("SHA-256", fingerprint);

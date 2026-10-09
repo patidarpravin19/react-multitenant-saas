@@ -1,6 +1,24 @@
+import type { StockSku } from "../../../accounting/SkuInventoryPanel";
 import { useState, useEffect, useMemo, useRef, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
-import { Plus, Trash2, ArrowLeft, Smartphone, PackagePlus, CheckCircle2, ShieldCheck, MapPin, Building2, RefreshCw, Zap } from "lucide-react";
+import {
+  Plus,
+  Trash2,
+  ArrowLeft,
+  Smartphone,
+  PackagePlus,
+  CheckCircle2,
+  ShieldCheck,
+  MapPin,
+  Building2,
+  RefreshCw,
+  Zap,
+  Lightbulb,
+  Sparkles,
+  ChevronDown,
+  ChevronUp,
+  AlertTriangle
+} from "lucide-react";
 import { Button } from "../../../../components/ui/Button";
 import { APP_ROUTES } from "../../../../config/routes";
 import { apiClient } from "../../../../services/apiClient";
@@ -27,13 +45,21 @@ export function SalesInvoiceFormPage() {
 
   // Reference data
   const [availableProducts, setAvailableProducts] = useState<SaleProductOption[]>([]);
+  const [skus, setSkus] = useState<StockSku[]>([]);
+  useEffect(() => { void apiClient.get<StockSku[]>("/inventory/skus").then(rows => setSkus(rows.filter(s => s.isActive !== false))).catch(e => notifications.error("Accessory stock unavailable", String(e))); }, []);
   const [taxes, setTaxes] = useState<SaleTaxOption[]>([]);
   const [sellerSettings, setSellerSettings] = useState<CustomerBillTemplate | null>(null);
   const [loadingRefData, setLoadingRefData] = useState(true);
 
-  // Customer state
+  // Customer state & Smart Dues Suggestion
   const [customerSearch, setCustomerSearch] = useState("");
   const [customerMatches, setCustomerMatches] = useState<CustomerLookupRecord[]>([]);
+  const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(null);
+  const [customerDues, setCustomerDues] = useState<{ totalOutstanding: number; invoiceCount: number } | null>(null);
+  const [customerAdvance, setCustomerAdvance] = useState<number>(0);
+  const [loadingCustomerBalance, setLoadingCustomerBalance] = useState(false);
+  const [showPlainEnglishGuide, setShowPlainEnglishGuide] = useState(false);
+
   const [customerName, setCustomerName] = useState("");
   const [customerMobile, setCustomerMobile] = useState("");
   const [customerAddress, setCustomerAddress] = useState("");
@@ -162,7 +188,7 @@ export function SalesInvoiceFormPage() {
     }
 
     return 0; // Default intra-state
-  }, [manualSupplyTypeOverride, sellerSettings?.stateCode, placeOfSupplyStateCode]);
+  }, [manualSupplyTypeOverride, sellerSettings?.stateCode, sellerSettings?.taxRegistrationNumber, placeOfSupplyStateCode]);
 
   const isInterState = effectiveSupplyType === 1;
 
@@ -185,7 +211,39 @@ export function SalesInvoiceFormPage() {
     return () => clearTimeout(timer);
   }, [customerSearch]);
 
+  const fetchCustomerBalance = async (customerId: string) => {
+    setLoadingCustomerBalance(true);
+    try {
+      const [unpaidRes, advRes] = await Promise.allSettled([
+        apiClient.get<{ totalOutstanding: number; invoices: Array<unknown> }>(`/sales/invoices/unpaid-by-customer/${customerId}`),
+        apiClient.get<Array<{ remainingAmount: number }>>(`/sales/invoices/advances/${customerId}`)
+      ]);
+
+      if (unpaidRes.status === "fulfilled" && unpaidRes.value) {
+        setCustomerDues({
+          totalOutstanding: unpaidRes.value.totalOutstanding || 0,
+          invoiceCount: unpaidRes.value.invoices?.length || 0,
+        });
+      } else {
+        setCustomerDues(null);
+      }
+
+      if (advRes.status === "fulfilled" && Array.isArray(advRes.value)) {
+        const totalAdv = advRes.value.reduce((sum, a) => sum + (Number(a.remainingAmount) || 0), 0);
+        setCustomerAdvance(totalAdv);
+      } else {
+        setCustomerAdvance(0);
+      }
+    } catch {
+      setCustomerDues(null);
+      setCustomerAdvance(0);
+    } finally {
+      setLoadingCustomerBalance(false);
+    }
+  };
+
   const selectCustomer = (c: CustomerLookupRecord) => {
+    setSelectedCustomerId(c.id);
     setCustomerName(c.name);
     setCustomerMobile(c.mobile);
     setCustomerAddress(c.address);
@@ -203,6 +261,9 @@ export function SalesInvoiceFormPage() {
     } else if (anyCustomer.stateCode) {
       handleStateChange(anyCustomer.stateCode);
     }
+
+    // Proactively fetch customer unpaid dues and advance store credit for smart suggestions
+    void fetchCustomerBalance(c.id);
   };
 
   // Line calculations taking Supply Type (IGST vs CGST+SGST) into account
@@ -371,6 +432,11 @@ export function SalesInvoiceFormPage() {
 
   const handleSubmit = async (e?: FormEvent) => {
     if (e) e.preventDefault();
+    if (sellerSettings?.taxRegistrationNumber?.trim() &&
+      (!(sellerSettings.stateCode?.trim() || /^\d{2}/.exec(sellerSettings.taxRegistrationNumber)?.[0]) || !placeOfSupplyStateCode)) {
+      notifications.error("GST state missing", "Save Home State (GST) in Settings > Customer Bill, then choose Place of Supply (State).");
+      return;
+    }
 
     if (!customerName.trim() || !customerMobile.trim() || !customerAddress.trim()) {
       notifications.error("Customer Incomplete", "Please enter customer Name, Mobile, and Address.");
@@ -413,6 +479,7 @@ export function SalesInvoiceFormPage() {
         lines: lines.map((l) => ({
           itemType: l.itemType,
           productId: l.productId || null,
+          skuId: l.skuId || null,
           itemDescription: l.itemDescription.trim(),
           hsnSac: l.hsnSac?.trim() || null,
           unitOfMeasure: l.unitOfMeasure || "NOS",
@@ -529,6 +596,67 @@ export function SalesInvoiceFormPage() {
         </div>
       </header>
 
+      {/* Smart Plain-English Guide for Non-Accountants Banner */}
+      <div className="rounded-xl border border-indigo-200 bg-gradient-to-r from-indigo-50/90 via-sky-50/60 to-purple-50/70 p-3.5 text-xs text-indigo-950 shadow-xs dark:border-indigo-900/50 dark:bg-indigo-950/30 dark:text-indigo-200">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div className="flex items-center gap-2.5">
+            <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-indigo-600 text-white shadow-xs dark:bg-indigo-500">
+              <Lightbulb size={16} />
+            </span>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="font-bold text-indigo-950 dark:text-indigo-100">
+                  Plain-English Billing Assistant
+                </span>
+                <span className="inline-flex items-center gap-0.5 rounded-full bg-indigo-100 px-2 py-0.5 text-[10px] font-semibold text-indigo-700 dark:bg-indigo-900/70 dark:text-indigo-300">
+                  <Sparkles size={10} /> Zero Accounting Knowledge Required
+                </span>
+              </div>
+              <p className="text-[11px] text-indigo-800/80 dark:text-indigo-300/80">
+                Double-entry journals, GST splits, inventory relieving, and customer ledger balances run automatically behind the scenes.
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => setShowPlainEnglishGuide((prev) => !prev)}
+            className="inline-flex items-center gap-1 rounded-lg border border-indigo-300/70 bg-white px-2.5 py-1 text-xs font-semibold text-indigo-800 shadow-2xs hover:bg-indigo-50 dark:border-indigo-700 dark:bg-slate-800 dark:text-indigo-200 dark:hover:bg-slate-700"
+          >
+            {showPlainEnglishGuide ? "Hide Guide" : "💡 How It Works (Quick Tour)"}
+            {showPlainEnglishGuide ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+          </button>
+        </div>
+
+        {showPlainEnglishGuide && (
+          <div className="mt-3 grid grid-cols-1 gap-2.5 border-t border-indigo-200/70 pt-3 sm:grid-cols-2 lg:grid-cols-4 dark:border-indigo-900/50">
+            <div className="rounded-lg bg-white/80 p-2.5 shadow-2xs dark:bg-slate-900/60">
+              <span className="font-semibold text-indigo-900 dark:text-indigo-200">1. Customer & Dues</span>
+              <p className="mt-1 text-[11px] leading-relaxed text-slate-600 dark:text-slate-300">
+                Type mobile number to find customer. The system proactively checks if they owe past bills or hold advance store credits.
+              </p>
+            </div>
+            <div className="rounded-lg bg-white/80 p-2.5 shadow-2xs dark:bg-slate-900/60">
+              <span className="font-semibold text-indigo-900 dark:text-indigo-200">2. Serialized IMEI & Stock</span>
+              <p className="mt-1 text-[11px] leading-relaxed text-slate-600 dark:text-slate-300">
+                Pick a phone from inventory. Its IMEI is locked to this invoice. Saving automatically subtracts 1 from store stock.
+              </p>
+            </div>
+            <div className="rounded-lg bg-white/80 p-2.5 shadow-2xs dark:bg-slate-900/60">
+              <span className="font-semibold text-indigo-900 dark:text-indigo-200">3. Automated GST Split</span>
+              <p className="mt-1 text-[11px] leading-relaxed text-slate-600 dark:text-slate-300">
+                No tax formulas needed. Intra-State splits CGST + SGST (50/50). Inter-State applies 100% IGST. All tax ledgers are ready for your CA.
+              </p>
+            </div>
+            <div className="rounded-lg bg-white/80 p-2.5 shadow-2xs dark:bg-slate-900/60">
+              <span className="font-semibold text-indigo-900 dark:text-indigo-200">4. 1-Click Fast Payment</span>
+              <p className="mt-1 text-[11px] leading-relaxed text-slate-600 dark:text-slate-300">
+                Click 1 button for "Full Cash", "Full UPI", or "Pay Later". Unpaid bills are safely tracked in the customer's ledger.
+              </p>
+            </div>
+          </div>
+        )}
+      </div>
+
       {/* Keyboard-Speed Assist Banner */}
       <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-amber-200 bg-amber-50/80 px-3.5 py-2.5 text-xs text-amber-950 shadow-xs dark:border-amber-900/50 dark:bg-amber-950/40 dark:text-amber-200">
         <div className="flex items-center gap-2 font-medium">
@@ -588,6 +716,46 @@ export function SalesInvoiceFormPage() {
               </div>
             )}
           </div>
+
+          {/* Proactive Customer Suggestion Badge */}
+          {(customerDues?.totalOutstanding || customerAdvance > 0 || loadingCustomerBalance) && (
+            <div className="mt-2.5 space-y-2">
+              {loadingCustomerBalance && (
+                <div className="flex items-center gap-1.5 text-[11px] text-slate-400">
+                  <RefreshCw size={12} className="animate-spin" /> Checking customer account history…
+                </div>
+              )}
+              {customerDues && customerDues.totalOutstanding > 0 && (
+                <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-amber-200 bg-amber-50/90 p-2.5 text-xs text-amber-900 dark:border-amber-900/60 dark:bg-amber-950/40 dark:text-amber-200">
+                  <div className="flex items-center gap-2">
+                    <AlertTriangle size={15} className="shrink-0 text-amber-600 dark:text-amber-400" />
+                    <div>
+                      <strong>💡 Smart Suggestion:</strong> Customer has{" "}
+                      <span className="font-extrabold text-amber-950 dark:text-amber-100">{currency(customerDues.totalOutstanding)}</span>{" "}
+                      unpaid balance across {customerDues.invoiceCount} past bill(s).
+                    </div>
+                  </div>
+                  <span className="rounded bg-amber-100 px-2 py-0.5 text-[10px] font-semibold text-amber-800 dark:bg-amber-900/60 dark:text-amber-200">
+                    Consider collecting old dues together with this bill
+                  </span>
+                </div>
+              )}
+              {customerAdvance > 0 && (
+                <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-emerald-200 bg-emerald-50/90 p-2.5 text-xs text-emerald-900 dark:border-emerald-900/60 dark:bg-emerald-950/40 dark:text-emerald-200">
+                  <div className="flex items-center gap-2">
+                    <Sparkles size={15} className="shrink-0 text-emerald-600 dark:text-emerald-400" />
+                    <div>
+                      <strong>✨ Advance Credit Available:</strong> Customer has{" "}
+                      <span className="font-extrabold text-emerald-950 dark:text-emerald-100">{currency(customerAdvance)}</span> in store credit.
+                    </div>
+                  </div>
+                  <span className="rounded bg-emerald-100 px-2 py-0.5 text-[10px] font-semibold text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-200">
+                    Can be applied to settle bills in Multi-Pay
+                  </span>
+                </div>
+              )}
+            </div>
+          )}
 
           <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div>
@@ -673,7 +841,7 @@ export function SalesInvoiceFormPage() {
               <span className="text-xs text-slate-500">Seller State:</span>
               <span className="inline-flex items-center gap-1 text-xs font-medium text-slate-700 dark:text-slate-300">
                 <Building2 size={13} className="text-slate-400" />
-                {sellerSettings?.stateName || sellerSettings?.stateCode || "Maharashtra"} ({sellerSettings?.stateCode || "27"})
+                {sellerSettings?.stateName || sellerSettings?.stateCode || (/^\d{2}/.exec(sellerSettings?.taxRegistrationNumber ?? "")?.[0]) || "Not configured — set Home State in Customer Bill settings"}
               </span>
               <span className="text-slate-300 dark:text-slate-700">|</span>
               <span className="text-xs text-slate-500">Place of Supply:</span>
@@ -748,7 +916,7 @@ export function SalesInvoiceFormPage() {
               {lines.length} lines
             </span>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <button
               type="button"
               onClick={addSerializedLine}
@@ -767,6 +935,42 @@ export function SalesInvoiceFormPage() {
             </button>
           </div>
         </div>
+
+        {skus.length > 0 && (
+          <div className="flex flex-wrap items-center gap-1.5 border-b border-slate-100 pb-2.5 pt-1 dark:border-slate-800">
+            <span className="text-[11px] font-semibold text-slate-400">💡 Quick Add Stocked Accessories:</span>
+            {skus.slice(0, 5).map((sku) => (
+              <button
+                key={sku.id}
+                type="button"
+                onClick={() => {
+                  const defaultTax = taxes[0];
+                  setLines((prev) => [
+                    ...prev,
+                    {
+                      tempId: `row_${Date.now()}_${Math.random()}`,
+                      itemType: 1,
+                      skuId: sku.id,
+                      itemDescription: sku.name,
+                      hsnSac: sku.hsnSac,
+                      unitOfMeasure: sku.unitOfMeasure || "NOS",
+                      quantity: 1,
+                      unitPrice: sku.unitCost || 0,
+                      discount: 0,
+                      taxId: defaultTax?.id,
+                      cgstRate: defaultTax?.cgst ?? 0,
+                      sgstRate: defaultTax?.sgst ?? 0,
+                      igstRate: (defaultTax?.cgst ?? 0) + (defaultTax?.sgst ?? 0),
+                    },
+                  ]);
+                }}
+                className="rounded-md border border-slate-200 bg-slate-50 px-2 py-0.5 text-[11px] font-medium text-slate-700 hover:bg-blue-50 hover:border-blue-300 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+              >
+                + {sku.name} ({sku.quantity} in stock)
+              </button>
+            ))}
+          </div>
+        )}
 
         <div className="mt-3 overflow-x-auto">
           <table className="w-full min-w-[780px] text-left text-xs">
@@ -794,7 +998,7 @@ export function SalesInvoiceFormPage() {
                       </span>
                     ) : (
                       <span className="inline-flex items-center gap-1 rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-semibold text-slate-700 dark:bg-slate-800 dark:text-slate-300">
-                        Item
+                        <select aria-label="Line item type" value={line.itemType} onChange={e => updateLineField(line.tempId, { itemType: Number(e.target.value) as 1 | 2, skuId: null, itemDescription: "" })} className="bg-transparent"><option value={1}>Accessory</option><option value={2}>Service</option></select>
                       </span>
                     )}
                   </td>
@@ -819,10 +1023,15 @@ export function SalesInvoiceFormPage() {
                           {line.serialNumber1 ? `· IMEI 2: ${line.serialNumber1}` : ""}
                         </div>
                       </div>
+                    ) : line.itemType === 1 ? (
+                      <select aria-label="Accessory SKU" value={line.skuId ?? ""} onChange={e => {
+                        const sku = skus.find(s => s.id === e.target.value);
+                        updateLineField(line.tempId, { skuId: sku?.id, itemDescription: sku?.name ?? "", hsnSac: sku?.hsnSac, unitOfMeasure: sku?.unitOfMeasure });
+                      }} className="w-full rounded border bg-transparent p-2"><option value="">Choose stocked accessory</option>{skus.map(s => <option key={s.id} value={s.id}>{s.code} · {s.name} · {s.quantity} available</option>)}</select>
                     ) : (
                       <input
                         type="text"
-                        placeholder="Item name / Accessory (e.g. 67W Charger, Case)"
+                        placeholder="Service description"
                         value={line.itemDescription}
                         onChange={(e) => updateLineField(line.tempId, { itemDescription: e.target.value })}
                         required
@@ -919,6 +1128,59 @@ export function SalesInvoiceFormPage() {
             />
             <span>Collect Payment at Invoicing (Optional)</span>
           </label>
+
+          {/* 1-Click Smart Payment Suggestion Shortcuts */}
+          <div className="mt-3 rounded-lg border border-indigo-100 bg-indigo-50/50 p-2.5 dark:border-indigo-900/40 dark:bg-indigo-950/20">
+            <div className="flex items-center gap-1.5 text-xs font-semibold text-indigo-900 dark:text-indigo-300">
+              <Sparkles size={13} className="text-indigo-600 dark:text-indigo-400" />
+              <span>Smart Payment Shortcuts (1-Click Auto-Fill):</span>
+            </div>
+            <div className="mt-2 flex flex-wrap items-center gap-1.5">
+              <button
+                type="button"
+                onClick={() => {
+                  setCollectPayment(true);
+                  setPaymentAmount(totals.total);
+                  setPaymentMode("Cash");
+                }}
+                className="inline-flex items-center gap-1 rounded-md border border-emerald-300 bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-800 hover:bg-emerald-100 dark:border-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300"
+              >
+                💵 Full Cash ({currency(totals.total)})
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setCollectPayment(true);
+                  setPaymentAmount(totals.total);
+                  setPaymentMode("UPI");
+                }}
+                className="inline-flex items-center gap-1 rounded-md border border-blue-300 bg-blue-50 px-2.5 py-1 text-xs font-semibold text-blue-800 hover:bg-blue-100 dark:border-blue-800 dark:bg-blue-950/60 dark:text-blue-300"
+              >
+                📱 Full UPI / QR ({currency(totals.total)})
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setCollectPayment(true);
+                  setPaymentAmount(totals.total);
+                  setPaymentMode("Card");
+                }}
+                className="inline-flex items-center gap-1 rounded-md border border-purple-300 bg-purple-50 px-2.5 py-1 text-xs font-semibold text-purple-800 hover:bg-purple-100 dark:border-purple-800 dark:bg-purple-950/60 dark:text-purple-300"
+              >
+                💳 Card Swipe ({currency(totals.total)})
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setCollectPayment(false);
+                  setPaymentAmount(0);
+                }}
+                className="inline-flex items-center gap-1 rounded-md border border-slate-300 bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-200 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
+              >
+                ⏳ Pay Later (Credit Bill)
+              </button>
+            </div>
+          </div>
 
           {collectPayment && (
             <div className="mt-4 space-y-3 rounded-lg bg-slate-50 p-3 dark:bg-slate-800/50">
