@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import axios from "axios";
+import { apiClient } from "../../../services/apiClient";
 import {
   Building2,
   CheckCircle2,
@@ -45,24 +45,19 @@ export function TenantApprovalsPage() {
   const [rejectModalTenant, setRejectModalTenant] = useState<PendingTenant | null>(null);
   const [rejectReason, setRejectReason] = useState("");
 
-  const baseUrl = (import.meta.env.VITE_API_BASE_URL || "/api").replace(/\/$/, "");
-
   const fetchPendingTenants = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const res = await axios.get<PendingTenant[]>(`${baseUrl}/tenants/pending`);
-      setTenants(Array.isArray(res.data) ? res.data : []);
+      const pending = await apiClient.get<PendingTenant[]>("/tenants/pending");
+      if (!Array.isArray(pending)) throw new Error("The service returned an invalid pending registrations list.");
+      setTenants(pending);
     } catch (err) {
-      if (axios.isAxiosError(err)) {
-        setError(err.response?.data?.message || err.message || "Failed to load pending registrations.");
-      } else {
-        setError("Unable to connect to service.");
-      }
+      setError(err instanceof Error ? err.message : "Failed to load pending registrations.");
     } finally {
       setLoading(false);
     }
-  }, [baseUrl]);
+  }, []);
 
   useEffect(() => {
     fetchPendingTenants();
@@ -81,20 +76,16 @@ export function TenantApprovalsPage() {
     setError(null);
     setSuccessMessage(null);
     try {
-      const res = await axios.post<{ ownerUsername: string; message: string }>(
-        `${baseUrl}/tenants/${tenant.id}/approve`
+      const res = await apiClient.post<{ ownerUsername: string; message: string }>(
+        `/tenants/${tenant.id}/approve`, {}
       );
 
       setSuccessMessage(
-        `Store "${tenant.name}" approved successfully! Schema "${tenant.schemaName}" provisioned, seed ledgers initialized, and owner account "${res.data?.ownerUsername || "admin"}" activated.`
+        `Store "${tenant.name}" approved successfully! Schema "${tenant.schemaName}" provisioned, seed ledgers initialized, and owner account "${res.ownerUsername || "admin"}" activated.`
       );
       await fetchPendingTenants();
     } catch (err) {
-      if (axios.isAxiosError(err)) {
-        setError(err.response?.data?.message || err.response?.data?.detail || "Approval failed.");
-      } else {
-        setError("Approval action encountered an error.");
-      }
+      setError(err instanceof Error ? err.message : "Approval failed.");
     } finally {
       setActionInProgress(null);
     }
@@ -108,7 +99,7 @@ export function TenantApprovalsPage() {
     setError(null);
     setSuccessMessage(null);
     try {
-      await axios.post(`${baseUrl}/tenants/${rejectModalTenant.id}/reject`, {
+      await apiClient.post(`/tenants/${rejectModalTenant.id}/reject`, {
         reason: rejectReason.trim() || undefined,
       });
 
@@ -117,11 +108,7 @@ export function TenantApprovalsPage() {
       setRejectReason("");
       await fetchPendingTenants();
     } catch (err) {
-      if (axios.isAxiosError(err)) {
-        setError(err.response?.data?.message || "Rejection failed.");
-      } else {
-        setError("Rejection action failed.");
-      }
+      setError(err instanceof Error ? err.message : "Rejection failed.");
     } finally {
       setActionInProgress(null);
     }
