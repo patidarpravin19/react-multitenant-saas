@@ -1,6 +1,8 @@
 import { Navigate, Route, Routes } from "react-router-dom";
 import { AppShell } from "./components/layout/AppShell";
 import { LoginPage } from "./features/auth/LoginPage";
+import { RegisterTenantPage } from "./features/auth/RegisterTenantPage";
+import { TenantApprovalsPage } from "./features/settings/tenants/TenantApprovalsPage";
 import { ForgotPasswordPage, ResetPasswordPage } from "./features/auth/PasswordRecoveryPages";
 import { ProtectedRoute } from "./features/auth/ProtectedRoute";
 import { ChangePasswordPage } from "./features/auth/ChangePasswordPage";
@@ -33,6 +35,8 @@ export default function App() {
   return (
     <Routes>
       <Route path="/login" element={<LoginPage />} />
+      <Route path="/register-tenant" element={<RegisterTenantPage />} />
+      <Route path="/register" element={<RegisterTenantPage />} />
       <Route path="/accept-invitation" element={<AcceptInvitationPage />} />
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />
       <Route path="/reset-password" element={<ResetPasswordPage />} />
@@ -69,6 +73,8 @@ export default function App() {
           </Route>
           <Route path={APP_ROUTES.settings.customerBill} element={<CustomerBillSettingsPage />} />
           <Route path={APP_ROUTES.settings.auditLogs} element={<AuditLogsPage />} />
+          <Route path={APP_ROUTES.settings.tenantApprovals} element={<TenantApprovalsPage />} />
+          <Route path="/admin/tenants" element={<TenantApprovalsPage />} />
 
           <Route path="**" element={<Navigate to="/" replace />} />
         </Route>

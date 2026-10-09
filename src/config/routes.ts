@@ -102,5 +102,6 @@ export const APP_ROUTES = {
       add: "/settings/finance-vendors/add",
       edit: (id: string) => `/settings/finance-vendors/${id}/edit`,
     },
+    tenantApprovals: "/settings/tenant-approvals",
   },
 } as const;

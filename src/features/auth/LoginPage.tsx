@@ -61,7 +61,16 @@ export function LoginPage() {
           })}
           {error && <p role="alert" className="rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-700 dark:bg-rose-950/40 dark:text-rose-200">{error}</p>}
           <button disabled={isSubmitting} className="flex w-full items-center justify-center gap-2 rounded-lg bg-[var(--tenant-primary)] px-4 py-2.5 font-semibold text-white transition hover:bg-[var(--tenant-primary-hover)] disabled:cursor-not-allowed disabled:opacity-60">{isSubmitting ? "Signing in…" : "Sign in"}</button>
-          <div className="text-center"><Link to="/forgot-password" className="text-sm font-medium text-[var(--tenant-primary)] hover:underline">Forgot password?</Link></div>
+          <div className="flex items-center justify-between text-xs pt-1">
+            <Link to="/forgot-password" className="font-medium text-[var(--tenant-primary)] hover:underline">Forgot password?</Link>
+            <Link to="/register-tenant" className="font-semibold text-blue-600 hover:underline dark:text-blue-400">Register New Store</Link>
+          </div>
+          <div className="pt-3 border-t border-slate-100 text-center text-xs text-slate-500 dark:border-slate-800">
+            <span>New business owner? </span>
+            <Link to="/register-tenant" className="font-semibold text-[var(--tenant-primary)] hover:underline">
+              Create store workspace
+            </Link>
+          </div>
         </form>
       </section>
     </main>
