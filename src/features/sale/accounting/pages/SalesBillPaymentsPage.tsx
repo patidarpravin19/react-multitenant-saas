@@ -26,6 +26,17 @@ export function SalesBillPaymentsPage() {
   const [paymentDate, setPaymentDate] = useState(today);
   const [referenceNumber, setReferenceNumber] = useState("");
   const [note, setNote] = useState("");
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+
+  const clearFieldError = (key: string) => {
+    if (fieldErrors[key]) {
+      setFieldErrors((prev) => {
+        const copy = { ...prev };
+        delete copy[key];
+        return copy;
+      });
+    }
+  };
 
   const loadDetails = useCallback(async () => {
     if (!id) {
@@ -48,15 +59,29 @@ export function SalesBillPaymentsPage() {
   async function recordPayment(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!details) return;
+
+    const errors: Record<string, string> = {};
     const paymentAmount = Number(amount);
-    if (!Number.isFinite(paymentAmount) || paymentAmount <= 0 || paymentAmount > details.bill.balance) {
-      setError(`Enter an amount between ₹0.01 and ${currency(details.bill.balance)}.`);
-      return;
+    if (!amount || !Number.isFinite(paymentAmount) || paymentAmount <= 0) {
+      errors.amount = "Please enter a valid payment amount.";
+    } else if (paymentAmount > details.bill.balance) {
+      errors.amount = `Amount cannot exceed balance ${currency(details.bill.balance)}.`;
     }
+
+    if (!paymentDate) {
+      errors.paymentDate = "Payment date is required.";
+    }
+
     if (["UPI", "OnlineTransfer", "Cheque"].includes(paymentMode) && !referenceNumber.trim()) {
-      setError("Add the transaction or cheque reference for this payment method.");
+      errors.referenceNumber = "Reference number or cheque ID is required for this method.";
+    }
+
+    if (Object.keys(errors).length > 0) {
+      setFieldErrors(errors);
       return;
     }
+
+    setFieldErrors({});
     try {
       setSaving(true);
       setError(null);
@@ -116,29 +141,69 @@ export function SalesBillPaymentsPage() {
       {error ? <div role="alert" className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">{error}</div> : null}
 
       {bill.balance > 0 ? (
-        <form onSubmit={recordPayment} className="space-y-3 rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
+        <form onSubmit={recordPayment} noValidate className="space-y-3 rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
           <div>
             <h2 className="text-base font-semibold">Record a payment</h2>
             <p className="text-xs text-slate-500">Record installments as they are received. The bill balance updates automatically.</p>
           </div>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            <label className="text-xs font-medium text-slate-700 dark:text-slate-200">Amount
-              <input required type="number" min="0.01" max={bill.balance} step="0.01" value={amount} onChange={(event) => setAmount(event.target.value)} className={inputClass} />
-            </label>
-            <label className="text-xs font-medium text-slate-700 dark:text-slate-200">Payment method
-              <select value={paymentMode} onChange={(event) => setPaymentMode(event.target.value as PaymentMode)} className={inputClass}>
+            <div>
+              <label className="text-xs font-medium text-slate-700 dark:text-slate-200">Amount <span className="text-rose-500">*</span></label>
+              <input
+                type="number"
+                min="0.01"
+                max={bill.balance}
+                step="0.01"
+                value={amount}
+                aria-invalid={Boolean(fieldErrors.amount)}
+                onChange={(event) => { setAmount(event.target.value); clearFieldError("amount"); }}
+                className={`${inputClass} ${fieldErrors.amount ? "border-rose-500 bg-rose-50/20" : ""}`}
+              />
+              {fieldErrors.amount && <p role="alert" className="mt-1 text-xs text-rose-600 dark:text-rose-400">{fieldErrors.amount}</p>}
+            </div>
+
+            <div>
+              <label className="text-xs font-medium text-slate-700 dark:text-slate-200">Payment method</label>
+              <select
+                value={paymentMode}
+                onChange={(event) => { setPaymentMode(event.target.value as PaymentMode); clearFieldError("referenceNumber"); }}
+                className={inputClass}
+              >
                 <option value="Cash">Cash</option><option value="UPI">UPI</option><option value="OnlineTransfer">Online transfer / NEFT / RTGS</option><option value="Cheque">Cheque</option><option value="Other">Other</option>
               </select>
-            </label>
-            <label className="text-xs font-medium text-slate-700 dark:text-slate-200">Payment date
-              <input required type="date" value={paymentDate} onChange={(event) => setPaymentDate(event.target.value)} className={inputClass} />
-            </label>
-            <label className="text-xs font-medium text-slate-700 dark:text-slate-200">{paymentMode === "Cheque" ? "Cheque number" : "Transaction reference"}{["UPI", "OnlineTransfer", "Cheque"].includes(paymentMode) ? " *" : ""}
-              <input required={["UPI", "OnlineTransfer", "Cheque"].includes(paymentMode)} maxLength={100} value={referenceNumber} onChange={(event) => setReferenceNumber(event.target.value)} className={inputClass} />
-            </label>
-            <label className="text-xs font-medium text-slate-700 dark:text-slate-200 sm:col-span-2 lg:col-span-4">Note (optional)
+            </div>
+
+            <div>
+              <label className="text-xs font-medium text-slate-700 dark:text-slate-200">Payment date <span className="text-rose-500">*</span></label>
+              <input
+                type="date"
+                value={paymentDate}
+                aria-invalid={Boolean(fieldErrors.paymentDate)}
+                onChange={(event) => { setPaymentDate(event.target.value); clearFieldError("paymentDate"); }}
+                className={`${inputClass} ${fieldErrors.paymentDate ? "border-rose-500 bg-rose-50/20" : ""}`}
+              />
+              {fieldErrors.paymentDate && <p role="alert" className="mt-1 text-xs text-rose-600 dark:text-rose-400">{fieldErrors.paymentDate}</p>}
+            </div>
+
+            <div>
+              <label className="text-xs font-medium text-slate-700 dark:text-slate-200">
+                {paymentMode === "Cheque" ? "Cheque number" : "Transaction reference"}{["UPI", "OnlineTransfer", "Cheque"].includes(paymentMode) ? <span className="text-rose-500"> *</span> : ""}
+              </label>
+              <input
+                maxLength={100}
+                value={referenceNumber}
+                aria-invalid={Boolean(fieldErrors.referenceNumber)}
+                onChange={(event) => { setReferenceNumber(event.target.value); clearFieldError("referenceNumber"); }}
+                placeholder={["UPI", "OnlineTransfer", "Cheque"].includes(paymentMode) ? "Required reference ID" : "Optional"}
+                className={`${inputClass} ${fieldErrors.referenceNumber ? "border-rose-500 bg-rose-50/20" : ""}`}
+              />
+              {fieldErrors.referenceNumber && <p role="alert" className="mt-1 text-xs text-rose-600 dark:text-rose-400">{fieldErrors.referenceNumber}</p>}
+            </div>
+
+            <div className="sm:col-span-2 lg:col-span-4">
+              <label className="text-xs font-medium text-slate-700 dark:text-slate-200">Note (optional)</label>
               <input maxLength={500} value={note} onChange={(event) => setNote(event.target.value)} className={inputClass} />
-            </label>
+            </div>
           </div>
           <Button type="submit" disabled={saving}>{saving ? "Recording…" : "Record payment"}</Button>
         </form>

@@ -1,7 +1,7 @@
 import type { InputHTMLAttributes } from "react";
 import type { DynamicFieldProps } from "../../../types/form";
 import { FormFieldShell } from "../../../components/ui/FormFieldShell";
-import { inputClass } from "../../../components/ui/inputClass";
+import { getInputClass } from "../../../components/ui/inputClass";
 
 export function NativeInputField({
   field,
@@ -51,10 +51,14 @@ export function NativeInputField({
     min: "min" in field ? field.min : undefined,
     max: "max" in field ? field.max : undefined,
     step: "step" in field ? field.step : undefined,
+    "aria-invalid": Boolean(message),
+    "aria-describedby": message ? `${field.id}-error` : undefined,
     className:
       field.type === "color"
-        ? "h-11 w-20 cursor-pointer rounded-lg border border-slate-300 bg-white p-1 dark:border-slate-700 dark:bg-slate-950"
-        : inputClass,
+        ? `h-11 w-20 cursor-pointer rounded-lg border bg-white p-1 dark:bg-slate-950 ${
+            message ? "border-rose-500" : "border-slate-300 dark:border-slate-700"
+          }`
+        : getInputClass(Boolean(message)),
   };
   return (
     <FormFieldShell

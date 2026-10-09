@@ -25,7 +25,18 @@ export function BankReconciliationPage() {
   const [openingBalance, setOpeningBalance] = useState("");
   const [closingBalance, setClosingBalance] = useState("");
   const [draftLines, setDraftLines] = useState<DraftLine[]>([{ transactionDate: "", description: "", reference: "", amount: "" }]);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [busy, setBusy] = useState(false);
+
+  const clearFieldError = (key: string) => {
+    if (fieldErrors[key]) {
+      setFieldErrors((prev) => {
+        const copy = { ...prev };
+        delete copy[key];
+        return copy;
+      });
+    }
+  };
 
   const load = useCallback(async () => {
     const [chart, statements] = await Promise.all([
@@ -55,10 +66,34 @@ export function BankReconciliationPage() {
   };
 
   const create = async (event: FormEvent) => {
-    event.preventDefault(); setBusy(true);
+    event.preventDefault();
+    const errors: Record<string, string> = {};
+    if (!accountId) errors.accountId = "Bank ledger account is required.";
+    if (!reference.trim()) errors.reference = "Statement reference is required.";
+    if (!startDate) errors.startDate = "Start date is required.";
+    if (!endDate) {
+      errors.endDate = "End date is required.";
+    } else if (startDate && endDate < startDate) {
+      errors.endDate = "End date must be on or after start date.";
+    }
+    if (openingBalance === "" || isNaN(Number(openingBalance))) errors.openingBalance = "Valid opening balance is required.";
+    if (closingBalance === "" || isNaN(Number(closingBalance))) errors.closingBalance = "Valid closing balance is required.";
+
+    const hasInvalidLine = draftLines.some(l => !l.transactionDate || !l.description.trim() || !l.amount || isNaN(Number(l.amount)));
+    if (hasInvalidLine) {
+      errors.lines = "All statement lines must have a valid date, description, and amount.";
+    }
+
+    if (Object.keys(errors).length > 0) {
+      setFieldErrors(errors);
+      return;
+    }
+
+    setFieldErrors({});
+    setBusy(true);
     try {
       const created = await apiClient.post<Reconciliation>("/bank-reconciliations", {
-        accountId, statementReference: reference, startDate, endDate,
+        accountId, statementReference: reference.trim(), startDate, endDate,
         openingBalance: Number(openingBalance), closingBalance: Number(closingBalance),
         lines: draftLines.map(line => ({ ...line, amount: Number(line.amount) })),
       });
@@ -91,20 +126,106 @@ export function BankReconciliationPage() {
   };
 
   const selected = reconciliations.find(item => item.id === selectedId);
-  const updateDraft = (index: number, patch: Partial<DraftLine>) => setDraftLines(current => current.map((line, row) => row === index ? { ...line, ...patch } : line));
+  const updateDraft = (index: number, patch: Partial<DraftLine>) => {
+    setDraftLines(current => current.map((line, row) => row === index ? { ...line, ...patch } : line));
+    clearFieldError("lines");
+  };
 
   return <section className="space-y-4">
     <header className="flex flex-wrap items-center justify-between gap-2"><div><h1 className="text-xl font-semibold">Bank Reconciliation</h1><p className="mt-0.5 text-xs text-slate-500">Import statement transactions, match them to bank ledger entries, then finalize the period.</p></div><Button variant="secondary" onClick={() => void load()}><RefreshCw size={14} /> Refresh</Button></header>
-    <form onSubmit={event => void create(event)} className="space-y-3 rounded-xl border border-slate-200 bg-white p-3 dark:border-slate-800 dark:bg-slate-900">
-      <h2 className="font-semibold">Import statement</h2><div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-        <label className="text-xs">Bank ledger account<select required className={`${inputClass} mt-1 w-full`} value={accountId} onChange={event => setAccountId(event.target.value)}><option value="">Select account</option>{accounts.map(item => <option key={item.id} value={item.id}>{item.code} · {item.name}</option>)}</select></label>
-        <label className="text-xs">Statement reference<input required maxLength={100} className={`${inputClass} mt-1 w-full`} value={reference} onChange={event => setReference(event.target.value)} placeholder="Bank statement ID" /></label>
-        <label className="text-xs">CSV file (date, description, reference, signed amount)<input className="mt-2 block w-full text-xs" type="file" accept=".csv,text/csv" onChange={event => void importCsv(event)} /></label>
-        <label className="text-xs">Start date<input required type="date" className={`${inputClass} mt-1 w-full`} value={startDate} onChange={event => setStartDate(event.target.value)} /></label>
-        <label className="text-xs">End date<input required type="date" className={`${inputClass} mt-1 w-full`} value={endDate} onChange={event => setEndDate(event.target.value)} /></label>
-        <div className="grid grid-cols-2 gap-2"><label className="text-xs">Opening balance<input required type="number" step="0.01" className={`${inputClass} mt-1 w-full`} value={openingBalance} onChange={event => setOpeningBalance(event.target.value)} /></label><label className="text-xs">Closing balance<input required type="number" step="0.01" className={`${inputClass} mt-1 w-full`} value={closingBalance} onChange={event => setClosingBalance(event.target.value)} /></label></div>
+    <form onSubmit={event => void create(event)} noValidate className="space-y-3 rounded-xl border border-slate-200 bg-white p-3 dark:border-slate-800 dark:bg-slate-900">
+      <h2 className="font-semibold">Import statement</h2>
+      {fieldErrors.lines && (
+        <p role="alert" className="rounded-lg bg-rose-50 p-2 text-xs font-medium text-rose-700 dark:bg-rose-950/40 dark:text-rose-200">
+          {fieldErrors.lines}
+        </p>
+      )}
+      <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+        <div>
+          <label className="text-xs font-medium">Bank ledger account <span className="text-rose-500">*</span></label>
+          <select
+            className={`${inputClass} mt-1 w-full ${fieldErrors.accountId ? "border-rose-500 bg-rose-50/20" : ""}`}
+            aria-invalid={Boolean(fieldErrors.accountId)}
+            value={accountId}
+            onChange={event => { setAccountId(event.target.value); clearFieldError("accountId"); }}
+          >
+            <option value="">Select account</option>
+            {accounts.map(item => <option key={item.id} value={item.id}>{item.code} · {item.name}</option>)}
+          </select>
+          {fieldErrors.accountId && <p role="alert" className="mt-1 text-xs text-rose-600 dark:text-rose-400">{fieldErrors.accountId}</p>}
+        </div>
+
+        <div>
+          <label className="text-xs font-medium">Statement reference <span className="text-rose-500">*</span></label>
+          <input
+            maxLength={100}
+            className={`${inputClass} mt-1 w-full ${fieldErrors.reference ? "border-rose-500 bg-rose-50/20" : ""}`}
+            aria-invalid={Boolean(fieldErrors.reference)}
+            value={reference}
+            onChange={event => { setReference(event.target.value); clearFieldError("reference"); }}
+            placeholder="Bank statement ID"
+          />
+          {fieldErrors.reference && <p role="alert" className="mt-1 text-xs text-rose-600 dark:text-rose-400">{fieldErrors.reference}</p>}
+        </div>
+
+        <div>
+          <label className="text-xs font-medium">CSV file (optional)</label>
+          <input className="mt-2 block w-full text-xs" type="file" accept=".csv,text/csv" onChange={event => void importCsv(event)} />
+        </div>
+
+        <div>
+          <label className="text-xs font-medium">Start date <span className="text-rose-500">*</span></label>
+          <input
+            type="date"
+            className={`${inputClass} mt-1 w-full ${fieldErrors.startDate ? "border-rose-500 bg-rose-50/20" : ""}`}
+            aria-invalid={Boolean(fieldErrors.startDate)}
+            value={startDate}
+            onChange={event => { setStartDate(event.target.value); clearFieldError("startDate"); }}
+          />
+          {fieldErrors.startDate && <p role="alert" className="mt-1 text-xs text-rose-600 dark:text-rose-400">{fieldErrors.startDate}</p>}
+        </div>
+
+        <div>
+          <label className="text-xs font-medium">End date <span className="text-rose-500">*</span></label>
+          <input
+            type="date"
+            className={`${inputClass} mt-1 w-full ${fieldErrors.endDate ? "border-rose-500 bg-rose-50/20" : ""}`}
+            aria-invalid={Boolean(fieldErrors.endDate)}
+            value={endDate}
+            onChange={event => { setEndDate(event.target.value); clearFieldError("endDate"); }}
+          />
+          {fieldErrors.endDate && <p role="alert" className="mt-1 text-xs text-rose-600 dark:text-rose-400">{fieldErrors.endDate}</p>}
+        </div>
+
+        <div className="grid grid-cols-2 gap-2">
+          <div>
+            <label className="text-xs font-medium">Opening balance <span className="text-rose-500">*</span></label>
+            <input
+              type="number"
+              step="0.01"
+              className={`${inputClass} mt-1 w-full ${fieldErrors.openingBalance ? "border-rose-500 bg-rose-50/20" : ""}`}
+              aria-invalid={Boolean(fieldErrors.openingBalance)}
+              value={openingBalance}
+              onChange={event => { setOpeningBalance(event.target.value); clearFieldError("openingBalance"); }}
+            />
+            {fieldErrors.openingBalance && <p role="alert" className="mt-1 text-xs text-rose-600 dark:text-rose-400">{fieldErrors.openingBalance}</p>}
+          </div>
+
+          <div>
+            <label className="text-xs font-medium">Closing balance <span className="text-rose-500">*</span></label>
+            <input
+              type="number"
+              step="0.01"
+              className={`${inputClass} mt-1 w-full ${fieldErrors.closingBalance ? "border-rose-500 bg-rose-50/20" : ""}`}
+              aria-invalid={Boolean(fieldErrors.closingBalance)}
+              value={closingBalance}
+              onChange={event => { setClosingBalance(event.target.value); clearFieldError("closingBalance"); }}
+            />
+            {fieldErrors.closingBalance && <p role="alert" className="mt-1 text-xs text-rose-600 dark:text-rose-400">{fieldErrors.closingBalance}</p>}
+          </div>
+        </div>
       </div>
-      <div className="space-y-2">{draftLines.map((line, index) => <div key={index} className="grid gap-2 rounded-lg bg-slate-50 p-2 dark:bg-slate-950 sm:grid-cols-2 lg:grid-cols-[1fr_2fr_1fr_1fr_auto]"><input required aria-label="Transaction date" type="date" className={inputClass} value={line.transactionDate} onChange={event => updateDraft(index, { transactionDate: event.target.value })} /><input required aria-label="Description" className={inputClass} placeholder="Description" value={line.description} onChange={event => updateDraft(index, { description: event.target.value })} /><input aria-label="Reference" className={inputClass} placeholder="Reference" value={line.reference} onChange={event => updateDraft(index, { reference: event.target.value })} /><input required aria-label="Signed amount" type="number" step="0.01" className={inputClass} placeholder="+ in / − out" value={line.amount} onChange={event => updateDraft(index, { amount: event.target.value })} /><Button type="button" variant="secondary" disabled={draftLines.length === 1} onClick={() => setDraftLines(rows => rows.filter((_, row) => row !== index))}>Remove</Button></div>)}</div>
+      <div className="space-y-2">{draftLines.map((line, index) => <div key={index} className="grid gap-2 rounded-lg bg-slate-50 p-2 dark:bg-slate-950 sm:grid-cols-2 lg:grid-cols-[1fr_2fr_1fr_1fr_auto]"><input aria-label="Transaction date" type="date" className={inputClass} value={line.transactionDate} onChange={event => updateDraft(index, { transactionDate: event.target.value })} /><input aria-label="Description" className={inputClass} placeholder="Description" value={line.description} onChange={event => updateDraft(index, { description: event.target.value })} /><input aria-label="Reference" className={inputClass} placeholder="Reference" value={line.reference} onChange={event => updateDraft(index, { reference: event.target.value })} /><input aria-label="Signed amount" type="number" step="0.01" className={inputClass} placeholder="+ in / − out" value={line.amount} onChange={event => updateDraft(index, { amount: event.target.value })} /><Button type="button" variant="secondary" disabled={draftLines.length === 1} onClick={() => setDraftLines(rows => rows.filter((_, row) => row !== index))}>Remove</Button></div>)}</div>
       <div className="flex flex-wrap gap-2"><Button type="button" variant="secondary" onClick={() => setDraftLines(rows => [...rows, { transactionDate: "", description: "", reference: "", amount: "" }])}><Plus size={14} /> Add line</Button><Button type="submit" isLoading={busy}>Import statement</Button></div>
     </form>
     <section className="rounded-xl border border-slate-200 bg-white p-3 dark:border-slate-800 dark:bg-slate-900"><label className="text-xs">Reconciliation<select className={`${inputClass} mt-1 w-full max-w-2xl`} value={selectedId} onChange={event => void selectReconciliation(event.target.value)}><option value="">Select statement</option>{reconciliations.map(item => <option key={item.id} value={item.id}>{item.accountCode} · {item.statementReference} · {item.startDate} to {item.endDate}{item.isFinalized ? " · Finalized" : ""}</option>)}</select></label>

@@ -133,7 +133,11 @@ function AutocompleteFieldControl({ field, setValue, errors }: DynamicFieldProps
               if (!event.currentTarget.parentElement?.parentElement?.contains(event.relatedTarget as Node | null))
                 setOpen(false);
             }}
-            className="w-full rounded-lg border border-slate-300 bg-white py-2.5 pl-9 pr-3 text-sm text-slate-900 shadow-sm outline-none placeholder:text-slate-400 focus:border-[var(--tenant-primary)] focus:ring-2 focus:ring-[var(--tenant-primary)]/20 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100"
+            className={`w-full rounded-lg border bg-white py-2.5 pl-9 pr-3 text-sm text-slate-900 shadow-sm outline-none placeholder:text-slate-400 focus:ring-2 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-slate-950 dark:text-slate-100 ${
+              validationMessage
+                ? "border-rose-500 bg-rose-50/20 focus:border-rose-500 focus:ring-rose-200 dark:border-rose-500 dark:bg-rose-950/20"
+                : "border-slate-300 focus:border-[var(--tenant-primary)] focus:ring-[var(--tenant-primary)]/20 dark:border-slate-700"
+            }`}
           />
         </div>
         {open && query.trim().length >= 2 && (

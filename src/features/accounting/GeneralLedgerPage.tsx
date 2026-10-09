@@ -37,6 +37,17 @@ export function GeneralLedgerPage() {
   const [accountType, setAccountType] = useState(0);
   const [normalBalance, setNormalBalance] = useState(0);
   const [lines, setLines] = useState<JournalLine[]>([{ accountId: "", debit: 0, credit: 0 }, { accountId: "", debit: 0, credit: 0 }]);
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+
+  const clearError = (key: string) => {
+    if (formErrors[key]) {
+      setFormErrors((prev) => {
+        const copy = { ...prev };
+        delete copy[key];
+        return copy;
+      });
+    }
+  };
 
   const load = useCallback(async () => {
     setError(null);
@@ -72,9 +83,17 @@ export function GeneralLedgerPage() {
 
   const createAccount = async (event: FormEvent) => {
     event.preventDefault();
+    const errs: Record<string, string> = {};
+    if (!accountCode.trim()) errs.accountCode = "Account code is required.";
+    if (!accountName.trim()) errs.accountName = "Account name is required.";
+    if (Object.keys(errs).length > 0) {
+      setFormErrors((prev) => ({ ...prev, ...errs }));
+      notifications.error("Incomplete account", "Account code and name are required.");
+      return;
+    }
     setBusy(true);
     try {
-      await apiClient.post("/general-ledger/accounts", { code: accountCode, name: accountName, type: accountType, normalBalance });
+      await apiClient.post("/general-ledger/accounts", { code: accountCode.trim(), name: accountName.trim(), type: accountType, normalBalance });
       setAccountCode(""); setAccountName("");
       notifications.success("Account created", "The ledger account is ready to use.");
       await load();
@@ -87,9 +106,24 @@ export function GeneralLedgerPage() {
   const totalCredit = lines.reduce((sum, line) => sum + Number(line.credit || 0), 0);
   const post = async (event: FormEvent) => {
     event.preventDefault();
+    const errs: Record<string, string> = {};
+    if (!date) errs.journalDate = "Journal date is required.";
+    if (!description.trim()) errs.journalDescription = "Description is required.";
+    const hasUnselectedAccount = lines.some((l) => !l.accountId);
+    if (hasUnselectedAccount) errs.journalLines = "Every line must have an account selected.";
+    if (totalDebit <= 0 || Math.round(totalDebit * 100) !== Math.round(totalCredit * 100)) {
+      errs.journalBalance = `Total debits (${totalDebit.toFixed(2)}) must equal credits (${totalCredit.toFixed(2)}).`;
+    }
+
+    if (Object.keys(errs).length > 0) {
+      setFormErrors((prev) => ({ ...prev, ...errs }));
+      notifications.error("Journal not posted", "Please correct the highlighted fields.");
+      return;
+    }
+
     setBusy(true);
     try {
-      await apiClient.post("/general-ledger/journals", { journalDate: date, description, lines });
+      await apiClient.post("/general-ledger/journals", { journalDate: date, description: description.trim(), lines });
       notifications.success("Journal posted", "The balanced journal entry was recorded.");
       setDescription("");
       setLines([{ accountId: "", debit: 0, credit: 0 }, { accountId: "", debit: 0, credit: 0 }]);
@@ -113,9 +147,22 @@ export function GeneralLedgerPage() {
   };
 
   const importOpeningBalances = async (event: FormEvent) => {
-    event.preventDefault(); setBusy(true);
+    event.preventDefault();
+    const errs: Record<string, string> = {};
+    if (!openingDate) errs.openingDate = "Cutover date is required.";
+    const validLines = openingLines.filter(line => line.accountId && (Number(line.debit) > 0 || Number(line.credit) > 0));
+    if (validLines.length === 0) {
+      errs.openingLines = "Add at least one line with an account and debit or credit balance.";
+    }
+
+    if (Object.keys(errs).length > 0) {
+      setFormErrors((prev) => ({ ...prev, ...errs }));
+      notifications.error("Cutover not imported", "Please choose an account and enter a balance amount.");
+      return;
+    }
+
+    setBusy(true);
     try {
-      const validLines = openingLines.filter(line => line.accountId && (Number(line.debit) > 0 || Number(line.credit) > 0));
       await apiClient.post("/general-ledger/opening-balances", { cutoverDate: openingDate, lines: validLines });
       notifications.success("Opening balances imported", "The cutover journal was balanced to retained earnings.");
       setOpeningLines([{ accountId: "", debit: 0, credit: 0, memo: "" }]); await load();
@@ -126,17 +173,134 @@ export function GeneralLedgerPage() {
   return <section className="space-y-4">
     <header className="flex flex-wrap items-center justify-between gap-2"><div><h1 className="text-xl font-semibold">General Ledger</h1><p className="mt-0.5 text-xs text-slate-500">Chart of accounts and balanced journal entries.</p></div><div className="flex gap-2"><Button variant="secondary" onClick={() => void load()}><RefreshCw size={15} /> Refresh</Button><Button variant="secondary" isLoading={busy} onClick={() => void initialize()}><BookOpenCheck size={15} /> Add standard accounts</Button></div></header>
     {error && <p role="alert" className="rounded-lg bg-red-50 p-3 text-sm text-red-700">{error}</p>}
-    <form onSubmit={event => void importOpeningBalances(event)} className="space-y-2 rounded-xl border border-slate-200 bg-white p-3 dark:border-slate-800 dark:bg-slate-900">
-      <div className="flex flex-wrap items-center justify-between gap-2"><div><h2 className="text-sm font-semibold">Opening balance cutover</h2><p className="text-xs text-slate-500">Balance sheet control totals only; difference posts to retained earnings. Customer/vendor balances and item quantities are not created by this journal. Add references in memo.</p></div><label className="text-xs">Cutover date<input type="date" className={`${inputClass} mt-1`} required value={openingDate} onChange={event => setOpeningDate(event.target.value)} /></label></div>
-      {openingLines.map((line, index) => <div key={index} className="grid gap-2 md:grid-cols-[2fr_1fr_1fr_2fr_auto]"><select aria-label="Opening balance account" className={inputClass} required value={line.accountId} onChange={event => setOpeningLines(current => current.map((row, i) => i === index ? { ...row, accountId: event.target.value } : row))}><option value="">Choose account</option>{accounts.filter(account => account.type <= 2).map(account => <option key={account.id} value={account.id}>{account.code} · {account.name}</option>)}</select><input aria-label="Opening debit" className={inputClass} type="number" min="0" step="0.01" placeholder="Debit" value={line.debit || ""} onChange={event => setOpeningLines(current => current.map((row, i) => i === index ? { ...row, debit: Number(event.target.value), credit: 0 } : row))} /><input aria-label="Opening credit" className={inputClass} type="number" min="0" step="0.01" placeholder="Credit" value={line.credit || ""} onChange={event => setOpeningLines(current => current.map((row, i) => i === index ? { ...row, credit: Number(event.target.value), debit: 0 } : row))} /><input aria-label="Customer vendor or stock reference" className={inputClass} placeholder="Customer, vendor, or stock reference" value={line.memo ?? ""} onChange={event => setOpeningLines(current => current.map((row, i) => i === index ? { ...row, memo: event.target.value } : row))} /><Button type="button" variant="secondary" onClick={() => setOpeningLines(current => current.filter((_, i) => i !== index))}>Remove</Button></div>)}
+    <form onSubmit={event => void importOpeningBalances(event)} noValidate className="space-y-2 rounded-xl border border-slate-200 bg-white p-3 dark:border-slate-800 dark:bg-slate-900">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div>
+          <h2 className="text-sm font-semibold">Opening balance cutover</h2>
+          <p className="text-xs text-slate-500">Balance sheet control totals only; difference posts to retained earnings. Customer/vendor balances and item quantities are not created by this journal. Add references in memo.</p>
+        </div>
+        <label className="text-xs">
+          Cutover date <span className="text-rose-500">*</span>
+          <input
+            type="date"
+            className={`${inputClass} mt-1 ${formErrors.openingDate ? "border-rose-500 bg-rose-50/20 text-slate-900 focus:border-rose-500 focus:ring-2 focus:ring-rose-200 dark:border-rose-500 dark:bg-rose-950/20 dark:text-white" : ""}`}
+            aria-invalid={Boolean(formErrors.openingDate)}
+            value={openingDate}
+            onChange={event => { setOpeningDate(event.target.value); clearError("openingDate"); }}
+          />
+          {formErrors.openingDate && <p role="alert" className="mt-1 text-xs font-medium text-rose-600 dark:text-rose-400">{formErrors.openingDate}</p>}
+        </label>
+      </div>
+      {formErrors.openingLines && <p role="alert" className="rounded-lg bg-rose-50 p-2 text-xs font-medium text-rose-700 dark:bg-rose-950/40 dark:text-rose-300">{formErrors.openingLines}</p>}
+      {openingLines.map((line, index) => <div key={index} className="grid gap-2 md:grid-cols-[2fr_1fr_1fr_2fr_auto]"><select aria-label="Opening balance account" className={inputClass} value={line.accountId} onChange={event => { clearError("openingLines"); setOpeningLines(current => current.map((row, i) => i === index ? { ...row, accountId: event.target.value } : row)); }}><option value="">Choose account</option>{accounts.filter(account => account.type <= 2).map(account => <option key={account.id} value={account.id}>{account.code} · {account.name}</option>)}</select><input aria-label="Opening debit" className={inputClass} type="number" min="0" step="0.01" placeholder="Debit" value={line.debit || ""} onChange={event => { clearError("openingLines"); setOpeningLines(current => current.map((row, i) => i === index ? { ...row, debit: Number(event.target.value), credit: 0 } : row)); }} /><input aria-label="Opening credit" className={inputClass} type="number" min="0" step="0.01" placeholder="Credit" value={line.credit || ""} onChange={event => { clearError("openingLines"); setOpeningLines(current => current.map((row, i) => i === index ? { ...row, credit: Number(event.target.value), debit: 0 } : row)); }} /><input aria-label="Customer vendor or stock reference" className={inputClass} placeholder="Customer, vendor, or stock reference" value={line.memo ?? ""} onChange={event => setOpeningLines(current => current.map((row, i) => i === index ? { ...row, memo: event.target.value } : row))} /><Button type="button" variant="secondary" onClick={() => setOpeningLines(current => current.filter((_, i) => i !== index))}>Remove</Button></div>)}
       <div className="flex gap-2"><Button type="button" variant="secondary" onClick={() => setOpeningLines(current => [...current, { accountId: "", debit: 0, credit: 0, memo: "" }])}><Plus size={14} /> Add balance</Button><Button type="submit" disabled={busy || openingLines.length === 0}>Import cutover</Button></div>
     </form>
     {cashFlow && <section className="space-y-2 rounded-xl border border-slate-200 bg-white p-3 dark:border-slate-800 dark:bg-slate-900"><div className="flex items-center justify-between"><div><h2 className="font-semibold">Cash Flow Statement</h2><p className="text-xs text-slate-500">Direct method · {cashFlow.fromDate} to {cashFlow.toDate}</p></div><div className="text-right text-xs">Opening {cashFlow.openingCash.toFixed(2)} · Change {cashFlow.netChange.toFixed(2)}<div className="font-semibold">Closing {cashFlow.closingCash.toFixed(2)}</div></div></div><div className="grid gap-2 md:grid-cols-3">{([['Operating', cashFlow.operating, cashFlow.operatingTotal], ['Investing', cashFlow.investing, cashFlow.investingTotal], ['Financing', cashFlow.financing, cashFlow.financingTotal]] as const).map(([name, rows, total]) => <div key={name} className="rounded-lg border border-slate-200 p-2 dark:border-slate-800"><div className="mb-1 flex justify-between text-sm font-semibold"><span>{name}</span><span>{total.toFixed(2)}</span></div>{rows.map(row => <div key={row.code} className="flex justify-between gap-2 border-t border-slate-100 py-1 text-xs dark:border-slate-800"><span>{row.code} · {row.name}</span><span>{row.amount.toFixed(2)}</span></div>)}</div>)}</div></section>}
     <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(400px,1.1fr)]">
-      <section className="rounded-xl border border-slate-200 bg-white p-3 dark:border-slate-800 dark:bg-slate-900"><h2 className="mb-2 font-semibold">Chart of Accounts</h2><form onSubmit={createAccount} className="mb-3 grid gap-2 sm:grid-cols-2"><input required maxLength={20} aria-label="Account code" className={inputClass} placeholder="Account code" value={accountCode} onChange={event => setAccountCode(event.target.value)} /><input required maxLength={150} aria-label="Account name" className={inputClass} placeholder="Account name" value={accountName} onChange={event => setAccountName(event.target.value)} /><select className={inputClass} value={accountType} onChange={event => setAccountType(Number(event.target.value))}>{accountTypes.map((type, index) => <option key={type} value={index}>{type}</option>)}</select><div className="flex gap-2"><select aria-label="Normal balance" className={inputClass} value={normalBalance} onChange={event => setNormalBalance(Number(event.target.value))}>{balanceSides.map((side, index) => <option key={side} value={index}>{side} normal balance</option>)}</select><Button type="submit" isLoading={busy}><Plus size={14} /> Add</Button></div></form><div className="max-h-[24rem] overflow-auto"><table className="w-full text-left text-sm"><thead className="sticky top-0 bg-slate-50 text-xs dark:bg-slate-950"><tr><th className="p-2">Code</th><th className="p-2">Account</th><th className="p-2">Type</th><th className="p-2">Normal balance</th></tr></thead><tbody>{accounts.map(account => <tr key={account.id} className="border-t border-slate-100 dark:border-slate-800"><td className="p-2 font-mono">{account.code}</td><td className="p-2">{account.name}{account.isSystem ? <span className="ml-1 text-[10px] text-slate-400">SYSTEM</span> : null}</td><td className="p-2">{accountTypes[account.type] ?? account.type}</td><td className="p-2">{balanceSides[account.normalBalance] ?? account.normalBalance}</td></tr>)}{accounts.length === 0 && <tr><td colSpan={4} className="p-6 text-center text-slate-500">Initialize the standard chart to begin.</td></tr>}</tbody></table></div></section>
-      <form onSubmit={post} className="space-y-3 rounded-xl border border-slate-200 bg-white p-3 dark:border-slate-800 dark:bg-slate-900"><div className="flex items-center justify-between"><h2 className="font-semibold">Post Journal</h2><span className={`text-xs font-semibold ${totalDebit === totalCredit ? "text-emerald-700" : "text-amber-700"}`}>Dr {totalDebit.toFixed(2)} · Cr {totalCredit.toFixed(2)}</span></div><div className="grid gap-2 sm:grid-cols-[150px_1fr]"><label className="text-xs">Journal date<input required type="date" className={inputClass} value={date} onChange={event => setDate(event.target.value)} /></label><label className="text-xs">Description<input required maxLength={500} className={inputClass} value={description} onChange={event => setDescription(event.target.value)} /></label></div>
-        {lines.map((line, index) => <div key={index} className="grid grid-cols-2 gap-2 rounded-lg bg-slate-50 p-2 dark:bg-slate-950 sm:grid-cols-[minmax(150px,1fr)_100px_100px_minmax(130px,1fr)_32px]"><select required aria-label={`Account line ${index + 1}`} className={inputClass} value={line.accountId} onChange={event => updateLine(index, { accountId: event.target.value })}><option value="">Select account</option>{accounts.filter(account => account.isActive).map(account => <option key={account.id} value={account.id}>{account.code} · {account.name}</option>)}</select><input aria-label="Debit" type="number" min="0" step="0.01" className={inputClass} placeholder="Debit" value={line.debit || ""} onChange={event => updateLine(index, { debit: Number(event.target.value), credit: 0 })} /><input aria-label="Credit" type="number" min="0" step="0.01" className={inputClass} placeholder="Credit" value={line.credit || ""} onChange={event => updateLine(index, { credit: Number(event.target.value), debit: 0 })} /><select aria-label={`Reporting dimension line ${index + 1}`} className={inputClass} value={line.dimensionId ?? ""} onChange={event => updateLine(index, { dimensionId: event.target.value || null })}><option value="">No dimension</option>{dimensions.map(d => <option key={d.id} value={d.id}>{d.dimensionType}: {d.code} · {d.name}</option>)}</select><button type="button" aria-label="Remove line" disabled={lines.length <= 2} onClick={() => setLines(current => current.filter((_, row) => row !== index))} className="text-slate-500 disabled:opacity-30">×</button></div>)}
-        <div className="flex flex-wrap justify-between gap-2"><Button type="button" variant="secondary" onClick={() => setLines(current => [...current, { accountId: "", debit: 0, credit: 0 }])}><Plus size={14} /> Add line</Button><Button type="submit" isLoading={busy} disabled={accounts.length === 0 || totalDebit <= 0 || Math.round(totalDebit * 100) !== Math.round(totalCredit * 100)}>Post balanced journal</Button></div>
+      <section className="rounded-xl border border-slate-200 bg-white p-3 dark:border-slate-800 dark:bg-slate-900">
+        <h2 className="mb-2 font-semibold">Chart of Accounts</h2>
+        <form onSubmit={createAccount} noValidate className="mb-3 grid gap-2 sm:grid-cols-2">
+          <div>
+            <input
+              maxLength={20}
+              aria-label="Account code"
+              className={`${inputClass} ${formErrors.accountCode ? "border-rose-500 bg-rose-50/20 text-slate-900 focus:border-rose-500 focus:ring-2 focus:ring-rose-200 dark:border-rose-500 dark:bg-rose-950/20 dark:text-white" : ""}`}
+              placeholder="Account code *"
+              value={accountCode}
+              onChange={event => { setAccountCode(event.target.value); clearError("accountCode"); }}
+              aria-invalid={Boolean(formErrors.accountCode)}
+            />
+            {formErrors.accountCode && <p role="alert" className="mt-1 text-xs font-medium text-rose-600 dark:text-rose-400">{formErrors.accountCode}</p>}
+          </div>
+          <div>
+            <input
+              maxLength={150}
+              aria-label="Account name"
+              className={`${inputClass} ${formErrors.accountName ? "border-rose-500 bg-rose-50/20 text-slate-900 focus:border-rose-500 focus:ring-2 focus:ring-rose-200 dark:border-rose-500 dark:bg-rose-950/20 dark:text-white" : ""}`}
+              placeholder="Account name *"
+              value={accountName}
+              onChange={event => { setAccountName(event.target.value); clearError("accountName"); }}
+              aria-invalid={Boolean(formErrors.accountName)}
+            />
+            {formErrors.accountName && <p role="alert" className="mt-1 text-xs font-medium text-rose-600 dark:text-rose-400">{formErrors.accountName}</p>}
+          </div>
+          <select className={inputClass} value={accountType} onChange={event => setAccountType(Number(event.target.value))}>
+            {accountTypes.map((type, index) => <option key={type} value={index}>{type}</option>)}
+          </select>
+          <div className="flex gap-2">
+            <select aria-label="Normal balance" className={inputClass} value={normalBalance} onChange={event => setNormalBalance(Number(event.target.value))}>
+              {balanceSides.map((side, index) => <option key={side} value={index}>{side} normal balance</option>)}
+            </select>
+            <Button type="submit" isLoading={busy}><Plus size={14} /> Add</Button>
+          </div>
+        </form>
+        <div className="max-h-[24rem] overflow-auto"><table className="w-full text-left text-sm"><thead className="sticky top-0 bg-slate-50 text-xs dark:bg-slate-950"><tr><th className="p-2">Code</th><th className="p-2">Account</th><th className="p-2">Type</th><th className="p-2">Normal balance</th></tr></thead><tbody>{accounts.map(account => <tr key={account.id} className="border-t border-slate-100 dark:border-slate-800"><td className="p-2 font-mono">{account.code}</td><td className="p-2">{account.name}{account.isSystem ? <span className="ml-1 text-[10px] text-slate-400">SYSTEM</span> : null}</td><td className="p-2">{accountTypes[account.type] ?? account.type}</td><td className="p-2">{balanceSides[account.normalBalance] ?? account.normalBalance}</td></tr>)}{accounts.length === 0 && <tr><td colSpan={4} className="p-6 text-center text-slate-500">Initialize the standard chart to begin.</td></tr>}</tbody></table></div>
+      </section>
+      <form onSubmit={post} noValidate className="space-y-3 rounded-xl border border-slate-200 bg-white p-3 dark:border-slate-800 dark:bg-slate-900">
+        <div className="flex items-center justify-between">
+          <h2 className="font-semibold">Post Journal</h2>
+          <span className={`text-xs font-semibold ${totalDebit === totalCredit ? "text-emerald-700" : "text-amber-700"}`}>
+            Dr {totalDebit.toFixed(2)} · Cr {totalCredit.toFixed(2)}
+          </span>
+        </div>
+        {formErrors.journalBalance && (
+          <p role="alert" className="rounded-lg bg-rose-50 p-2 text-xs font-medium text-rose-700 dark:bg-rose-950/40 dark:text-rose-300">
+            {formErrors.journalBalance}
+          </p>
+        )}
+        {formErrors.journalLines && (
+          <p role="alert" className="rounded-lg bg-rose-50 p-2 text-xs font-medium text-rose-700 dark:bg-rose-950/40 dark:text-rose-300">
+            {formErrors.journalLines}
+          </p>
+        )}
+        <div className="grid gap-2 sm:grid-cols-[150px_1fr]">
+          <label className="text-xs">
+            Journal date <span className="text-rose-500">*</span>
+            <input
+              type="date"
+              className={`${inputClass} mt-1 ${formErrors.journalDate ? "border-rose-500 bg-rose-50/20 text-slate-900 focus:border-rose-500 focus:ring-2 focus:ring-rose-200 dark:border-rose-500 dark:bg-rose-950/20 dark:text-white" : ""}`}
+              value={date}
+              onChange={event => { setDate(event.target.value); clearError("journalDate"); }}
+              aria-invalid={Boolean(formErrors.journalDate)}
+            />
+            {formErrors.journalDate && <p role="alert" className="mt-1 text-xs font-medium text-rose-600 dark:text-rose-400">{formErrors.journalDate}</p>}
+          </label>
+          <label className="text-xs">
+            Description <span className="text-rose-500">*</span>
+            <input
+              maxLength={500}
+              className={`${inputClass} mt-1 ${formErrors.journalDescription ? "border-rose-500 bg-rose-50/20 text-slate-900 focus:border-rose-500 focus:ring-2 focus:ring-rose-200 dark:border-rose-500 dark:bg-rose-950/20 dark:text-white" : ""}`}
+              value={description}
+              onChange={event => { setDescription(event.target.value); clearError("journalDescription"); }}
+              aria-invalid={Boolean(formErrors.journalDescription)}
+            />
+            {formErrors.journalDescription && <p role="alert" className="mt-1 text-xs font-medium text-rose-600 dark:text-rose-400">{formErrors.journalDescription}</p>}
+          </label>
+        </div>
+        {lines.map((line, index) => (
+          <div key={index} className="grid grid-cols-2 gap-2 rounded-lg bg-slate-50 p-2 dark:bg-slate-950 sm:grid-cols-[minmax(150px,1fr)_100px_100px_minmax(130px,1fr)_32px]">
+            <select
+              aria-label={`Account line ${index + 1}`}
+              className={inputClass}
+              value={line.accountId}
+              onChange={event => { clearError("journalLines"); updateLine(index, { accountId: event.target.value }); }}
+            >
+              <option value="">Select account *</option>
+              {accounts.filter(account => account.isActive).map(account => <option key={account.id} value={account.id}>{account.code} · {account.name}</option>)}
+            </select>
+            <input aria-label="Debit" type="number" min="0" step="0.01" className={inputClass} placeholder="Debit" value={line.debit || ""} onChange={event => { clearError("journalBalance"); updateLine(index, { debit: Number(event.target.value), credit: 0 }); }} />
+            <input aria-label="Credit" type="number" min="0" step="0.01" className={inputClass} placeholder="Credit" value={line.credit || ""} onChange={event => { clearError("journalBalance"); updateLine(index, { credit: Number(event.target.value), debit: 0 }); }} />
+            <select aria-label={`Reporting dimension line ${index + 1}`} className={inputClass} value={line.dimensionId ?? ""} onChange={event => updateLine(index, { dimensionId: event.target.value || null })}>
+              <option value="">No dimension</option>
+              {dimensions.map(d => <option key={d.id} value={d.id}>{d.dimensionType}: {d.code} · {d.name}</option>)}
+            </select>
+            <button type="button" aria-label="Remove line" disabled={lines.length <= 2} onClick={() => setLines(current => current.filter((_, row) => row !== index))} className="text-slate-500 disabled:opacity-30">×</button>
+          </div>
+        ))}
+        <div className="flex flex-wrap justify-between gap-2">
+          <Button type="button" variant="secondary" onClick={() => setLines(current => [...current, { accountId: "", debit: 0, credit: 0 }])}><Plus size={14} /> Add line</Button>
+          <Button type="submit" isLoading={busy} disabled={accounts.length === 0 || totalDebit <= 0 || Math.round(totalDebit * 100) !== Math.round(totalCredit * 100)}>Post balanced journal</Button>
+        </div>
       </form>
     </div>
     <section className="rounded-xl border border-slate-200 bg-white p-3 dark:border-slate-800 dark:bg-slate-900"><h2 className="mb-2 font-semibold">Recent Posted Journals</h2><div className="overflow-auto"><table className="w-full min-w-[760px] text-left text-sm"><thead className="text-xs text-slate-500"><tr><th className="p-2">Date / number</th><th className="p-2">Description</th><th className="p-2">Lines</th><th className="p-2 text-right">Debit</th><th className="p-2 text-right">Credit</th><th className="p-2">Action</th></tr></thead><tbody>{journals.map(journal => <tr key={journal.id} className="border-t border-slate-100 dark:border-slate-800"><td className="p-2">{journal.journalDate}<div className="font-mono text-xs text-slate-500">{journal.journalNumber}</div></td><td className="p-2">{journal.description}{journal.reversalOfJournalEntryId ? <span className="ml-1 text-xs text-amber-700">REVERSAL</span> : null}<div className="text-xs text-slate-500">{journal.lines.map(line => `${line.accountCode} ${line.debit ? `Dr ${line.debit.toFixed(2)}` : `Cr ${line.credit.toFixed(2)}`}`).join(" · ")}</div></td><td className="p-2">{journal.lines.length}</td><td className="p-2 text-right">{journal.totalDebit.toFixed(2)}</td><td className="p-2 text-right">{journal.totalCredit.toFixed(2)}</td><td className="p-2">{journal.isReversed ? <span className="text-xs text-slate-500">Reversed</span> : !journal.reversalOfJournalEntryId && (!journal.sourceType || ["manual", "financialcorrection"].includes(journal.sourceType.toLowerCase())) ? <Button type="button" variant="secondary" disabled={busy} onClick={() => void reverseJournal(journal)}><Undo2 size={14} /> Reverse</Button> : <span className="text-xs text-slate-500">—</span>}</td></tr>)}{journals.length === 0 && <tr><td colSpan={6} className="p-6 text-center text-slate-500">No journals posted yet.</td></tr>}</tbody></table></div></section>

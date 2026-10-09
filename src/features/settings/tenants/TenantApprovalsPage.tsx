@@ -321,7 +321,7 @@ export function TenantApprovalsPage() {
               Provide an optional reason explaining why this registration was rejected. This will be included in the notification email to the store owner.
             </p>
 
-            <form onSubmit={handleReject} className="mt-4 space-y-4">
+            <form onSubmit={handleReject} noValidate className="mt-4 space-y-4">
               <div>
                 <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">
                   Rejection Reason (Optional)

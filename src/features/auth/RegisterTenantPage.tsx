@@ -64,59 +64,110 @@ export function RegisterTenantPage() {
   const [gstin, setGstin] = useState("");
   const [address, setAddress] = useState("");
 
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
   const [registeredData, setRegisteredData] = useState<{ name: string; slug: string; email: string } | null>(null);
 
+  const clearFieldError = (fieldName: string) => {
+    if (fieldErrors[fieldName]) {
+      setFieldErrors((prev) => {
+        const copy = { ...prev };
+        delete copy[fieldName];
+        return copy;
+      });
+    }
+  };
+
   const handleNameChange = (val: string) => {
     setName(val);
+    clearFieldError("name");
     if (!slugModified) {
-      setSlug(slugify(val));
+      const generatedSlug = slugify(val);
+      setSlug(generatedSlug);
+      if (generatedSlug) clearFieldError("slug");
     }
   };
 
   const handleSlugChange = (val: string) => {
     setSlugModified(true);
     setSlug(slugify(val));
+    clearFieldError("slug");
   };
 
   const handleGstinChange = (val: string) => {
     const clean = val.toUpperCase().trim();
     setGstin(clean);
+    clearFieldError("gstin");
     if (clean.length >= 2 && /^\d{2}/.test(clean)) {
       const code = clean.substring(0, 2);
       if (GST_STATES.some((s) => s.code === code)) {
         setStateCode(code);
+        clearFieldError("stateCode");
       }
     }
+  };
+
+  const validateFields = (): Record<string, string> => {
+    const errors: Record<string, string> = {};
+
+    if (!name.trim()) {
+      errors.name = "Store / Business Name is required.";
+    } else if (name.trim().length < 2) {
+      errors.name = "Business Name must be at least 2 characters.";
+    }
+
+    if (!slug.trim()) {
+      errors.slug = "Store slug is required.";
+    } else if (!/^[a-z0-9]+(-[a-z0-9]+)*$/.test(slug.trim())) {
+      errors.slug = "Store slug must contain only lowercase letters, numbers, and hyphens.";
+    }
+
+    if (!stateCode.trim()) {
+      errors.stateCode = "Please select a GST state.";
+    }
+
+    if (!ownerEmail.trim()) {
+      errors.ownerEmail = "Notification Email is required.";
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(ownerEmail.trim())) {
+      errors.ownerEmail = "Please enter a valid email address.";
+    }
+
+    if (ownerMobile.trim() && !/^\d{10}$/.test(ownerMobile.trim())) {
+      errors.ownerMobile = "Mobile number must be a valid 10-digit number.";
+    }
+
+    if (gstin.trim()) {
+      const gstinRegex = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/;
+      if (!gstinRegex.test(gstin.trim())) {
+        errors.gstin = "Invalid GSTIN format (e.g. 27AABCU9603R1ZM).";
+      }
+    }
+
+    if (password && password.length < 8) {
+      errors.password = "Password must be at least 8 characters long.";
+    }
+
+    if (password && password !== confirmPassword) {
+      errors.confirmPassword = "Passwords do not match.";
+    }
+
+    return errors;
   };
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError("");
 
-    if (!name.trim()) {
-      setError("Please enter the store / business name.");
-      return;
-    }
-    if (!slug.trim()) {
-      setError("Please enter a valid store identifier (slug).");
-      return;
-    }
-    if (!ownerEmail.trim()) {
-      setError("Please enter a valid email address for notifications.");
-      return;
-    }
-    if (password && password.length < 8) {
-      setError("Password must be at least 8 characters long.");
-      return;
-    }
-    if (password !== confirmPassword) {
-      setError("Passwords do not match.");
+    const errors = validateFields();
+    if (Object.keys(errors).length > 0) {
+      setFieldErrors(errors);
+      setError("Please fix the validation errors below before submitting.");
       return;
     }
 
+    setFieldErrors({});
     setLoading(true);
     try {
       const baseUrl = import.meta.env.VITE_API_BASE_URL || "/api";
@@ -226,7 +277,7 @@ export function RegisterTenantPage() {
         </div>
 
         <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xl sm:p-8 dark:border-slate-800 dark:bg-slate-900">
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} noValidate className="space-y-6">
             {error && (
               <div
                 role="alert"
@@ -246,45 +297,72 @@ export function RegisterTenantPage() {
               <div className="grid gap-4 sm:grid-cols-2">
                 <div>
                   <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">
-                    Store / Business Name *
+                    Store / Business Name <span className="text-rose-500">*</span>
                   </label>
                   <input
                     type="text"
-                    required
+                    aria-invalid={Boolean(fieldErrors.name)}
                     placeholder="e.g. Siddhi Electronics & Mobiles"
                     value={name}
                     onChange={(e) => handleNameChange(e.target.value)}
-                    className="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm outline-none transition focus:border-blue-600 focus:ring-2 focus:ring-blue-100 dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:focus:ring-blue-950"
+                    className={`mt-1.5 w-full rounded-xl border ${
+                      fieldErrors.name
+                        ? "border-rose-500 bg-rose-50/20 focus:border-rose-500 focus:ring-2 focus:ring-rose-200 dark:border-rose-500 dark:bg-rose-950/20 dark:focus:ring-rose-950"
+                        : "border-slate-200 bg-white focus:border-blue-600 focus:ring-2 focus:ring-blue-100 dark:border-slate-700 dark:bg-slate-800 dark:focus:ring-blue-950"
+                    } px-3.5 py-2.5 text-sm text-slate-900 outline-none transition dark:text-white`}
                   />
+                  {fieldErrors.name && (
+                    <p role="alert" className="mt-1 text-xs font-medium text-rose-600 dark:text-rose-400">
+                      {fieldErrors.name}
+                    </p>
+                  )}
                 </div>
 
                 <div>
                   <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">
-                    Store Slug (Identifier) *
+                    Store Slug (Identifier) <span className="text-rose-500">*</span>
                   </label>
                   <input
                     type="text"
-                    required
+                    aria-invalid={Boolean(fieldErrors.slug)}
                     placeholder="e.g. siddhi-electronics"
                     value={slug}
                     onChange={(e) => handleSlugChange(e.target.value)}
-                    className="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm font-mono outline-none transition focus:border-blue-600 focus:ring-2 focus:ring-blue-100 dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:focus:ring-blue-950"
+                    className={`mt-1.5 w-full rounded-xl border ${
+                      fieldErrors.slug
+                        ? "border-rose-500 bg-rose-50/20 focus:border-rose-500 focus:ring-2 focus:ring-rose-200 dark:border-rose-500 dark:bg-rose-950/20 dark:focus:ring-rose-950"
+                        : "border-slate-200 bg-white focus:border-blue-600 focus:ring-2 focus:ring-blue-100 dark:border-slate-700 dark:bg-slate-800 dark:focus:ring-blue-950"
+                    } px-3.5 py-2.5 text-sm font-mono text-slate-900 outline-none transition dark:text-white`}
                   />
-                  <p className="mt-1 text-[11px] text-slate-500">
-                    Your login identifier: <code>app/{slug || "your-slug"}</code>
-                  </p>
+                  {fieldErrors.slug ? (
+                    <p role="alert" className="mt-1 text-xs font-medium text-rose-600 dark:text-rose-400">
+                      {fieldErrors.slug}
+                    </p>
+                  ) : (
+                    <p className="mt-1 text-[11px] text-slate-500">
+                      Your login identifier: <code>app/{slug || "your-slug"}</code>
+                    </p>
+                  )}
                 </div>
               </div>
 
               <div className="grid gap-4 sm:grid-cols-2">
                 <div>
                   <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">
-                    GST State Code *
+                    GST State Code <span className="text-rose-500">*</span>
                   </label>
                   <select
                     value={stateCode}
-                    onChange={(e) => setStateCode(e.target.value)}
-                    className="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm outline-none transition focus:border-blue-600 focus:ring-2 focus:ring-blue-100 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                    aria-invalid={Boolean(fieldErrors.stateCode)}
+                    onChange={(e) => {
+                      setStateCode(e.target.value);
+                      clearFieldError("stateCode");
+                    }}
+                    className={`mt-1.5 w-full rounded-xl border ${
+                      fieldErrors.stateCode
+                        ? "border-rose-500 bg-rose-50/20 focus:border-rose-500 focus:ring-2 focus:ring-rose-200 dark:border-rose-500 dark:bg-rose-950/20"
+                        : "border-slate-200 bg-white focus:border-blue-600 focus:ring-2 focus:ring-blue-100 dark:border-slate-700 dark:bg-slate-800"
+                    } px-3.5 py-2.5 text-sm text-slate-900 outline-none transition dark:text-white`}
                   >
                     {GST_STATES.map((s) => (
                       <option key={s.code} value={s.code}>
@@ -292,6 +370,11 @@ export function RegisterTenantPage() {
                       </option>
                     ))}
                   </select>
+                  {fieldErrors.stateCode && (
+                    <p role="alert" className="mt-1 text-xs font-medium text-rose-600 dark:text-rose-400">
+                      {fieldErrors.stateCode}
+                    </p>
+                  )}
                 </div>
 
                 <div>
@@ -301,11 +384,21 @@ export function RegisterTenantPage() {
                   <input
                     type="text"
                     maxLength={15}
+                    aria-invalid={Boolean(fieldErrors.gstin)}
                     placeholder="e.g. 27AABCU9603R1ZM"
                     value={gstin}
                     onChange={(e) => handleGstinChange(e.target.value)}
-                    className="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm font-mono uppercase outline-none transition focus:border-blue-600 focus:ring-2 focus:ring-blue-100 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                    className={`mt-1.5 w-full rounded-xl border ${
+                      fieldErrors.gstin
+                        ? "border-rose-500 bg-rose-50/20 focus:border-rose-500 focus:ring-2 focus:ring-rose-200 dark:border-rose-500 dark:bg-rose-950/20"
+                        : "border-slate-200 bg-white focus:border-blue-600 focus:ring-2 focus:ring-blue-100 dark:border-slate-700 dark:bg-slate-800"
+                    } px-3.5 py-2.5 text-sm font-mono uppercase text-slate-900 outline-none transition dark:text-white`}
                   />
+                  {fieldErrors.gstin && (
+                    <p role="alert" className="mt-1 text-xs font-medium text-rose-600 dark:text-rose-400">
+                      {fieldErrors.gstin}
+                    </p>
+                  )}
                 </div>
               </div>
 
@@ -346,34 +439,60 @@ export function RegisterTenantPage() {
 
                 <div>
                   <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">
-                    Contact Mobile Number
+                    Contact Mobile Number (Optional)
                   </label>
                   <input
                     type="tel"
                     maxLength={10}
+                    aria-invalid={Boolean(fieldErrors.ownerMobile)}
                     placeholder="e.g. 9876543210"
                     value={ownerMobile}
-                    onChange={(e) => setOwnerMobile(e.target.value.replace(/\D/g, ""))}
-                    className="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm outline-none transition focus:border-blue-600 focus:ring-2 focus:ring-blue-100 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                    onChange={(e) => {
+                      setOwnerMobile(e.target.value.replace(/\D/g, ""));
+                      clearFieldError("ownerMobile");
+                    }}
+                    className={`mt-1.5 w-full rounded-xl border ${
+                      fieldErrors.ownerMobile
+                        ? "border-rose-500 bg-rose-50/20 focus:border-rose-500 focus:ring-2 focus:ring-rose-200 dark:border-rose-500 dark:bg-rose-950/20"
+                        : "border-slate-200 bg-white focus:border-blue-600 focus:ring-2 focus:ring-blue-100 dark:border-slate-700 dark:bg-slate-800"
+                    } px-3.5 py-2.5 text-sm text-slate-900 outline-none transition dark:text-white`}
                   />
+                  {fieldErrors.ownerMobile && (
+                    <p role="alert" className="mt-1 text-xs font-medium text-rose-600 dark:text-rose-400">
+                      {fieldErrors.ownerMobile}
+                    </p>
+                  )}
                 </div>
               </div>
 
               <div>
                 <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">
-                  Notification Email Address *
+                  Notification Email Address <span className="text-rose-500">*</span>
                 </label>
                 <input
                   type="email"
-                  required
+                  aria-invalid={Boolean(fieldErrors.ownerEmail)}
                   placeholder="owner@siddhimobile.in"
                   value={ownerEmail}
-                  onChange={(e) => setOwnerEmail(e.target.value)}
-                  className="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm outline-none transition focus:border-blue-600 focus:ring-2 focus:ring-blue-100 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                  onChange={(e) => {
+                    setOwnerEmail(e.target.value);
+                    clearFieldError("ownerEmail");
+                  }}
+                  className={`mt-1.5 w-full rounded-xl border ${
+                    fieldErrors.ownerEmail
+                      ? "border-rose-500 bg-rose-50/20 focus:border-rose-500 focus:ring-2 focus:ring-rose-200 dark:border-rose-500 dark:bg-rose-950/20"
+                      : "border-slate-200 bg-white focus:border-blue-600 focus:ring-2 focus:ring-blue-100 dark:border-slate-700 dark:bg-slate-800"
+                  } px-3.5 py-2.5 text-sm text-slate-900 outline-none transition dark:text-white`}
                 />
-                <p className="mt-1 text-[11px] text-slate-500">
-                  Your thank you confirmation and activation approval link will be sent here.
-                </p>
+                {fieldErrors.ownerEmail ? (
+                  <p role="alert" className="mt-1 text-xs font-medium text-rose-600 dark:text-rose-400">
+                    {fieldErrors.ownerEmail}
+                  </p>
+                ) : (
+                  <p className="mt-1 text-[11px] text-slate-500">
+                    Your thank you confirmation and activation approval link will be sent here.
+                  </p>
+                )}
               </div>
 
               <div className="grid gap-4 sm:grid-cols-2">
@@ -384,11 +503,24 @@ export function RegisterTenantPage() {
                   <input
                     type="password"
                     autoComplete="new-password"
+                    aria-invalid={Boolean(fieldErrors.password)}
                     placeholder="Min. 8 characters"
                     value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm outline-none transition focus:border-blue-600 focus:ring-2 focus:ring-blue-100 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                    onChange={(e) => {
+                      setPassword(e.target.value);
+                      clearFieldError("password");
+                    }}
+                    className={`mt-1.5 w-full rounded-xl border ${
+                      fieldErrors.password
+                        ? "border-rose-500 bg-rose-50/20 focus:border-rose-500 focus:ring-2 focus:ring-rose-200 dark:border-rose-500 dark:bg-rose-950/20"
+                        : "border-slate-200 bg-white focus:border-blue-600 focus:ring-2 focus:ring-blue-100 dark:border-slate-700 dark:bg-slate-800"
+                    } px-3.5 py-2.5 text-sm text-slate-900 outline-none transition dark:text-white`}
                   />
+                  {fieldErrors.password && (
+                    <p role="alert" className="mt-1 text-xs font-medium text-rose-600 dark:text-rose-400">
+                      {fieldErrors.password}
+                    </p>
+                  )}
                 </div>
 
                 <div>
@@ -398,11 +530,24 @@ export function RegisterTenantPage() {
                   <input
                     type="password"
                     autoComplete="new-password"
+                    aria-invalid={Boolean(fieldErrors.confirmPassword)}
                     placeholder="Re-enter password"
                     value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    className="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm outline-none transition focus:border-blue-600 focus:ring-2 focus:ring-blue-100 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                    onChange={(e) => {
+                      setConfirmPassword(e.target.value);
+                      clearFieldError("confirmPassword");
+                    }}
+                    className={`mt-1.5 w-full rounded-xl border ${
+                      fieldErrors.confirmPassword
+                        ? "border-rose-500 bg-rose-50/20 focus:border-rose-500 focus:ring-2 focus:ring-rose-200 dark:border-rose-500 dark:bg-rose-950/20"
+                        : "border-slate-200 bg-white focus:border-blue-600 focus:ring-2 focus:ring-blue-100 dark:border-slate-700 dark:bg-slate-800"
+                    } px-3.5 py-2.5 text-sm text-slate-900 outline-none transition dark:text-white`}
                   />
+                  {fieldErrors.confirmPassword && (
+                    <p role="alert" className="mt-1 text-xs font-medium text-rose-600 dark:text-rose-400">
+                      {fieldErrors.confirmPassword}
+                    </p>
+                  )}
                 </div>
               </div>
             </div>

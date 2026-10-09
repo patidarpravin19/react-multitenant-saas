@@ -1,5 +1,5 @@
 import { FormFieldShell } from "../../../components/ui/FormFieldShell";
-import { inputClass } from "../../../components/ui/inputClass";
+import { getInputClass } from "../../../components/ui/inputClass";
 import type { DynamicFieldProps } from "../../../types/form";
 
 export function TextareaField({ field, register, errors }: DynamicFieldProps) {
@@ -21,7 +21,9 @@ export function TextareaField({ field, register, errors }: DynamicFieldProps) {
         rows={field.rows ?? 4}
         placeholder={field.placeholder}
         disabled={field.disabled}
-        className={`${inputClass} resize-y`}
+        aria-invalid={Boolean(message)}
+        aria-describedby={message ? `${field.id}-error` : undefined}
+        className={getInputClass(Boolean(message), "resize-y")}
         {...register(field.name)}
       />
     </FormFieldShell>

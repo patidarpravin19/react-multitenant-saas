@@ -65,6 +65,17 @@ export function SalesInvoiceFormPage() {
   const [customerAddress, setCustomerAddress] = useState("");
   const [customerEmail, setCustomerEmail] = useState("");
   const [customerGstin, setCustomerGstin] = useState("");
+  const [customerErrors, setCustomerErrors] = useState<Record<string, string>>({});
+
+  const clearCustomerError = (key: string) => {
+    if (customerErrors[key]) {
+      setCustomerErrors((prev) => {
+        const copy = { ...prev };
+        delete copy[key];
+        return copy;
+      });
+    }
+  };
 
   // Place of Supply & Tax Mode
   const [placeOfSupplyStateCode, setPlaceOfSupplyStateCode] = useState("");
@@ -438,10 +449,39 @@ export function SalesInvoiceFormPage() {
       return;
     }
 
-    if (!customerName.trim() || !customerMobile.trim() || !customerAddress.trim()) {
-      notifications.error("Customer Incomplete", "Please enter customer Name, Mobile, and Address.");
+    const errors: Record<string, string> = {};
+    if (!customerName.trim()) errors.customerName = "Customer name is required.";
+    if (!customerMobile.trim()) {
+      errors.customerMobile = "Mobile number is required.";
+    } else if (!/^\d{10}$/.test(customerMobile.trim())) {
+      errors.customerMobile = "Mobile number must be a 10-digit number.";
+    }
+    if (!customerAddress.trim()) errors.customerAddress = "Customer address is required.";
+    if (!placeOfSupplyStateCode) errors.placeOfSupplyStateCode = "Please select Place of Supply state.";
+    if (customerEmail.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(customerEmail.trim())) {
+      errors.customerEmail = "Please enter a valid email address.";
+    }
+    if (customerGstin.trim()) {
+      const gstinRegex = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/;
+      if (!gstinRegex.test(customerGstin.trim())) {
+        errors.customerGstin = "Invalid GSTIN format (e.g. 27AABCU9603R1ZM).";
+      }
+    }
+    if (!invoiceDate) errors.invoiceDate = "Invoice date is required.";
+    if (collectPayment) {
+      if (!paymentAmount || paymentAmount <= 0) {
+        errors.paymentAmount = "Payment amount must be greater than zero.";
+      } else if (paymentAmount > totals.total) {
+        errors.paymentAmount = "Payment amount cannot exceed invoice total.";
+      }
+    }
+
+    if (Object.keys(errors).length > 0) {
+      setCustomerErrors(errors);
+      notifications.error("Incomplete details", "Please correct the highlighted fields before submitting.");
       return;
     }
+    setCustomerErrors({});
 
     if (lines.length === 0) {
       notifications.error("Empty Invoice", "Please add at least one line item.");
@@ -565,7 +605,7 @@ export function SalesInvoiceFormPage() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6 pb-12">
+    <form onSubmit={handleSubmit} noValidate className="space-y-6 pb-12">
       {/* Top Header */}
       <header className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 pb-4 dark:border-slate-800">
         <div className="flex items-center gap-3">
@@ -759,47 +799,102 @@ export function SalesInvoiceFormPage() {
 
           <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div>
-              <label className="text-xs font-medium text-slate-600 dark:text-slate-400">Customer Name *</label>
+              <label className="text-xs font-medium text-slate-600 dark:text-slate-400">
+                Customer Name <span className="text-rose-500">*</span>
+              </label>
               <input
                 type="text"
-                required
                 value={customerName}
-                onChange={(e) => setCustomerName(e.target.value)}
+                onChange={(e) => {
+                  setCustomerName(e.target.value);
+                  clearCustomerError("customerName");
+                }}
                 placeholder="Full Name"
-                className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-1.5 text-sm dark:border-slate-700 dark:bg-slate-800"
+                aria-invalid={Boolean(customerErrors.customerName)}
+                className={`mt-1 w-full rounded-lg border px-3 py-1.5 text-sm dark:bg-slate-800 ${
+                  customerErrors.customerName
+                    ? "border-rose-500 bg-rose-50/20 text-slate-900 focus:border-rose-500 focus:ring-2 focus:ring-rose-200 dark:border-rose-500 dark:bg-rose-950/20 dark:text-white"
+                    : "border-slate-300 dark:border-slate-700"
+                }`}
               />
+              {customerErrors.customerName && (
+                <p role="alert" className="mt-1 text-xs font-medium text-rose-600 dark:text-rose-400">
+                  {customerErrors.customerName}
+                </p>
+              )}
             </div>
             <div>
-              <label className="text-xs font-medium text-slate-600 dark:text-slate-400">Mobile Number *</label>
+              <label className="text-xs font-medium text-slate-600 dark:text-slate-400">
+                Mobile Number <span className="text-rose-500">*</span>
+              </label>
               <input
                 type="tel"
-                required
                 value={customerMobile}
-                onChange={(e) => setCustomerMobile(e.target.value)}
+                onChange={(e) => {
+                  setCustomerMobile(e.target.value);
+                  clearCustomerError("customerMobile");
+                }}
                 placeholder="10-digit mobile"
-                className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-1.5 text-sm dark:border-slate-700 dark:bg-slate-800"
+                aria-invalid={Boolean(customerErrors.customerMobile)}
+                className={`mt-1 w-full rounded-lg border px-3 py-1.5 text-sm dark:bg-slate-800 ${
+                  customerErrors.customerMobile
+                    ? "border-rose-500 bg-rose-50/20 text-slate-900 focus:border-rose-500 focus:ring-2 focus:ring-rose-200 dark:border-rose-500 dark:bg-rose-950/20 dark:text-white"
+                    : "border-slate-300 dark:border-slate-700"
+                }`}
               />
+              {customerErrors.customerMobile && (
+                <p role="alert" className="mt-1 text-xs font-medium text-rose-600 dark:text-rose-400">
+                  {customerErrors.customerMobile}
+                </p>
+              )}
             </div>
             <div>
-              <label className="text-xs font-medium text-slate-600 dark:text-slate-400">Address *</label>
+              <label className="text-xs font-medium text-slate-600 dark:text-slate-400">
+                Address <span className="text-rose-500">*</span>
+              </label>
               <input
                 type="text"
-                required
                 value={customerAddress}
-                onChange={(e) => setCustomerAddress(e.target.value)}
+                onChange={(e) => {
+                  setCustomerAddress(e.target.value);
+                  clearCustomerError("customerAddress");
+                }}
                 placeholder="Street / Area / City"
-                className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-1.5 text-sm dark:border-slate-700 dark:bg-slate-800"
+                aria-invalid={Boolean(customerErrors.customerAddress)}
+                className={`mt-1 w-full rounded-lg border px-3 py-1.5 text-sm dark:bg-slate-800 ${
+                  customerErrors.customerAddress
+                    ? "border-rose-500 bg-rose-50/20 text-slate-900 focus:border-rose-500 focus:ring-2 focus:ring-rose-200 dark:border-rose-500 dark:bg-rose-950/20 dark:text-white"
+                    : "border-slate-300 dark:border-slate-700"
+                }`}
               />
+              {customerErrors.customerAddress && (
+                <p role="alert" className="mt-1 text-xs font-medium text-rose-600 dark:text-rose-400">
+                  {customerErrors.customerAddress}
+                </p>
+              )}
             </div>
             <div>
               <label className="text-xs font-medium text-slate-600 dark:text-slate-400">Email (Optional)</label>
               <input
                 type="email"
                 value={customerEmail}
-                onChange={(e) => setCustomerEmail(e.target.value)}
+                onChange={(e) => {
+                  setCustomerEmail(e.target.value);
+                  clearCustomerError("customerEmail");
+                }}
                 placeholder="customer@email.com"
-                className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-1.5 text-sm dark:border-slate-700 dark:bg-slate-800"
+                aria-invalid={Boolean(customerErrors.customerEmail)}
+                className={`mt-1 w-full rounded-lg border px-3 py-1.5 text-sm dark:bg-slate-800 ${
+                  customerErrors.customerEmail
+                    ? "border-rose-500 bg-rose-50/20 text-slate-900 focus:border-rose-500 focus:ring-2 focus:ring-rose-200 dark:border-rose-500 dark:bg-rose-950/20 dark:text-white"
+                    : "border-slate-300 dark:border-slate-700"
+                }`}
               />
+              {customerErrors.customerEmail && (
+                <p role="alert" className="mt-1 text-xs font-medium text-rose-600 dark:text-rose-400">
+                  {customerErrors.customerEmail}
+                </p>
+              )}
             </div>
 
             {/* GSTIN & Place of Supply */}
@@ -812,18 +907,39 @@ export function SalesInvoiceFormPage() {
                 maxLength={15}
                 placeholder="e.g. 27AABCU9603R1ZM"
                 value={customerGstin}
-                onChange={(e) => handleGstinChange(e.target.value)}
-                className="mt-1 w-full font-mono uppercase rounded-lg border border-slate-300 px-3 py-1.5 text-sm tracking-wider dark:border-slate-700 dark:bg-slate-800"
+                onChange={(e) => {
+                  handleGstinChange(e.target.value);
+                  clearCustomerError("customerGstin");
+                }}
+                aria-invalid={Boolean(customerErrors.customerGstin)}
+                className={`mt-1 w-full font-mono uppercase rounded-lg border px-3 py-1.5 text-sm tracking-wider dark:bg-slate-800 ${
+                  customerErrors.customerGstin
+                    ? "border-rose-500 bg-rose-50/20 text-slate-900 focus:border-rose-500 focus:ring-2 focus:ring-rose-200 dark:border-rose-500 dark:bg-rose-950/20 dark:text-white"
+                    : "border-slate-300 dark:border-slate-700"
+                }`}
               />
+              {customerErrors.customerGstin && (
+                <p role="alert" className="mt-1 text-xs font-medium text-rose-600 dark:text-rose-400">
+                  {customerErrors.customerGstin}
+                </p>
+              )}
             </div>
             <div>
               <label className="text-xs font-medium text-slate-600 dark:text-slate-400">
-                Place of Supply (State) *
+                Place of Supply (State) <span className="text-rose-500">*</span>
               </label>
               <select
                 value={placeOfSupplyStateCode}
-                onChange={(e) => handleStateChange(e.target.value)}
-                className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-1.5 text-sm dark:border-slate-700 dark:bg-slate-800"
+                onChange={(e) => {
+                  handleStateChange(e.target.value);
+                  clearCustomerError("placeOfSupplyStateCode");
+                }}
+                aria-invalid={Boolean(customerErrors.placeOfSupplyStateCode)}
+                className={`mt-1 w-full rounded-lg border px-3 py-1.5 text-sm dark:bg-slate-800 ${
+                  customerErrors.placeOfSupplyStateCode
+                    ? "border-rose-500 bg-rose-50/20 text-slate-900 focus:border-rose-500 focus:ring-2 focus:ring-rose-200 dark:border-rose-500 dark:bg-rose-950/20 dark:text-white"
+                    : "border-slate-300 dark:border-slate-700"
+                }`}
               >
                 <option value="">Select State / UT</option>
                 {INDIAN_GST_STATES.map((s) => (
@@ -832,6 +948,11 @@ export function SalesInvoiceFormPage() {
                   </option>
                 ))}
               </select>
+              {customerErrors.placeOfSupplyStateCode && (
+                <p role="alert" className="mt-1 text-xs font-medium text-rose-600 dark:text-rose-400">
+                  {customerErrors.placeOfSupplyStateCode}
+                </p>
+              )}
             </div>
           </div>
 
@@ -873,14 +994,28 @@ export function SalesInvoiceFormPage() {
           </h2>
           <div className="mt-3 space-y-3">
             <div>
-              <label className="text-xs font-medium text-slate-600 dark:text-slate-400">Invoice Date *</label>
+              <label className="text-xs font-medium text-slate-600 dark:text-slate-400">
+                Invoice Date <span className="text-rose-500">*</span>
+              </label>
               <input
                 type="date"
-                required
                 value={invoiceDate}
-                onChange={(e) => setInvoiceDate(e.target.value)}
-                className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-1.5 text-sm dark:border-slate-700 dark:bg-slate-800"
+                onChange={(e) => {
+                  setInvoiceDate(e.target.value);
+                  clearCustomerError("invoiceDate");
+                }}
+                aria-invalid={Boolean(customerErrors.invoiceDate)}
+                className={`mt-1 w-full rounded-lg border px-3 py-1.5 text-sm dark:bg-slate-800 ${
+                  customerErrors.invoiceDate
+                    ? "border-rose-500 bg-rose-50/20 text-slate-900 focus:border-rose-500 focus:ring-2 focus:ring-rose-200 dark:border-rose-500 dark:bg-rose-950/20 dark:text-white"
+                    : "border-slate-300 dark:border-slate-700"
+                }`}
               />
+              {customerErrors.invoiceDate && (
+                <p role="alert" className="mt-1 text-xs font-medium text-rose-600 dark:text-rose-400">
+                  {customerErrors.invoiceDate}
+                </p>
+              )}
             </div>
             <div>
               <label className="text-xs font-medium text-slate-600 dark:text-slate-400">Payment Terms (days)</label>
@@ -1186,16 +1321,31 @@ export function SalesInvoiceFormPage() {
             <div className="mt-4 space-y-3 rounded-lg bg-slate-50 p-3 dark:bg-slate-800/50">
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-xs font-medium text-slate-600 dark:text-slate-400">Payment Amount (₹)</label>
+                  <label className="text-xs font-medium text-slate-600 dark:text-slate-400">
+                    Payment Amount (₹) <span className="text-rose-500">*</span>
+                  </label>
                   <input
                     type="number"
                     step="0.01"
                     min="0.01"
                     max={totals.total}
                     value={paymentAmount}
-                    onChange={(e) => setPaymentAmount(Number(e.target.value))}
-                    className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-1.5 text-sm dark:border-slate-700 dark:bg-slate-800"
+                    onChange={(e) => {
+                      setPaymentAmount(Number(e.target.value));
+                      clearCustomerError("paymentAmount");
+                    }}
+                    aria-invalid={Boolean(customerErrors.paymentAmount)}
+                    className={`mt-1 w-full rounded-lg border px-3 py-1.5 text-sm dark:bg-slate-800 ${
+                      customerErrors.paymentAmount
+                        ? "border-rose-500 bg-rose-50/20 text-slate-900 focus:border-rose-500 focus:ring-2 focus:ring-rose-200 dark:border-rose-500 dark:bg-rose-950/20 dark:text-white"
+                        : "border-slate-300 dark:border-slate-700"
+                    }`}
                   />
+                  {customerErrors.paymentAmount && (
+                    <p role="alert" className="mt-1 text-xs font-medium text-rose-600 dark:text-rose-400">
+                      {customerErrors.paymentAmount}
+                    </p>
+                  )}
                 </div>
                 <div>
                   <label className="text-xs font-medium text-slate-600 dark:text-slate-400">Payment Mode</label>
