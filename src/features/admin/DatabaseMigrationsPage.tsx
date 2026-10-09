@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { Link } from "react-router-dom";
 import {
   Database,
   RefreshCw,
@@ -12,6 +13,7 @@ import {
   Terminal,
   Activity,
   Calendar,
+  ArrowRightLeft,
 } from "lucide-react";
 import { apiClient } from "../../services/apiClient";
 
@@ -37,18 +39,26 @@ export function DatabaseMigrationsPage() {
   const [error, setError] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const [migrationLog, setMigrationLog] = useState<string[]>([]);
+  const [activeDbTarget, setActiveDbTarget] = useState<string>("Local");
 
   const fetchMigrationStatus = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const data = await apiClient.get<MigrationStatusResult>("/admin/migrations/status")
-        .catch(() => ({
-          masterSchema: "tenant",
-          tenantSchemas: [],
-          timestamp: new Date().toISOString(),
-        }));
+      const [data, dbConfig] = await Promise.all([
+        apiClient.get<MigrationStatusResult>("/admin/migrations/status")
+          .catch(() => ({
+            masterSchema: "tenant",
+            tenantSchemas: [],
+            timestamp: new Date().toISOString(),
+          })),
+        apiClient.get<{ activeTarget?: string }>("/admin/database/config")
+          .catch(() => ({ activeTarget: "Local" })),
+      ]);
       setMigrationStatus(data);
+      if (dbConfig?.activeTarget) {
+        setActiveDbTarget(dbConfig.activeTarget);
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to retrieve migration status.");
     } finally {
@@ -110,7 +120,16 @@ export function DatabaseMigrationsPage() {
           </div>
         </div>
 
-        <div className="flex items-center gap-2.5">
+        <div className="flex flex-wrap items-center gap-2.5">
+          <Link
+            to="/admin/system-settings"
+            className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+            title="Configure or switch between Local and Cloud databases"
+          >
+            <ArrowRightLeft className="size-3.5 text-indigo-500" />
+            <span>Target: <strong className="font-mono text-indigo-600 dark:text-indigo-400">{activeDbTarget} PostgreSQL</strong></span>
+          </Link>
+
           <button
             onClick={fetchMigrationStatus}
             disabled={loading || migrating}

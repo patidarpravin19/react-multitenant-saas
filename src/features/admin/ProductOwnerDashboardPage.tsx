@@ -49,12 +49,13 @@ export function ProductOwnerDashboardPage() {
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const [copiedLink, setCopiedLink] = useState(false);
   const [approvingId, setApprovingId] = useState<string | null>(null);
+  const [activeDbTarget, setActiveDbTarget] = useState<string>("Local");
 
   const fetchDashboardData = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const [metricsRes, pendingRes] = await Promise.all([
+      const [metricsRes, pendingRes, dbConfigRes] = await Promise.all([
         apiClient.get<TenantMetrics>("/admin/metrics").catch(() => ({
           totalTenants: 1,
           pendingApprovals: 0,
@@ -64,10 +65,14 @@ export function ProductOwnerDashboardPage() {
           offlineMode: true,
         })),
         apiClient.get<PendingTenant[]>("/admin/tenants/pending").catch(() => []),
+        apiClient.get<{ activeTarget?: string }>("/admin/database/config").catch(() => ({ activeTarget: "Local" })),
       ]);
 
       setMetrics(metricsRes);
       setPendingTenants(Array.isArray(pendingRes) ? pendingRes : []);
+      if (dbConfigRes?.activeTarget) {
+        setActiveDbTarget(dbConfigRes.activeTarget);
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load platform metrics.");
     } finally {
@@ -126,6 +131,15 @@ export function ProductOwnerDashboardPage() {
           </div>
 
           <div className="flex flex-wrap items-center gap-2.5">
+            <Link
+              to={APP_ROUTES.admin.systemSettings}
+              className="flex items-center gap-2 rounded-xl border border-indigo-400/30 bg-indigo-500/20 px-3.5 py-2 text-xs font-semibold text-indigo-200 backdrop-blur hover:bg-indigo-500/30 transition"
+              title="Click to view database settings or switch active database"
+            >
+              <Database className="size-4 text-indigo-300" />
+              <span>DB: <strong className="text-white font-mono">{activeDbTarget}</strong></span>
+            </Link>
+
             <button
               onClick={copyRegistrationLink}
               className="flex items-center gap-2 rounded-xl border border-slate-700 bg-slate-800/80 px-4 py-2 text-xs font-semibold text-slate-200 backdrop-blur hover:bg-slate-700 transition"
