@@ -62,6 +62,12 @@ export const productOwnerSidebarConfiguration: NavigationItem[] = [
     path: APP_ROUTES.admin.systemSettings,
     icon: Server,
   },
+  {
+    id: "admin-masters-import",
+    label: "Master Data Import",
+    path: APP_ROUTES.admin.mastersImport,
+    icon: FileSpreadsheet,
+  },
 ];
 
 export const sidebarConfiguration: NavigationItem[] = [
@@ -111,7 +117,13 @@ export const sidebarConfiguration: NavigationItem[] = [
         label: "Colors",
         path: APP_ROUTES.products.colors.list,
         icon: Palette,
-      }
+      },
+      {
+        id: "master-import",
+        label: "Import Master Data",
+        path: APP_ROUTES.products.importMasters,
+        icon: FileSpreadsheet,
+      },
     ],
   },
   {

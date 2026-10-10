@@ -36,6 +36,7 @@ import { ProductOwnerDashboardPage } from "./features/admin/ProductOwnerDashboar
 import { TenantDirectoryPage } from "./features/admin/TenantDirectoryPage";
 import { DatabaseMigrationsPage } from "./features/admin/DatabaseMigrationsPage";
 import { SystemSettingsPage } from "./features/admin/SystemSettingsPage";
+import { MasterImportPage } from "./features/products/import/MasterImportPage";
 
 function RootDashboard() {
   const { isProductOwner } = useAuth();
@@ -94,6 +95,7 @@ export default function App() {
           <Route path={APP_ROUTES.admin.pendingApprovals} element={<TenantApprovalsPage />} />
           <Route path={APP_ROUTES.admin.databaseMigrations} element={<DatabaseMigrationsPage />} />
           <Route path={APP_ROUTES.admin.systemSettings} element={<SystemSettingsPage />} />
+          <Route path={APP_ROUTES.admin.mastersImport} element={<MasterImportPage isAdminMode={true} />} />
 
           <Route path="**" element={<Navigate to="/" replace />} />
         </Route>

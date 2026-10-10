@@ -11,6 +11,7 @@ import { VariantFormPage } from "../variant/pages/VariantFormPage";
 import { VariantListPage } from "../variant/pages/VariantListPage";
 import { VendorFormPage } from "../vendor/pages/VendorFormPage";
 import { VendorListPage } from "../vendor/pages/VendorListPage";
+import { MasterImportPage } from "../import/MasterImportPage";
 
 export const productRoutes = <>
   <Route path="/products/vendors">
@@ -49,4 +50,5 @@ export const productRoutes = <>
     <Route path="add" element={<ColorFormPage mode="create" />} />
     <Route path=":id/edit" element={<ColorFormPage mode="edit" />} />
   </Route>
+  <Route path="/products/import-masters" element={<MasterImportPage />} />
 </>;

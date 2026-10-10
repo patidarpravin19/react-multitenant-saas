@@ -3,7 +3,7 @@ import { apiClient } from "../../services/apiClient";
 import { useAuth } from "../auth/AuthContext";
 
 type Access = { isOwner: boolean; permissions: string[] };
-const Context = createContext<{ access: Access | null; refresh: () => Promise<void> }>({ access: null, refresh: async () => {} });
+const Context = createContext<{ access: Access | null; refresh: () => Promise<void> }>({ access: null, refresh: async () => { } });
 export function AccountingAccessProvider({ children }: PropsWithChildren) {
   const { isProductOwner } = useAuth();
   const [access, setAccess] = useState<Access | null>(
@@ -22,9 +22,9 @@ export function AccountingAccessProvider({ children }: PropsWithChildren) {
   useEffect(() => {
     if (isProductOwner) return;
     void refresh();
-    const focus = () => { void refresh(); };
-    window.addEventListener("focus", focus);
-    return () => window.removeEventListener("focus", focus);
+    // const focus = () => { void refresh(); };
+    // window.addEventListener("focus", focus);
+    // return () => window.removeEventListener("focus", focus);
   }, [isProductOwner, refresh]);
   if (!access) return <div role={error ? "alert" : "status"}>{error || "Loading permissions…"}{error && <button onClick={() => void refresh()}>Retry</button>}</div>;
   return <Context.Provider value={{ access, refresh }}>{children}</Context.Provider>;

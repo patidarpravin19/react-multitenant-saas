@@ -20,9 +20,10 @@ import {
   Mail,
   Phone,
   MapPin,
-  FileText,
+  FileText
 } from "lucide-react";
 import { apiClient } from "../../services/apiClient";
+import { useNotifications } from "../../context/NotificationContext";
 
 interface AdminTenant {
   id: string;
@@ -42,6 +43,7 @@ interface AdminTenant {
 }
 
 export function TenantDirectoryPage() {
+  const notifications = useNotifications();
   const [tenants, setTenants] = useState<AdminTenant[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -77,7 +79,14 @@ export function TenantDirectoryPage() {
   }, [fetchTenants]);
 
   const handleSuspend = async (tenant: AdminTenant) => {
-    if (!window.confirm(`Are you sure you want to suspend "${tenant.name}"? Users belonging to this store will no longer be able to log in.`)) {
+    const confirmed = await notifications.confirm({
+      title: "Suspend Store?",
+      message: `Are you sure you want to suspend "${tenant.name}"? Users belonging to this store will no longer be able to log in.`,
+      variant: "danger",
+      confirmLabel: "Suspend Store",
+      cancelLabel: "Cancel",
+    });
+    if (!confirmed) {
       return;
     }
 
@@ -113,7 +122,14 @@ export function TenantDirectoryPage() {
   };
 
   const handleApprove = async (tenant: AdminTenant) => {
-    if (!window.confirm(`Approve "${tenant.name}"? This will create its isolated PostgreSQL schema and seed default accounting ledgers.`)) {
+    const confirmed = await notifications.confirm({
+      title: "Approve Store Registration?",
+      message: `Approve "${tenant.name}"? This will create its isolated PostgreSQL schema and seed default accounting ledgers.`,
+      variant: "warning",
+      confirmLabel: "Approve & Provision",
+      cancelLabel: "Cancel",
+    });
+    if (!confirmed) {
       return;
     }
 
@@ -244,11 +260,10 @@ export function TenantDirectoryPage() {
             <button
               key={tab.id}
               onClick={() => setStatusFilter(tab.id)}
-              className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition ${
-                statusFilter === tab.id
+              className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition ${statusFilter === tab.id
                   ? "bg-indigo-600 text-white shadow-sm"
                   : "bg-white text-slate-600 hover:bg-slate-100 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
-              }`}
+                }`}
             >
               {tab.label} <span className="opacity-70">({tab.count})</span>
             </button>

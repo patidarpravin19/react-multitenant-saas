@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { apiClient } from "../../../services/apiClient";
+import { useNotifications } from "../../../context/NotificationContext";
 import {
   Building2,
   CheckCircle2,
@@ -34,6 +35,7 @@ interface PendingTenant {
 }
 
 export function TenantApprovalsPage() {
+  const notifications = useNotifications();
   const [tenants, setTenants] = useState<PendingTenant[]>([]);
   const [loading, setLoading] = useState(false);
   const [actionInProgress, setActionInProgress] = useState<string | null>(null);
@@ -64,11 +66,14 @@ export function TenantApprovalsPage() {
   }, [fetchPendingTenants]);
 
   const handleApprove = async (tenant: PendingTenant) => {
-    if (
-      !window.confirm(
-        `Are you sure you want to approve "${tenant.name}"? This will create its isolated PostgreSQL schema, apply all database migrations, and seed default ledgers.`
-      )
-    ) {
+    const confirmed = await notifications.confirm({
+      title: "Approve Store Registration?",
+      message: `Are you sure you want to approve "${tenant.name}"? This will create its isolated PostgreSQL schema, apply all database migrations, and seed default ledgers.`,
+      variant: "warning",
+      confirmLabel: "Approve & Provision",
+      cancelLabel: "Cancel",
+    });
+    if (!confirmed) {
       return;
     }
 

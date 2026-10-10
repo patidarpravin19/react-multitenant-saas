@@ -48,6 +48,7 @@ export const APP_ROUTES = {
       add: "/products/colors/add",
       edit: (id: string) => `/products/colors/${id}/edit`,
     },
+    importMasters: "/products/import-masters",
   },
 
   purchase: {
@@ -111,6 +112,7 @@ export const APP_ROUTES = {
     pendingApprovals: "/admin/tenants/pending",
     databaseMigrations: "/admin/database-migrations",
     systemSettings: "/admin/system-settings",
+    mastersImport: "/admin/masters-import",
     login: "/admin/login",
   },
 } as const;

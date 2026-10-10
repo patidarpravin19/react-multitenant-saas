@@ -174,11 +174,15 @@ addRequestInterceptor((_, config) => {
   const token = localStorage.getItem("auth_token");
   if (!token) return config;
   const headers = new Headers(config.headers);
-  const tenantId = localStorage.getItem("tenant_id");
-  if (tenantId && tenantId !== "00000000-0000-0000-0000-000000000000" && tenantId !== "system") {
-    headers.set("X-Tenant-ID", tenantId);
+  if (!headers.has("X-Tenant-ID")) {
+    const tenantId = localStorage.getItem("tenant_id");
+    if (tenantId && tenantId !== "00000000-0000-0000-0000-000000000000" && tenantId !== "system") {
+      headers.set("X-Tenant-ID", tenantId);
+    }
   }
-  headers.set("Authorization", `Bearer ${token}`);
+  if (!headers.has("Authorization")) {
+    headers.set("Authorization", `Bearer ${token}`);
+  }
   return { ...config, headers };
 });
 
@@ -259,4 +263,76 @@ export const apiClient = {
     request<T>(path, withJsonBody(body, { ...config, method: "PATCH" })),
   delete: <T>(path: string, config?: ApiRequestConfig) =>
     request<T>(path, { ...config, method: "DELETE" }),
+  download: async (
+    path: string,
+    defaultFileName: string,
+    config: ApiRequestConfig = {},
+  ): Promise<void> => {
+    const headers = new Headers(config.headers);
+    let finalConfig: ApiRequestConfig = { ...config, headers, method: "GET" };
+
+    for (const interceptor of requestInterceptors)
+      finalConfig = await interceptor(toUrl(path), finalConfig);
+
+    activeRequests += 1;
+    notifyLoading();
+    try {
+      let response = await fetch(toUrl(path), finalConfig);
+      if (
+        response.status === 401 &&
+        finalConfig.authenticate !== false &&
+        !finalConfig.skipAuthRefresh &&
+        unauthorizedHandler
+      ) {
+        if (await unauthorizedHandler()) {
+          const retryConfig = { ...config, headers: new Headers(headers), method: "GET" };
+          for (const interceptor of requestInterceptors)
+            finalConfig = await interceptor(toUrl(path), retryConfig);
+          response = await fetch(toUrl(path), finalConfig);
+        }
+      }
+
+      if (!response.ok) {
+        const body = await parseBody(response);
+        throw new ApiError(getErrorMessage(body, response.status), response.status, body);
+      }
+
+      const blob = await response.blob();
+      if (defaultFileName.toLowerCase().endsWith(".xlsx")) {
+        const signature = new Uint8Array(await blob.slice(0, 4).arrayBuffer());
+        const contentType = response.headers.get("content-type") ?? "";
+        if (contentType.includes("json") || contentType.includes("text/html")
+          || signature.length !== 4 || signature[0] !== 0x50 || signature[1] !== 0x4b
+          || signature[2] !== 0x03 || signature[3] !== 0x04) {
+          throw new ApiError(
+            "The server did not return a valid Excel workbook. Please restart the updated AccountingInventory API and try again. If the issue continues, check the download response in the browser Network tab.",
+            response.status,
+            { contentType },
+          );
+        }
+      }
+      let fileName = defaultFileName;
+      const contentDisposition = response.headers.get("content-disposition");
+      if (contentDisposition) {
+        const match = contentDisposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
+        if (match && match[1]) {
+          fileName = match[1].replace(/['"]/g, "").trim();
+        }
+      }
+
+      const blobUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = blobUrl;
+      link.setAttribute("download", fileName);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      setTimeout(() => {
+        window.URL.revokeObjectURL(blobUrl);
+      }, 5000);
+    } finally {
+      activeRequests -= 1;
+      notifyLoading();
+    }
+  },
 };

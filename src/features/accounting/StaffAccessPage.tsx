@@ -2,10 +2,12 @@ import { useCallback, useEffect, useState, type FormEvent } from "react";
 import { apiClient } from "../../services/apiClient";
 import { Button } from "../../components/ui/Button";
 import { useAccountingAccess } from "./AccountingAccess";
+import { useNotifications } from "../../context/NotificationContext";
 type Staff = { id: string; userName: string; email: string; mobile: string; isOwner: boolean; isActive: boolean; emailVerified: boolean };
 type Grants = { userId: string; permissions: string[] };
 const codes = ["catalog.manage", "purchases.manage", "sales.manage", "inventory.manage", "accounting.manage", "accounting.approve", "accounting.dimensions.manage", "accounting.documents.manage", "accounting.assets.manage", "accounting.budgets.manage"];
 export function StaffAccessPage() {
+  const notifications = useNotifications();
   const { isOwner, refresh } = useAccountingAccess(); const [staff, setStaff] = useState<Staff[]>([]); const [grants, setGrants] = useState<Grants[]>([]);
   const [error, setError] = useState(""); const [busy, setBusy] = useState(false);
   const [userName, setUserName] = useState("");
@@ -140,6 +142,25 @@ export function StaffAccessPage() {
     </form>
     <div className="overflow-auto"><table className="w-full text-left text-sm"><thead><tr><th>User</th><th>Status</th><th>Access</th><th>Actions</th></tr></thead><tbody>{staff.map(s => <tr key={s.id} className="border-t"><td className="p-3">{s.userName}<div>{s.email}</div></td><td>{s.isOwner ? "Owner" : !s.emailVerified ? "Invited" : s.isActive ? "Active" : "Disabled"}</td><td><div className="grid gap-2 md:grid-cols-2">{codes.map(code => <label key={code}><input type="checkbox" disabled={busy || s.isOwner || !s.isActive} checked={s.isOwner || (grants.find(g => g.userId === s.id)?.permissions.includes(code) ?? false)} onChange={e => void run(() => apiClient.put(`/accounting-permissions/${s.id}/${code}`,{granted:e.target.checked}))} /> {code}</label>)}</div></td><td>{!s.isOwner && s.emailVerified && <Button disabled={busy} onClick={() => void run(() => apiClient.put(`/accounting/staff/${s.id}/status`,{active:!s.isActive}))}>{s.isActive ? "Disable" : "Enable"}</Button>}
       {!s.emailVerified && <Button disabled={busy} onClick={() => void run(() => apiClient.post("/accounting/staff/invitations",{userName:s.userName,email:s.email,mobile:s.mobile}))}>Resend invitation</Button>}
-      {!s.isOwner && s.isActive && s.emailVerified && <Button disabled={busy} variant="secondary" onClick={() => { if (window.confirm(`Transfer ownership to ${s.userName}? You will lose owner access.`)) void run(() => apiClient.post("/accounting/owner/transfer",{userId:s.id})); }}>Transfer ownership</Button>}</td></tr>)}</tbody></table></div>
+      {!s.isOwner && s.isActive && s.emailVerified && (
+        <Button
+          disabled={busy}
+          variant="secondary"
+          onClick={async () => {
+            const confirmed = await notifications.confirm({
+              title: "Transfer Store Ownership?",
+              message: `Transfer ownership to ${s.userName}? You will lose owner access.`,
+              variant: "danger",
+              confirmLabel: "Transfer Ownership",
+              cancelLabel: "Cancel",
+            });
+            if (confirmed) {
+              void run(() => apiClient.post("/accounting/owner/transfer", { userId: s.id }));
+            }
+          }}
+        >
+          Transfer ownership
+        </Button>
+      )}</td></tr>)}</tbody></table></div>
   </div>;
 }

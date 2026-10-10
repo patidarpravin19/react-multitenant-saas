@@ -13,9 +13,10 @@ import {
   Terminal,
   Activity,
   Calendar,
-  ArrowRightLeft,
+  ArrowRightLeft
 } from "lucide-react";
 import { apiClient } from "../../services/apiClient";
+import { useNotifications } from "../../context/NotificationContext";
 
 interface TenantSchemaStatus {
   tenantId: string;
@@ -33,6 +34,7 @@ interface MigrationStatusResult {
 }
 
 export function DatabaseMigrationsPage() {
+  const notifications = useNotifications();
   const [migrationStatus, setMigrationStatus] = useState<MigrationStatusResult | null>(null);
   const [loading, setLoading] = useState(true);
   const [migrating, setMigrating] = useState(false);
@@ -71,7 +73,14 @@ export function DatabaseMigrationsPage() {
   }, [fetchMigrationStatus]);
 
   const handleApplyMigrations = async () => {
-    if (!window.confirm("Execute database migrations across all active tenant PostgreSQL schemas? This ensures all schemas are updated to the latest EF Core model.")) {
+    const confirmed = await notifications.confirm({
+      title: "Apply Database Migrations?",
+      message: "Execute database migrations across all active tenant PostgreSQL schemas? This ensures all schemas are updated to the latest EF Core model.",
+      variant: "warning",
+      confirmLabel: "Apply Migrations",
+      cancelLabel: "Cancel",
+    });
+    if (!confirmed) {
       return;
     }
 
